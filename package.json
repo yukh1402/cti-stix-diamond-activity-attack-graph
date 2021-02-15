@@ -13,5 +13,9 @@
   },
   "devDependencies": {
     "parcel-bundler": "^1.12.4"
+  },
+  "dependencies": {
+    "bootstrap-material-design": "^4.1.1",
+    "d3": "^6.5.0"
   }
 }
