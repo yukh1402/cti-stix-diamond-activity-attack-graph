@@ -27,40 +27,27 @@
 <script src="js/vendor/modernizr-3.11.2.min.js"></script>
 <script src="js/plugins.js"></script>
 <script src="js/main.js"></script>
+<script src="https://d3js.org/d3.v6.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js" integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9" crossorigin="anonymous"></script>
 <script>$(document).ready(function() { $('body').bootstrapMaterialDesign(); });</script>
 
-<!-- Navigation with side-->
-<div class="bmd-layout-container bmd-drawer-f-l">
-  <header class="bmd-layout-header">
-    <div class="navbar navbar-light bg-faded">
-      <button class="navbar-toggler" type="button" data-toggle="drawer" data-target="#dw-s1">
-        <span class="sr-only">Toggle drawer</span>
-        <i class="material-icons">menu</i>
-      </button>
-      <ul class="nav navbar-nav">
-        <li class="nav-item">Title</li>
-      </ul>
+<div class="row-flex pl-3">
+  <div id="svg-elment-view" class="col-3">
+    <div class="form-group">
+      <label for="exampleTextarea" class="bmd-label-floating">STIX 2.1 JSON</label>
+      <textarea class="form-control" id="exampleTextarea" rows="35"></textarea>
+      <button type="button" class="mt-2 btn btn-raised btn-primary">Parse</button>
     </div>
-  </header>
-  <div id="dw-s1" class="bmd-layout-drawer bg-faded">
-    <header>
-      <a class="navbar-brand">Title</a>
-    </header>
-    <ul class="list-group">
-      <a class="list-group-item">Link 1</a>
-      <a class="list-group-item">Link 2</a>
-      <a class="list-group-item">Link 3</a>
-    </ul>
   </div>
-  <main class="bmd-layout-content">
-    <div class="container">
-      <p>Main content</p>
+  <div class="col-9">
+    <div id="svg-container">
     </div>
-  </main>
+  </div>
 </div>
+
+<script src="js/graph/basic.js"></script>
 
 <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
 <!--  <script>-->
