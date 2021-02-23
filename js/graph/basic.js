@@ -28,54 +28,47 @@ function initGraph(divId, width = 1000, height = 500) {
     .append("svg")
     .attr("viewBox", [0, 0, width, height])
     .attr("id", "svg")
-    // .classed("svg-background", true)
+    .classed("svg-background", true)
     .append("g")
     .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.TOP + ")");
 }
 
 
-let svg = initGraph('svg-container', width + MARGIN.LEFT + MARGIN.RIGHT, height + MARGIN.TOP + MARGIN.BOTTOM);
-// let data = [
-//   {
-//     name: "some",
-//     num: 1
-//   },
-//   {
-//     name: "any",
-//     num: 2
-//   },
-// ]
-//
+let svg = initGraph('svg-container',
+  width + MARGIN.LEFT + MARGIN.RIGHT,
+  height + MARGIN.TOP + MARGIN.BOTTOM);
 
 let data = [
   {
     Sepal_Length: 5.1,
-    Petal_Length: 1.4,
+    Petal_Length: new Date("2021-02-06 00:00:00"),
   },
   {
     Sepal_Length: 4.9,
-    Petal_Length: 1.4,
+    Petal_Length: new Date("2021-01-03 00:00:00"),
   }
 ]
 
 /**
- * Build Attack Graph
+ * Build Activity Thread or Attack Graph depending on the Graph selection
  */
-function buildAttackGraph() {
+function buildActivityThreadGraph() {
   let x = d3.scaleLinear()
     .domain([0, 9])
     .range([0, width])
   let xAxis = svg.append("g")
     .attr("id", "xAxis")
+    .attr("style", "color: white")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x))
 
   // Add Y axis
-  let y = d3.scaleLinear()
-    .domain([0, 9])
+  let y = d3.scaleUtc()
+    .domain([new Date("2021-01-01 00:00:00"), new Date("2021-12-31 23:59:59")])
     .range([height, 0]);
   let yAxis = svg.append("g")
     .attr("id", "yAxis")
+    .attr("style", "color: white")
     .call(d3.axisLeft(y));
 
   // ClipPath is a boundary where everything outside is not be drawn
@@ -99,20 +92,21 @@ function buildAttackGraph() {
     .enter()
     .append("circle")
     .attr("cx", function (d) { return x(d.Sepal_Length); } )
-    // .attr("cx", "10" )
-    // .attr("cy", function (d) { return y(d.Petal_Length); } )
     .attr("cy", function (d) { return y(d.Petal_Length); } )
     .attr("r", 8)
     .style("fill", "#61a3a9")
     .style("opacity", 0.5)
 
-  // Set the zoom and Pan features: how much you can zoom, on which part, and what to do when there is a zoom
+  graphZoom(scatter, x, xAxis, y, yAxis)
+}
+
+/**
+ * This adds zoom functionality to the svg by using a rect element
+ */
+function graphZoom (scatter, x, xAxis, y, yAxis) {
   let zoom = d3.zoom()
-    .scaleExtent([.5, 20])  // This control how much you can unzoom (x0.5) and zoom (x20)
-    .extent([[0, 0], [width, height]])
     .on("zoom", (event) => updateGraphView(event, scatter, x, xAxis, y, yAxis));
 
-  // This add an invisible rect on top of the chart area. This rect can recover pointer events: necessary to understand when the user zoom
   svg.append("rect")
     .attr("width", width)
     .attr("height", height)
@@ -121,8 +115,6 @@ function buildAttackGraph() {
     .attr('transform', 'translate(' + MARGIN.LEFT + ',' + MARGIN.RIGHT + ')')
     .call(zoom);
 }
-
-buildAttackGraph()
 
 /**
  * This updates the graph view on a zoom event
@@ -156,3 +148,5 @@ function updateGraphView(event, scatter, x = undefined, xAxis = undefined, y = u
       })
   }
 }
+
+buildActivityThreadGraph()
