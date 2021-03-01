@@ -45,7 +45,22 @@
 <!--    -->
 <!--  </div>-->
 <!--</div>-->
+
+<div class="nav">
+  <button class="btn btn-secondary" type="button" id="stix-parser" aria-haspopup="true" aria-expanded="false">
+    Parse STIX
+  </button>
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="graphDropdown" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+    Graph selection
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" id="attack-graph" href="#attack_graph">Attack Graph</a>
+    <a class="dropdown-item" id="activity-thread" href="#activity_thread">Activity Thread Graph</a>
+  </div>
+</div>
 <div id="svg-container">
+  <b><span id="currentSelection" class="position-absolute text-white selectionText"></span></b>
 </div>
 
 <script src="js/graph/basic.js"></script>

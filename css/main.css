@@ -285,3 +285,7 @@ textarea {
   display: flex;
   flex-direction: row;
 }
+
+.selectionText {
+  right: 10px;
+}

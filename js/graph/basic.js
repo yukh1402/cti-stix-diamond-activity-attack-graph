@@ -14,6 +14,22 @@ const MARGIN = {
 const width = 1000;
 const height = 500;
 
+let graphSelection = window.location.hash.replace("#", "") || GRAPH_TYPE.ATTACK_GRAPH;
+
+/**
+ * Get Graph selection through change in URL hash
+ */
+window.onhashchange = function () {
+  console.log("Cuurent selection " + graphSelection)
+  graphSelection = window.location.hash.replace("#", "");
+  console.log("new selection " + graphSelection)
+  svg.selectAll("#xAxis").remove();
+  svg.selectAll("#yAxis").remove();
+  svg.selectAll("#clip").remove();
+  svg.selectAll("#scatter").remove();
+  setCurrentGraphSelection();
+  buildGraph();
+}
 
 /**
  * Create basic SVG Container with background on a DIV element
@@ -22,8 +38,8 @@ const height = 500;
  * @param height: Viewbox height
  */
 function initGraph(divId, width = 1000, height = 500) {
+  console.log("Bin grapphselection " + graphSelection)
   let divEl = document.getElementById(divId)
-  console.log(divEl)
   return d3.select(divEl)
     .append("svg")
     .attr("viewBox", [0, 0, width, height])
@@ -49,10 +65,14 @@ let data = [
   }
 ]
 
+// let epoch = new Date(Date.UTC(2015, 11, 4, 12, 36, 47, 121));
+let epoch = new Date("2021-02-06 00:00:00")
+
+
 /**
  * Build Activity Thread or Attack Graph depending on the Graph selection
  */
-function buildActivityThreadGraph() {
+function buildGraph() {
   let x = d3.scaleLinear()
     .domain([0, 9])
     .range([0, width])
@@ -62,14 +82,36 @@ function buildActivityThreadGraph() {
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x))
 
-  // Add Y axis
-  let y = d3.scaleUtc()
-    .domain([new Date("2021-01-01 00:00:00"), new Date("2021-12-31 23:59:59")])
-    .range([height, 0]);
-  let yAxis = svg.append("g")
-    .attr("id", "yAxis")
-    .attr("style", "color: white")
-    .call(d3.axisLeft(y));
+  let y = undefined;
+  let yAxis = undefined;
+
+  if (graphSelection === GRAPH_TYPE.ACTIVITY_THREAD) {
+    // Add Y axis
+    y = d3.scaleTime()
+      .domain([new Date("2021-01-01 00:00:00"), new Date("2021-12-31 23:59:59")])
+      .range([height, 0]);
+    yAxis = svg.append("g")
+      .attr("id", "yAxis")
+      .attr("style", "color: white")
+      .call(d3.axisLeft(y));
+
+  } else {
+    y = d3.scaleUtc()
+      .domain([d3.timeDay.offset(epoch, -1), d3.timeDay.offset(epoch, +5)])
+      .range([height, 0]);
+    yAxis = svg.append("g")
+      .attr("id", "yAxis")
+      .attr("style", "color: white")
+      .call(
+        d3.axisLeft(y)
+          .tickFormat(formatRelativeTime)
+          .tickValues(d3.scaleUtc()
+            .domain(y.domain().map(toRelative))
+            .ticks(10)
+            .map(toAbsolute)
+          )
+      );
+  }
 
   // ClipPath is a boundary where everything outside is not be drawn
   let clip = svg.append("defs")
@@ -83,6 +125,7 @@ function buildActivityThreadGraph() {
 
   // Add the ClipPath
   let scatter = svg.append('g')
+    .attr("id", "scatter")
     .attr("clip-path", "url(#clip)")
 
   // Add circles
@@ -97,7 +140,9 @@ function buildActivityThreadGraph() {
     .style("fill", "#61a3a9")
     .style("opacity", 0.5)
 
-  graphZoom(scatter, x, xAxis, y, yAxis)
+  if (y && yAxis) {
+    graphZoom(scatter, x, xAxis, y, yAxis)
+  }
 }
 
 /**
@@ -108,6 +153,7 @@ function graphZoom (scatter, x, xAxis, y, yAxis) {
     .on("zoom", (event) => updateGraphView(event, scatter, x, xAxis, y, yAxis));
 
   svg.append("rect")
+    .attr("id", "zoom-rect")
     .attr("width", width)
     .attr("height", height)
     .style("fill", "none")
@@ -139,7 +185,14 @@ function updateGraphView(event, scatter, x = undefined, xAxis = undefined, y = u
   }
   if (y && yAxis) {
     let newY = event.transform.rescaleY(y);
-    yAxis.call(d3.axisLeft(newY));
+
+    if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH) {
+      yAxis.call(d3.axisLeft(newY)
+        .tickFormat(formatRelativeTime)
+      );
+    } else {
+      yAxis.call(d3.axisLeft(newY));
+    }
     // Update node position
     scatter
       .selectAll("circle")
@@ -149,4 +202,54 @@ function updateGraphView(event, scatter, x = undefined, xAxis = undefined, y = u
   }
 }
 
-buildActivityThreadGraph()
+buildGraph()
+
+function formatRelativeTime(absolute) {
+  let pad = d3.format("02d");
+  let delta = absolute - epoch;
+  if (!delta) return "0";
+  let milliseconds = Math.abs(delta);
+  let viewValue = (delta < 0 ? "-" : "+")
+
+  if (milliseconds >= 3.154e10) {
+    // Milliseconds > 12 months then display in years
+    viewValue += Math.floor(milliseconds / 3.154e10) + "yr"
+  }
+  else if (milliseconds >= 2.628e9) {
+    // Milliseconds > 30 days then display in months
+    viewValue += Math.floor(milliseconds / 2.628e9) + "mo"
+  }
+  else if (milliseconds >= 8.64e7) {
+    // Milliseconds > 24 Hours then display in days
+    viewValue += Math.floor(milliseconds / 8.64e7) + "d"
+  } else if (milliseconds >= 3.6e6) {
+    // Milliseconds > 60 min then display in hours
+    viewValue += Math.floor(milliseconds / 3.6e6) + "hr"
+  } else {
+    // Milliseconds < 60 min then display in minutes
+    viewValue += Math.floor(milliseconds / 6e4) + ":"
+    + pad(Math.floor(milliseconds % 6e4 / 1e3)) + "min"
+  }
+  return viewValue;
+}
+
+// Convert an absolute time to a time relative to the epoch.
+function toRelative(absolute) {
+  return new Date(absolute - epoch);
+}
+
+// Convert a time relative to the epoch to an absolute time.
+function toAbsolute(relative) {
+  return new Date(+relative + +epoch);
+}
+
+
+/**
+ * Set Current Graph Selection Text
+ */
+function setCurrentGraphSelection() {
+  document.getElementById("currentSelection").textContent =
+    graphSelection === GRAPH_TYPE.ATTACK_GRAPH ? "Current Graph: Attack Graph": "Current Graph: Activity Thread";
+}
+
+setCurrentGraphSelection();
