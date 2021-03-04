@@ -20,9 +20,7 @@ let graphSelection = window.location.hash.replace("#", "") || GRAPH_TYPE.ATTACK_
  * Get Graph selection through change in URL hash
  */
 window.onhashchange = function () {
-  console.log("Cuurent selection " + graphSelection)
   graphSelection = window.location.hash.replace("#", "");
-  console.log("new selection " + graphSelection)
   svg.selectAll("#xAxis").remove();
   svg.selectAll("#yAxis").remove();
   svg.selectAll("#clip").remove();
@@ -56,11 +54,11 @@ let svg = initGraph('svg-container',
 
 let data = [
   {
-    Sepal_Length: 5.1,
+    Sepal_Length: "Test3",
     Petal_Length: new Date("2021-02-06 00:00:00"),
   },
   {
-    Sepal_Length: 4.9,
+    Sepal_Length: "Test6",
     Petal_Length: new Date("2021-01-03 00:00:00"),
   }
 ]
@@ -150,7 +148,7 @@ function buildGraph() {
  */
 function graphZoom (scatter, x, xAxis, y, yAxis) {
   let zoom = d3.zoom()
-    .on("zoom", (event) => updateGraphView(event, scatter, x, xAxis, y, yAxis));
+    .on("zoom", (event) => onZoom(event, scatter, x, xAxis, y, yAxis));
 
   svg.append("rect")
     .attr("id", "zoom-rect")
@@ -171,7 +169,7 @@ function graphZoom (scatter, x, xAxis, y, yAxis) {
  * @param y
  * @param yAxis
  */
-function updateGraphView(event, scatter, x = undefined, xAxis = undefined, y = undefined, yAxis = undefined) {
+function onZoom(event, scatter, x = undefined, xAxis = undefined, y = undefined, yAxis = undefined) {
   // Retrieve the new scale position and update the axis boundaries
   if (x && xAxis) {
     let newX = event.transform.rescaleX(x);

@@ -18,7 +18,9 @@
 
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
+  <link rel="stylesheet"
+        href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css"
+        integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
 
   <meta name="theme-color" content="#fafafa">
 </head>
@@ -28,41 +30,55 @@
 <script src="js/plugins.js"></script>
 <script src="js/main.js"></script>
 <script src="https://d3js.org/d3.v6.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js" integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9" crossorigin="anonymous"></script>
-<script>$(document).ready(function() { $('body').bootstrapMaterialDesign(); });</script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js"
+        integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U"
+        crossorigin="anonymous"></script>
+<script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js"
+        integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9"
+        crossorigin="anonymous"></script>
+<script>$(document).ready(function () {
+  $('body').bootstrapMaterialDesign();
+});</script>
 
-<!--<div class="row-flex pl-3">-->
-<!--  <div id="svg-elment-view" class="col-3">-->
-<!--    <div class="form-group">-->
-<!--      <label for="exampleTextarea" class="bmd-label-floating">STIX 2.1 JSON</label>-->
-<!--      <textarea class="form-control" id="exampleTextarea" rows="35"></textarea>-->
-<!--      <button type="button" class="mt-2 btn btn-raised btn-primary">Parse</button>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--  <div class="col-9">-->
-<!--    -->
-<!--  </div>-->
-<!--</div>-->
+<div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
 
-<div class="nav">
-  <button class="btn btn-secondary" type="button" id="stix-parser" aria-haspopup="true" aria-expanded="false">
-    Parse STIX
-  </button>
-  <button class="btn btn-secondary dropdown-toggle" type="button" id="graphDropdown" data-toggle="dropdown"
-          aria-haspopup="true" aria-expanded="false">
-    Graph selection
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" id="attack-graph" href="#attack_graph">Attack Graph</a>
-    <a class="dropdown-item" id="activity-thread" href="#activity_thread">Activity Thread Graph</a>
+  <header class="bmd-layout-header">
+    <div class="navbar navbar-light ">
+      <button class="btn btn-secondary" type="button" data-toggle="drawer" data-target="#dw-s2">
+        Parse STIX
+      </button>
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="graphDropdown" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+        Graph selection
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" id="attack-graph" href="#attack_graph">Attack Graph</a>
+        <a class="dropdown-item" id="activity-thread" href="#activity_thread">Activity Thread Graph</a>
+      </div>
+    </div>
+  </header>
+
+  <div id="dw-s2" class="bmd-layout-drawer bg-faded">
+    <div class="container mt-2">
+      <div>
+        <label for="exampleTextarea" class="bmd-label-floating">STIX 2.1 JSON</label>
+        <textarea class="form-control" id="exampleTextarea" rows="35"></textarea>
+        <button type="button" class="mt-2 btn btn-raised btn-primary">Parse</button>
+      </div>
+    </div>
   </div>
-</div>
-<div id="svg-container">
-  <b><span id="currentSelection" class="position-absolute text-white selectionText"></span></b>
-</div>
+  <main class="bmd-layout-content">
+    <div>
+      <div id="svg-container">
+        <b><span id="currentSelection" class="position-absolute text-white selectionText"></span></b>
+      </div>
+    </div>
+  </main>
 
+</div>
 <script src="js/graph/basic.js"></script>
 
 <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->

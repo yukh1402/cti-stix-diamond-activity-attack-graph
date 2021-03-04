@@ -289,3 +289,17 @@ textarea {
 .selectionText {
   right: 10px;
 }
+
+.dropdown-menu {
+  left: unset !important;
+  right: 0;
+}
+
+:not(.bmd-drawer-out).bmd-drawer-in.bmd-drawer-f-l>.bmd-layout-drawer {
+  transform: translateX(0) !important;
+}
+
+.bmd-layout-drawer {
+  width: 600px !important;
+  transform: translateX(-610px) !important;
+}
