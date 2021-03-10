@@ -17,7 +17,9 @@ import {IDENTITY_TYPE} from "../stix/sdo/identity";
 import {THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor";
 import {OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo";
 
-const bundle = {
+let stixBundle = undefined;
+
+const som = {
   "type": "bundle",
   "id": "bundle--111f0784-6b83-46bd-a3aa-2d1527d48b83",
   "objects": [
@@ -341,7 +343,7 @@ function onZoom(event, scatter, x = undefined, xAxis = undefined, y = undefined,
   }
 }
 
-function buildAttackGraph() {
+function buildAttackGraph(bundle) {
   let graph = parseBundleToGraph(bundle);
   let attackPatterns = getNodesWithAttackPattern(graph);
 
@@ -433,14 +435,16 @@ function attackPatternMouseleave() {
   d3.select("#tooltip").style("visibility", "hidden");
 }
 
-function createGraph() {
-  removeGraphComponents();
-  addSTIXImages();
+function createGraph(bundle) {
+  if (bundle !== undefined) {
+    removeGraphComponents();
+    addSTIXImages();
 
-  if (graphSelection === GRAPH_TYPE.SUB_ATTACK_GRAPH || graphSelection === GRAPH_TYPE.SUB_ACTIVITY_THREAD) {
-    buildActivityAttackSubGraph();
-  } else if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH) {
-    buildAttackGraph();
+    if (graphSelection === GRAPH_TYPE.SUB_ATTACK_GRAPH || graphSelection === GRAPH_TYPE.SUB_ACTIVITY_THREAD) {
+      buildActivityAttackSubGraph(bundle);
+    } else if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH) {
+      buildAttackGraph(bundle);
+    }
   }
 }
 
@@ -561,3 +565,23 @@ function setCurrentGraphSelection() {
 }
 
 setCurrentGraphSelection();
+
+document.getElementById("parseButton").addEventListener("click", parseSTIXContent)
+
+function parseSTIXContent() {
+  eraseSyntaxError();
+  stixBundle = document.getElementById("stixContent").value;
+  try {
+    createGraph(JSON.parse(stixBundle));
+  } catch (e) {
+    showSyntaxError(e)
+  }
+}
+
+function showSyntaxError(message) {
+  document.getElementById("syntaxError").innerText = message;
+}
+
+function eraseSyntaxError() {
+  document.getElementById("syntaxError").innerText = "";
+}

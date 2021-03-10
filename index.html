@@ -47,7 +47,7 @@
 
   <header class="bmd-layout-header">
     <div class="navbar navbar-light ">
-      <button class="btn btn-secondary" type="button" data-toggle="drawer" data-target="#dw-s2">
+      <button class="btn btn-secondary" type="button" data-toggle="drawer" data-target="#dw">
         Parse STIX
       </button>
       <button class="btn btn-secondary dropdown-toggle" type="button" id="graphDropdown" data-toggle="dropdown"
@@ -62,12 +62,14 @@
     </div>
   </header>
 
-  <div id="dw-s2" class="bmd-layout-drawer bg-faded">
+  <div id="dw" class="bmd-layout-drawer bg-faded">
     <div class="container mt-2">
       <div>
-        <label for="exampleTextarea" class="bmd-label-floating">STIX 2.1 JSON</label>
-        <textarea class="form-control" id="exampleTextarea" rows="35"></textarea>
-        <button type="button" class="mt-2 btn btn-raised btn-primary">Parse</button>
+        <label for="stixContent" class="bmd-label-floating">STIX 2.1 JSON</label>
+        <textarea class="form-control" id="stixContent" rows="35"></textarea>
+        <button type="button" class="mt-2 btn btn-raised btn-primary"
+                id="parseButton">Parse</button>
+        <div id="syntaxError" class="alert-warning"></div>
       </div>
     </div>
   </div>
