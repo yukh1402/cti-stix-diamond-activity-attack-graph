@@ -1,5 +1,8 @@
 import {BasicSDOSRO, KillChainPhase, STIXObject} from '../basic';
 
+export const TOOL_TYPE = "tool"
+
+
 export interface ToolSDO extends BasicSDOSRO {
   name: string;
   description?: string;

@@ -1,5 +1,7 @@
 import {BasicSDOSRO, STIXField, STIXObject} from '../basic';
 
+export const OBSERVED_DATA_TYPE = "observed-data"
+
 export const OBSERVED_SDO_FIELDS: STIXField [] = [
   {key: "first_observed", viewValue: "First observed", type: 'observed-data', typeName: 'Observed SDO'},
   {key: "last_observed", viewValue: "Last observed", type: 'observed-data', typeName: 'Observed SDO'},
@@ -9,8 +11,6 @@ export const OBSERVED_SDO_FIELDS: STIXField [] = [
   {key: "x_ttps", viewValue: "TTPs", type: 'observed-data', typeName: 'Observed SDO'},
   {key: "x_artifact_type", viewValue: "Artifact type", type: 'observed-data', typeName: 'Observed SDO'},
 ];
-
-
 
 export interface ObservedSDO extends BasicSDOSRO{
   first_observed: Date;

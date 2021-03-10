@@ -7,6 +7,8 @@ export enum DIAMOND_EVENT_CATEGORY {
   VICTIM = 'victim'
 }
 
+export const GROUPING_TYPE = "grouping"
+
 // A Grouping object reflects a Diamond Model Event
 export interface GroupingSDO extends BasicSDOSRO{
   name?: string;

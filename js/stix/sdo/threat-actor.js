@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.THREAT_ACTOR_SDO_FIELDS = void 0;
+exports.THREAT_ACTOR_SDO_FIELDS = exports.THREAT_ACTOR_TYPE = void 0;
+exports.THREAT_ACTOR_TYPE = "threat-actor";
 exports.THREAT_ACTOR_SDO_FIELDS = [
     { key: 'name', viewValue: 'Name' },
     { key: 'x_country', viewValue: 'Country' },

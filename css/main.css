@@ -303,3 +303,25 @@ textarea {
   width: 600px !important;
   transform: translateX(-610px) !important;
 }
+
+.link {
+  stroke: #ffffff;
+  stroke-opacity: .6;
+}
+
+.tooltipAttackGraph {
+  position: absolute;
+  text-align: center;
+  min-height: 28px;
+  max-width: 300px;
+  word-break: break-word;
+  padding: 2px;
+  font: 14px sans-serif;
+  background: white;
+  border: 0;
+  border-radius: 8px;
+}
+
+.overflow-y-hidden {
+  overflow-y: hidden !important;
+}

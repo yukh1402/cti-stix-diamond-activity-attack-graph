@@ -1,5 +1,8 @@
 import {BasicSDOSRO, STIXField, STIXObject} from '../basic';
 
+export const IDENTITY_TYPE = "identity"
+
+
 export const IDENTITY_SDO_FIELDS: STIXField [] = [
   {key: "name", viewValue: "Hostname", type: 'identity', typeName: 'Identity SDO'},
   {key: "x_dns_hostname", viewValue: "DNS Hostname", type: 'identity', typeName: 'Identity SDO'},

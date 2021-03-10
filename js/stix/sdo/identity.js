@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IDENTITY_SDO_FIELDS = void 0;
+exports.IDENTITY_SDO_FIELDS = exports.IDENTITY_TYPE = void 0;
+exports.IDENTITY_TYPE = "identity";
 exports.IDENTITY_SDO_FIELDS = [
     { key: "name", viewValue: "Hostname", type: 'identity', typeName: 'Identity SDO' },
     { key: "x_dns_hostname", viewValue: "DNS Hostname", type: 'identity', typeName: 'Identity SDO' },

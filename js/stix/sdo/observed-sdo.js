@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OBSERVED_SDO_FIELDS = void 0;
+exports.OBSERVED_SDO_FIELDS = exports.OBSERVED_DATA_TYPE = void 0;
+exports.OBSERVED_DATA_TYPE = "observed-data";
 exports.OBSERVED_SDO_FIELDS = [
     { key: "first_observed", viewValue: "First observed", type: 'observed-data', typeName: 'Observed SDO' },
     { key: "last_observed", viewValue: "Last observed", type: 'observed-data', typeName: 'Observed SDO' },

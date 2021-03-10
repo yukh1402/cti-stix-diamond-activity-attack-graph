@@ -55,7 +55,8 @@
         Graph selection
       </button>
       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" id="attack-graph" href="#attack_graph">Attack Graph</a>
+        <a class="dropdown-item" id="attack-graph" href="#attack_attack">Attack Graph</a>
+        <a class="dropdown-item" id="sub_attack-graph" href="#sub_attack_graph">Sub Attack Graph</a>
         <a class="dropdown-item" id="activity-thread" href="#activity_thread">Activity Thread Graph</a>
       </div>
     </div>
@@ -70,7 +71,7 @@
       </div>
     </div>
   </div>
-  <main class="bmd-layout-content">
+  <main class="bmd-layout-content overflow-y-hidden">
     <div>
       <div id="svg-container">
         <b><span id="currentSelection" class="position-absolute text-white selectionText"></span></b>
@@ -79,7 +80,7 @@
   </main>
 
 </div>
-<script src="js/graph/basic.js"></script>
+<script type="module" src="js/graph/basic.js"></script>
 
 <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
 <!--  <script>-->

@@ -1,5 +1,7 @@
 import {BasicSDOSRO, BasicSTIX, STIXObject} from '../basic';
 
+export const THREAT_ACTOR_TYPE = "threat-actor"
+
 export const THREAT_ACTOR_SDO_FIELDS = [
   {key: 'name', viewValue: 'Name'},
   {key: 'x_country', viewValue: 'Country'},
