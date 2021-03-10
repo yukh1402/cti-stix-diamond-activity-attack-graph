@@ -15,6 +15,14 @@ html {
   color: #222;
   font-size: 1em;
   line-height: 1.4;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto,
+  "Helvetica Neue",
+  sans-serif;
 }
 
 /*
@@ -261,3 +269,59 @@ textarea {
   }
 }
 
+/* SVG CSS classes*/
+
+.svg-background {
+  background-color: #1b1e27;
+  background-image:
+    linear-gradient(to right, #2d3443 1px, transparent 1px),
+    linear-gradient(to bottom, #2d3443 1px, transparent 1px);
+  background-size: 25px 25px;
+  width: 100%;
+  height: 100%;
+}
+
+.row-flex {
+  display: flex;
+  flex-direction: row;
+}
+
+.selectionText {
+  right: 10px;
+}
+
+.dropdown-menu {
+  left: unset !important;
+  right: 0;
+}
+
+:not(.bmd-drawer-out).bmd-drawer-in.bmd-drawer-f-l>.bmd-layout-drawer {
+  transform: translateX(0) !important;
+}
+
+.bmd-layout-drawer {
+  width: 600px !important;
+  transform: translateX(-610px) !important;
+}
+
+.link {
+  stroke: #ffffff;
+  stroke-opacity: .6;
+}
+
+.tooltipAttackGraph {
+  position: absolute;
+  text-align: center;
+  min-height: 28px;
+  max-width: 300px;
+  word-break: break-word;
+  padding: 2px;
+  font: 14px sans-serif;
+  background: white;
+  border: 0;
+  border-radius: 8px;
+}
+
+.overflow-y-hidden {
+  overflow-y: hidden !important;
+}
