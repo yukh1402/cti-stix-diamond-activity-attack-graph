@@ -18,125 +18,7 @@ import {THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor";
 import {OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo";
 
 let stixBundle = undefined;
-
-const som = {
-  "type": "bundle",
-  "id": "bundle--111f0784-6b83-46bd-a3aa-2d1527d48b83",
-  "objects": [
-    {
-      "type": "threat-actor",
-      "spec_version": "2.1",
-      "id": "threat-actor--951df65c-73b5-4edd-a68f-5ab3356ce4cb",
-      "created": "2021-02-24T03:56:17.518335Z",
-      "modified": "2021-02-24T03:56:17.518335Z",
-      "name": "Test Actor",
-      "description": "Something"
-    },
-    {
-      "type": "campaign",
-      "spec_version": "2.1",
-      "id": "campaign--fa93a468-aa40-4010-8069-7bb96d00cf05",
-      "created": "2021-02-24T03:56:17.518335Z",
-      "modified": "2021-02-24T03:56:17.518335Z",
-      "name": "Test Campaign",
-      "description": "Something"
-    },
-    {
-      "type": "attack-pattern",
-      "spec_version": "2.1",
-      "id": "attack-pattern--732b3a1a-36a8-4b5b-9b09-bcaf8fa7449e",
-      "created": "2021-02-24T03:56:17.519336Z",
-      "modified": "2021-02-24T03:56:17.519336Z",
-      "name": "Network Device CLI",
-      "description": "Adversaries may abuse scripting or built-in command line interpreters (CLI) on network devices to execute malicious command and payloads. The CLI is the primary means through which users and administrators interact with the device in order to view system information, modify device operations, or perform diagnostic and administrative...",
-      "kill_chain_phases": [
-        {
-          "kill_chain_name": "mitre-attack",
-          "phase_name": "execution"
-        }
-      ],
-      "external_references": [
-        {
-          "source_name": "mitre-attack",
-          "url": "https://attack.mitre.org/techniques/T1059/008",
-          "external_id": "T1059.008"
-        }
-      ]
-    },
-    {
-      "type": "relationship",
-      "spec_version": "2.1",
-      "id": "relationship--014841f8-eb38-4673-9904-70f67c92dd8b",
-      "created": "2020-01-16T18:52:24.277Z",
-      "modified": "2020-01-16T18:52:24.277Z",
-      "relationship_type": "analysis-of",
-      "source_ref": "attack-pattern--732b3a1a-36a8-4b5b-9b09-bcaf8fa7449e",
-      "target_ref": "campaign--fa93a468-aa40-4010-8069-7bb96d00cf05"
-
-    },
-    {
-      "type": "grouping",
-      "spec_version": "2.1",
-      "id": "grouping--a74fc654-6f81-4666-8009-48ed2649548c",
-      "created": "2021-02-24T03:56:17.557334Z",
-      "modified": "2021-02-24T03:56:17.557334Z",
-      "context": "Test",
-      "object_refs": [
-        "threat-actor--951df65c-73b5-4edd-a68f-5ab3356ce4cb",
-        "campaign--fa93a468-aa40-4010-8069-7bb96d00cf05",
-        "attack-pattern--732b3a1a-36a8-4b5b-9b09-bcaf8fa7449e"
-      ],
-      "x_master_event": true
-    },
-    {
-      "type": "attack-pattern",
-      "spec_version": "2.1",
-      "id": "attack-pattern--732b3a1a-36a8-4b5b-9b09-bcaf8fa7449f",
-      "created": "2021-02-24T03:56:17.519336Z",
-      "modified": "2021-02-24T03:56:17.519336Z",
-      "name": "Network Device CLI",
-      "description": "Adversaries may abuse scripting or built-in command line interpreters (CLI) on network devices to execute malicious command and payloads. The CLI is the primary means through which users and administrators interact with the device in order to view system information, modify device operations, or perform diagnostic and administrative...",
-      "kill_chain_phases": [
-        {
-          "kill_chain_name": "mitre-attack",
-          "phase_name": "persistence"
-        }
-      ],
-      "external_references": [
-        {
-          "source_name": "mitre-attack",
-          "url": "https://attack.mitre.org/techniques/T1059/008",
-          "external_id": "T1176"
-        }
-      ]
-    },
-    {
-      "type": "grouping",
-      "spec_version": "2.1",
-      "id": "grouping--a74fc654-6f81-4666-8009-48ed2649549d",
-      "created": "2021-02-24T03:56:17.557334Z",
-      "modified": "2021-02-24T03:56:17.557334Z",
-      "context": "Test",
-      "object_refs": [
-        "threat-actor--951df65c-73b5-4edd-a68f-5ab3356ce4cb",
-        "campaign--fa93a468-aa40-4010-8069-7bb96d00cf05",
-        "attack-pattern--732b3a1a-36a8-4b5b-9b09-bcaf8fa7449f"
-      ],
-      "x_master_event": true
-    },
-    {
-      "type": "relationship",
-      "spec_version": "2.1",
-      "id": "relationship--beae22ba-0c69-4e16-88bf-d7f99fe269c5",
-      "created": "2021-02-19T09:17:19.513165Z",
-      "modified": "2021-02-19T09:17:19.513165Z",
-      "relationship_type": "attributed-to",
-      "source_ref": "grouping--a74fc654-6f81-4666-8009-48ed2649549d",
-      "target_ref": "grouping--a74fc654-6f81-4666-8009-48ed2649548c"
-    },
-  ]
-}
-
+let stixGraph = undefined;
 
 const GRAPH_TYPE = {
   ACTIVITY_THREAD: "activity_thread", // hard coded graph
@@ -185,7 +67,6 @@ function initGraph(divId, width = 1000, height = 500) {
     .append("g")
     .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.TOP + ")");
 }
-
 
 let svg = initGraph('svg-container',
   width + MARGIN.LEFT + MARGIN.RIGHT,
@@ -343,8 +224,7 @@ function onZoom(event, scatter, x = undefined, xAxis = undefined, y = undefined,
   }
 }
 
-function buildAttackGraph(bundle) {
-  let graph = parseBundleToGraph(bundle);
+function buildAttackGraph(graph) {
   let attackPatterns = getNodesWithAttackPattern(graph);
 
   let x = d3.scalePoint()
@@ -392,6 +272,7 @@ function buildAttackGraph(bundle) {
     .on("mouseover", attackPatternMouseover)
     .on("mousemove", attackPatternMousemove)
     .on("mouseout", attackPatternMouseleave)
+    .on("dblclick", attackPatternDoubleClick)
 
   createTTPLabels("#node")
 
@@ -435,15 +316,20 @@ function attackPatternMouseleave() {
   d3.select("#tooltip").style("visibility", "hidden");
 }
 
-function createGraph(bundle) {
-  if (bundle !== undefined) {
+function attackPatternDoubleClick(event, node) {
+
+  console.log(node)
+}
+
+function createGraph(graph) {
+  if (graph !== undefined) {
     removeGraphComponents();
     addSTIXImages();
 
     if (graphSelection === GRAPH_TYPE.SUB_ATTACK_GRAPH || graphSelection === GRAPH_TYPE.SUB_ACTIVITY_THREAD) {
-      buildActivityAttackSubGraph(bundle);
+      buildActivityAttackSubGraph(graph);
     } else if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH) {
-      buildAttackGraph(bundle);
+      buildAttackGraph(graph);
     }
   }
 }
@@ -486,6 +372,9 @@ function removeGraphComponents() {
   svg.selectAll("#xAxis").remove();
   svg.selectAll("#yAxis").remove();
   svg.selectAll("#clip").remove();
+  svg.selectAll("#node").remove();
+  svg.selectAll("#node-label").remove();
+  svg.selectAll("#link").remove();
   svg.selectAll("#scatter").remove();
 }
 
@@ -572,7 +461,8 @@ function parseSTIXContent() {
   eraseSyntaxError();
   stixBundle = document.getElementById("stixContent").value;
   try {
-    createGraph(JSON.parse(stixBundle));
+    stixGraph = parseBundleToGraph(JSON.parse(stixBundle));
+    createGraph(stixGraph);
   } catch (e) {
     showSyntaxError(e)
   }
