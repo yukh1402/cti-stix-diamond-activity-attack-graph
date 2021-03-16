@@ -20,14 +20,9 @@ export class Node {
 
 export class Link {
   constructor(source, target, data, relation = undefined) {
-    console.log("In link class")
-    console.log(source)
-    console.log(target)
     this.source = source;
     this.target = target;
     this.data = data;
     this.relation = relation;
-    console.log(source)
-    console.log(target)
   }
 }

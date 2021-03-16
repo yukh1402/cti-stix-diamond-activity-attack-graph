@@ -304,6 +304,10 @@ textarea {
   transform: translateX(-610px) !important;
 }
 
+.subNode {
+  cursor: move;
+}
+
 .link {
   stroke: #ffffff;
   stroke-opacity: .6;

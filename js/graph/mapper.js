@@ -2,6 +2,20 @@ import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern";
 import {Graph, Link, Node} from "./node";
 import {GROUPING_TYPE} from "../stix/sdo/grouping";
 import {RELATIONSHIP_TYPE} from "../stix/sro/relationship";
+import {THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor";
+import {CAMPAIGN_TYPE} from "../stix/sdo/campaign";
+import {INTRUSION_SET_TYPE} from "../stix/sdo/intrusion-set";
+import {VULNERABILITY_TYPE} from "../stix/sdo/vulnerability";
+import {TOOL_TYPE} from "../stix/sdo/tool";
+import {MALWARE_TYPE} from "../stix/sdo/malware";
+import {INFRASTRUCTURE_TYPE} from "../stix/sdo/infrastructure";
+import {OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo";
+import {IDENTITY_TYPE} from "../stix/sdo/identity";
+import {INDICATOR_TYPE} from "../stix/sdo/indicator";
+import {LOCATION_TYPE} from "../stix/sdo/location";
+import {MALWARE_ANALYSIS_TYPE} from "../stix/sdo/malware-analysis";
+import {COURSE_OF_ACTION_TYPE} from "../stix/sdo/course-of-action";
+import {INCIDENT_TYPE} from "../stix/sdo/incident";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
@@ -345,19 +359,22 @@ export function parseTacticNameToXAxis(tactic) {
 export function parseBundleToGraph(bundle) {
   let nodes = [];
   let groupingLinks = [];
-  bundle.objects.forEach(obj => {
-    if (obj.type === GROUPING_TYPE) {
-      let node = new Node(obj.id, obj, obj.type, buildSubGraphForGrouping(obj, bundle))
-      nodes.push(node);
-    } else if (obj.type === RELATIONSHIP_TYPE) {
-      if (obj.source_ref.includes(GROUPING_TYPE) && obj.target_ref.includes(GROUPING_TYPE)) {
-        groupingLinks.push(
-          new Link(
-            nodes.findIndex(no => no.id === obj.source_ref),
-            nodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type));
-      }
-    }
-  })
+
+  // Add all Grouping SDOs
+  bundle.objects
+    .filter(obj => obj.type === GROUPING_TYPE)
+    .forEach(obj => nodes.push(new Node(obj.id, obj, obj.type, buildSubGraphForGrouping(obj, bundle))))
+
+  // Add all Grouping relationships
+  bundle.objects
+    .filter(obj => obj.type === RELATIONSHIP_TYPE)
+    .filter(obj => obj.source_ref.includes(GROUPING_TYPE) && obj.target_ref.includes(GROUPING_TYPE))
+    .forEach(obj =>
+      groupingLinks.push(
+        new Link(
+          nodes.findIndex(no => no.id === obj.source_ref),
+          nodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type)));
+
   return new Graph(nodes, groupingLinks);
 }
 
@@ -365,32 +382,45 @@ function buildSubGraphForGrouping(grouping, bundle) {
   let childNodes = [];
   let childLinks = [];
   grouping.object_refs.forEach(ref => {
+    // The grouping reference object that is found in the bundle
     let foundObj = bundle.objects.find(obj => obj.id === ref);
 
     // Grouping Objects are not allowed in the Subgraph
     if (!foundObj.id.includes(GROUPING_TYPE)) {
       if (!foundObj.id.includes(RELATIONSHIP_TYPE)) {
-        childNodes.push(new Node(foundObj.id, foundObj, foundObj.type));
-      } else {
-        // Dont push relationship obj if target or source ref is a grouping object or relationship obj already exists in childlinks
-        if (!foundObj.source_ref.includes(GROUPING_TYPE) && !foundObj.target_ref.includes(GROUPING_TYPE)
-          && !childLinks.find(link => link.id === foundObj.id))
+        childNodes.push(new Node(foundObj.id, foundObj, foundObj.type, undefined, grouping.id));
+      }
+    }
+  });
+
+  // Get all links
+  grouping.object_refs.forEach(ref => {
+    let foundObj = bundle.objects.find(obj => obj.id === ref);
+
+    if (foundObj.id.includes(RELATIONSHIP_TYPE)) {
+      // Dont push relationship obj if target or source ref is a grouping object or relationship obj already exists in childlinks
+      if (!foundObj.source_ref.includes(GROUPING_TYPE) && !foundObj.target_ref.includes(GROUPING_TYPE)
+        && !childLinks.find(link => link.data.id === foundObj.id))
+        childLinks.push(
+          new Link(
+            childNodes.findIndex(no => no.id === foundObj.source_ref),
+            childNodes.findIndex(no => no.id === foundObj.target_ref), foundObj, foundObj.relationship_type));
+    }
+    // Get all relationship objects for foundObj
+    bundle.objects.forEach(obj => {
+      if (obj.id.includes(RELATIONSHIP_TYPE)) {
+        if (!childLinks.find(rel => rel.data.id === obj.id)
+          && (obj.source_ref === foundObj.id || obj.target_ref === foundObj.id)) {
           childLinks.push(
             new Link(
-              childNodes.findIndex(no => no.id === foundObj.source_ref),
-              childNodes.findIndex(no => no.id === foundObj.target_ref), foundObj, foundObj.relationship_type));
-      }
-      // Get all relationship objects for foundObj
-      bundle.objects.forEach(obj => {
-        if (obj.id.includes(RELATIONSHIP_TYPE)) {
-          if (!childLinks.find(rel => rel.id === obj.id)
-            && (obj.source_ref === foundObj.id || obj.target_ref === foundObj.id)) {
-            childLinks.push(obj);
-          }
+              childNodes.findIndex(no => no.id === obj.source_ref),
+              childNodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type
+            )
+          );
         }
-      })
-    }
-  })
+      }
+    })
+  });
   return new Graph(childNodes, childLinks);
 }
 
@@ -408,4 +438,111 @@ export function getNodesWithAttackPattern(graph) {
     }).filter(n => n !== undefined);
     if (attackPattern.length > 0) return attackPattern;
   }).filter(n => n !== undefined));
+}
+
+/**
+ * For the Sub Attack Graph the node with sequence number 1 or the min date is the first relative node
+ * @param nodes
+ */
+export function getFirstRelativeNodeTime(nodes) {
+  let relativeTime = nodes.filter(node => "x_sequence_number" in node.data)
+    .find(n => n.data.x_sequence_number === 1)
+
+  if (relativeTime !== undefined) {
+    return Date.parse(relativeTime.created);
+  } else {
+    return getMinNodeDate(nodes);
+  }
+}
+
+/**
+ * Get the minimum Date from a list of Nodes
+ * @param nodes
+ * @return {Date}
+ */
+export function getMinNodeDate(nodes) {
+  return new Date(Math.min.apply(null, nodes.map(node => Date.parse(node.data.created))))
+}
+
+/**
+ * The sub graph is split into 5 layers. Layer 1-4 are the Diamond Event Categories. The fifth layer is a floating
+ * layer where STIX Cyber observable objects are displayed over all layers.
+ *
+ *              --|---------------------------------------------------------------------------------------------|
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *                |                                                                                             |
+ * Adversary------|---------------------------------------------------------------------------------------------|
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *                |                                                                                             |
+ * Capability-----|---------------------------------------------------------------------------------------------|
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *                |                                                                                             |
+ * Infrastructure-|---------------------------------------------------------------------------------------------|
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *                |                                                                                             |
+ * Victim---------|---------------------------------------------------------------------------------------------|
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *              --|---------------------------------------------------------------------------------------------|
+ *
+ * @param node
+ */
+export function getDiamondModelCategoryLayer(node) {
+  // Layers
+  const ADVERSARY = 0;
+  const CAPABILITY = 1;
+  const INFRASTRUCTURE = 2;
+  const VICTIM = 3;
+  const OVERLAY = 4;
+
+  switch (node.data.type) {
+    case THREAT_ACTOR_TYPE:
+    case INTRUSION_SET_TYPE:
+    case CAMPAIGN_TYPE:
+      return ADVERSARY;
+    case VULNERABILITY_TYPE:
+    case TOOL_TYPE:
+    case ATTACK_PATTERN_TYPE:
+    case MALWARE_TYPE:
+    case MALWARE_ANALYSIS_TYPE:
+      return CAPABILITY;
+    case INFRASTRUCTURE_TYPE:
+      return INFRASTRUCTURE;
+    case OBSERVED_DATA_TYPE:
+    case IDENTITY_TYPE:
+    case COURSE_OF_ACTION_TYPE:
+    case INCIDENT_TYPE:
+      return VICTIM;
+    default:
+      return OVERLAY;
+  }
+}
+
+
+/**
+ * Get the Node label which should be displayed in the Graph
+ * @param node
+ */
+export function getNodeLabel(node) {
+  switch (node.data.type) {
+    case ATTACK_PATTERN_TYPE:
+      return node.data.name + " - " + getTTP(node);
+    case CAMPAIGN_TYPE:
+    case IDENTITY_TYPE:
+    case INDICATOR_TYPE:
+    case INFRASTRUCTURE_TYPE:
+    case INTRUSION_SET_TYPE:
+    case LOCATION_TYPE:
+    case MALWARE_TYPE:
+    case THREAT_ACTOR_TYPE:
+    case TOOL_TYPE:
+    case VULNERABILITY_TYPE:
+      return node.data.name;
+
+  }
 }
