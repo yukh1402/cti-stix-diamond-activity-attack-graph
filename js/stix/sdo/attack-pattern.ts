@@ -8,3 +8,7 @@ export interface AttackPatternSDO extends BasicSDOSRO{
   aliases: string [];
   kill_chain_phases: KillChainPhase [];
 }
+
+export function getAttackPatternView(attackPatternSDO: AttackPatternSDO) {
+
+}

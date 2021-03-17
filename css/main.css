@@ -326,6 +326,27 @@ textarea {
   border-radius: 8px;
 }
 
+.tooltipSubGraph {
+  position: absolute;
+  /*text-align: center;*/
+  min-height: 28px;
+  min-width: 200px;
+  max-width: 400px;
+  word-break: break-word;
+  padding: 2px;
+  font: 14px sans-serif;
+  background: white;
+  border: 0;
+  opacity: 0.9;
+  border-radius: 8px;
+}
+
+.nodeView {
+  width: 400px;
+  background: lightgray;
+
+}
+
 .overflow-y-hidden {
   overflow-y: hidden !important;
 }

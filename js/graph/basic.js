@@ -66,7 +66,7 @@ function initGraph(divId, width = 1000, height = 500) {
     .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.TOP + ")");
 }
 
-let svg = initGraph('svg-container',
+let svg = initGraph("svg-container",
   WIDTH + MARGIN.LEFT + MARGIN.RIGHT,
   HEIGHT + MARGIN.TOP + MARGIN.BOTTOM);
 
@@ -113,7 +113,7 @@ function buildActivityThreadGraph(graph) {
     .attr("y", 0);
 
   // Add the ClipPath
-  let scatter = svg.append('g')
+  let scatter = svg.append("g")
     .attr("id", "scatter")
     .attr("clip-path", "url(#clip)")
 
@@ -135,7 +135,7 @@ function buildActivityThreadGraph(graph) {
       return y(Date.parse(grouping.data.created))
     })
     .attr("r", 10)
-    .style('fill', () => getNodeImage(new Node(undefined, undefined, GROUPING_TYPE)))
+    .style("fill", () => getNodeImage(new Node(undefined, undefined, GROUPING_TYPE)))
   //todo: Create node labels
   graphZoom(scatter, y, yAxis)
 }
@@ -161,13 +161,13 @@ function buildAttackGraph(graph) {
     .style("visibility", "hidden");
 
   // Create links
-  svg.selectAll('.link')
+  svg.selectAll(".link")
     .data(graph.links)
-    .join('g')
-    .attr('id', 'link')
-    .append('path')
+    .join("g")
+    .attr("id", "link")
+    .append("path")
     .attr("id", "linkPath")
-    .classed('link', true);
+    .classed("link", true);
 
   // Add circles
   svg.selectAll("circle")
@@ -185,10 +185,10 @@ function buildAttackGraph(graph) {
       return d.y;
     })
     .attr("r", 10)
-    .style('fill', () => getNodeImage(new Node(undefined, undefined, GROUPING_TYPE)))
-    .on("mouseover", attackPatternTooltipVisible)
+    .style("fill", () => getNodeImage(new Node(undefined, undefined, GROUPING_TYPE)))
+    .on("mouseover", showTooltip)
     .on("mousemove", attackPatternMousemove)
-    .on("mouseout", attackPatternTooltipHide)
+    .on("mouseout", hideTooltip)
     .on("dblclick", attackPatternDoubleClick)
 
   createNodeLabels("#node")
@@ -235,18 +235,34 @@ function buildSubGraph(groupingNode) {
     .attr("fill", "#FFFFFF")
     .text(d => d.relation);
 
+  // Create DIV element for Tooltip
+  d3.select("#svg-container")
+    .append("div")
+    .attr("id", "tooltip")
+    .attr("class", "tooltipSubGraph")
+    .style("visibility", "hidden");
+
   let node = svg.selectAll(".node")
     .data(subGraph.nodes)
-    .join('g')
-    .attr('id', 'node')
-    .append('circle')
-    .attr('id', 'node-circle')
+    .join("g")
+    .attr("id", "node")
+    .append("circle")
+    .attr("id", "node-circle")
     .attr("r", 10)
-    .style('fill', (n) => getNodeImage(n))
+    .style("fill", (n) => getNodeImage(n))
     .classed("fixed", d => d.fx !== undefined)
     .classed("subNode", true)
+    .on("mouseover", showTooltip)
+    .on("mousemove", subGraphMousemove)
+    .on("mouseout", hideTooltip)
 
-  createNodeLabels("#node")
+  svg.selectAll("#node")
+    .append("text")
+    .attr("id", "node-label")
+    .attr("font-size", "0.5em")
+    .attr("text-anchor", "middle")
+    .attr("fill", "#FFFFFF")
+    .text((n) => getNodeLabel(n));
 
   let simulation = d3.forceSimulation()
     .nodes(subGraph.nodes)
@@ -288,12 +304,12 @@ function forceDirectedTick(nodeId, nodeLabel, linkId, linkLabel) {
     .attr("y2", d => d.target.y);
 
   d3.selectAll(nodeLabel)
-    .attr('x', d => d.x)
-    .attr('y', d => d.y + 20);
+    .attr("x", d => d.x)
+    .attr("y", d => d.y + 20);
 
   d3.selectAll(linkLabel)
-    .attr('x', d => d.source.x + ((d.target.x - d.source.x) / 2))
-    .attr('y', d => d.source.y + ((d.target.y - d.source.y) / 2));
+    .attr("x", d => d.source.x + ((d.target.x - d.source.x) / 2))
+    .attr("y", d => d.source.y + ((d.target.y - d.source.y) / 2));
 }
 
 function nodeDragStart() {
@@ -311,6 +327,7 @@ function nodeClick(event, d, simulation) {
   delete d.fy;
   d3.select(this).classed("fixed", false);
   simulation.alpha(1).restart();
+  showNode(d);
 }
 
 /**
@@ -326,7 +343,7 @@ function graphZoom(scatter, y, yAxis) {
     .attr("height", HEIGHT)
     .style("fill", "none")
     .style("pointer-events", "all")
-    .attr('transform', 'translate(' + MARGIN.LEFT + ',' + MARGIN.RIGHT + ')')
+    .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.RIGHT + ")")
     .call(zoom);
 }
 
@@ -345,7 +362,7 @@ function onZoom(event, scatter, y, yAxis) {
   // Update node position
   scatter
     .selectAll("circle")
-    .attr('cy', function (d) {
+    .attr("cy", function (d) {
       let grouping = stixGraph.nodes.find(grouping => grouping.id === d.groupingId);
       return newY(Date.parse(grouping.data.created))
     })
@@ -353,29 +370,44 @@ function onZoom(event, scatter, y, yAxis) {
 
 function createNodeLabels(id) {
   svg.selectAll(id)
-    .append('text')
+    .append("text")
     .attr("id", "node-label")
-    .attr('font-size', '0.5em')
-    .attr('text-anchor', 'middle')
-    .attr('x', d => d.x)
-    .attr('y', d => d.y + 20)
-    .attr('fill', '#FFFFFF')
+    .attr("font-size", "0.5em")
+    .attr("text-anchor", "middle")
+    .attr("x", d => d.x)
+    .attr("y", d => d.y + 20)
+    .attr("fill", "#FFFFFF")
     .text((n) => getNodeLabel(n));
 }
 
-function attackPatternTooltipVisible() {
+function showTooltip() {
   d3.select("#tooltip").style("visibility", "visible")
 }
 
 function attackPatternMousemove(event, d) {
   d3.select("#tooltip")
     .style("top", (event.pageY - 20) + "px")
-    .style("left", (event.pageX) + "px")
+    .style("left", () => calcLeftPosition(event, 300))
     .html(d.data.description)
 }
 
-function attackPatternTooltipHide() {
+function subGraphMousemove(event, d) {
+  d3.select("#tooltip")
+    .style("top", (event.pageY - 20) + "px")
+    .style("left", () => calcLeftPosition(event, 300))
+    .html(d.data.name)
+}
+
+function hideTooltip() {
   d3.select("#tooltip").style("visibility", "hidden");
+}
+
+function calcLeftPosition(event, tooltipWidth) {
+  if ((event.pageX + tooltipWidth) >= event.view.screen.availWidth) {
+    return (event.view.screen.availWidth - tooltipWidth) + "px";
+  } else {
+    return (event.pageX) + "px";
+  }
 }
 
 function attackPatternDoubleClick(event, node) {
@@ -421,25 +453,25 @@ function clamp(x, lo, hi) {
 function getNodeImage(node) {
   switch (node.type) {
     case GROUPING_TYPE:
-      return 'url(#groupingImage)';
+      return "url(#groupingImage)";
     case ATTACK_PATTERN_TYPE:
-      return 'url(#attackPatternImage)';
+      return "url(#attackPatternImage)";
     case TOOL_TYPE:
-      return 'url(#toolImage)';
+      return "url(#toolImage)";
     case MALWARE_TYPE:
-      return 'url(#malwareImage)';
+      return "url(#malwareImage)";
     case VULNERABILITY_TYPE:
-      return 'url(#vulnerabilityImage)';
+      return "url(#vulnerabilityImage)";
     case IDENTITY_TYPE:
-      return 'url(#identityImage)';
+      return "url(#identityImage)";
     case INDICATOR_TYPE:
-      return 'url(#indicatorImage)'
+      return "url(#indicatorImage)"
     case THREAT_ACTOR_TYPE:
-      return 'url(#threatActorImage)';
+      return "url(#threatActorImage)";
     case OBSERVED_DATA_TYPE:
-      return 'url(#observedDataImage)';
+      return "url(#observedDataImage)";
     case CAMPAIGN_TYPE:
-      return 'url(#campaignImage)';
+      return "url(#campaignImage)";
   }
 }
 
@@ -482,4 +514,26 @@ function showSyntaxError(message) {
 
 function eraseSyntaxError() {
   document.getElementById("syntaxError").innerText = "";
+}
+
+function getNodeHTML(node) {
+  switch (node.data.type) {
+    case ATTACK_PATTERN_TYPE:
+      // return getAttackPatternView(node.data);
+      return ""
+  }
+}
+
+function showNode(node) {
+  d3.select("#nodeView").remove();
+  createNodeView();
+}
+
+function createNodeView() {
+  const nodeViewDIV = document.createElement("div");
+  nodeViewDIV.id = "nodeView"
+  nodeViewDIV.className = "nodeView"
+  nodeViewDIV.innerHTML = "<b>something</b>"
+
+  document.getElementById("workspace").appendChild(nodeViewDIV);
 }
