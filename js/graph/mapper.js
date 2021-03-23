@@ -1,26 +1,40 @@
-import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern";
+import {ATTACK_PATTERN_TYPE, getAttackPatternView} from "../stix/sdo/attack-pattern";
 import {Graph, Link, Node} from "./node";
 import {GROUPING_TYPE} from "../stix/sdo/grouping";
 import {RELATIONSHIP_TYPE} from "../stix/sro/relationship";
-import {THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor";
-import {CAMPAIGN_TYPE} from "../stix/sdo/campaign";
-import {INTRUSION_SET_TYPE} from "../stix/sdo/intrusion-set";
-import {VULNERABILITY_TYPE} from "../stix/sdo/vulnerability";
-import {TOOL_TYPE} from "../stix/sdo/tool";
-import {MALWARE_TYPE} from "../stix/sdo/malware";
-import {INFRASTRUCTURE_TYPE} from "../stix/sdo/infrastructure";
-import {OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo";
-import {IDENTITY_TYPE} from "../stix/sdo/identity";
-import {INDICATOR_TYPE} from "../stix/sdo/indicator";
-import {LOCATION_TYPE} from "../stix/sdo/location";
-import {MALWARE_ANALYSIS_TYPE} from "../stix/sdo/malware-analysis";
-import {COURSE_OF_ACTION_TYPE} from "../stix/sdo/course-of-action";
-import {INCIDENT_TYPE} from "../stix/sdo/incident";
+import {getThreatActorView, THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor";
+import {CAMPAIGN_TYPE, getCampaignView} from "../stix/sdo/campaign";
+import {getIntrusionSetView, INTRUSION_SET_TYPE} from "../stix/sdo/intrusion-set";
+import {getVulnerabilityView, VULNERABILITY_TYPE} from "../stix/sdo/vulnerability";
+import {getToolView, TOOL_TYPE} from "../stix/sdo/tool";
+import {getMalwareView, MALWARE_TYPE} from "../stix/sdo/malware";
+import {getInfrastructureView, INFRASTRUCTURE_TYPE} from "../stix/sdo/infrastructure";
+import {getObservedDataView, OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo";
+import {getIdentityView, IDENTITY_TYPE} from "../stix/sdo/identity";
+import {getIndicatorView, INDICATOR_TYPE} from "../stix/sdo/indicator";
+import {getLocationView, LOCATION_TYPE} from "../stix/sdo/location";
+import {getMalwareAnalysisView, MALWARE_ANALYSIS_TYPE} from "../stix/sdo/malware-analysis";
+import {COURSE_OF_ACTION_TYPE, getCourseOfActionView} from "../stix/sdo/course-of-action";
+import {getIncidentView, INCIDENT_TYPE} from "../stix/sdo/incident";
+import {capitalize} from "./utils";
+import {getNoteView, NOTE_TYPE} from "../stix/sdo/note";
+import {getOpinionView, OPINION_TYPE} from "../stix/sdo/opinion";
+import {getReportView, REPORT_TYPE} from "../stix/sdo/report";
+import {getIPvView, IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco";
+import {DOMAIN_TYPE, getDomainView} from "../stix/sco/domain";
+import {getUrlView, URL_TYPE} from "../stix/sco/url";
+import {FILE_TYPE, getFileView} from "../stix/sco/file";
+import {DIRECTORY_TYPE, getDirectoryView} from "../stix/sco/directory";
+import {getProcessView, PROCESS_TYPE} from "../stix/sco/process";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
   "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control",
   "Exfiltration", "Impact"]
+
+export const DIAMOND_MODEL_META_FEATURE_CATEGORIES = [
+  "Victim", "Infrastructure", "Capabilities", "Adversary"
+]
 
 export const TTP_Y_AXIS = [
   [
@@ -344,7 +358,7 @@ export function parseTacticNameToXAxis(tactic) {
     if (word.toLowerCase() === "and") {
       string += "and";
     } else {
-      string += word.charAt(0).toUpperCase() + word.slice(1);
+      string += capitalize(word);
     }
   })
   return string;
@@ -523,7 +537,6 @@ export function getDiamondModelCategoryLayer(node) {
   }
 }
 
-
 /**
  * Get the Node label which should be displayed in the Graph
  * @param node
@@ -544,5 +557,96 @@ export function getNodeLabel(node) {
     case VULNERABILITY_TYPE:
       return node.data.name;
 
+  }
+}
+
+
+/**
+ * Create the node view depending on the STIX object
+ * @param data: This is a Node (STIX) object
+ * @param titleId: The id of the title HTML element
+ * @param contentId: The id of the content HTML element
+ * @param typeId: The id of the type HTML element
+ */
+export function createView(data, titleId, contentId, typeId) {
+  switch (data.type) {
+    case ATTACK_PATTERN_TYPE:
+      getAttackPatternView(titleId, contentId, typeId, data);
+      break;
+    case CAMPAIGN_TYPE:
+      getCampaignView(titleId, contentId, typeId, data);
+      break;
+    case COURSE_OF_ACTION_TYPE:
+      getCourseOfActionView(titleId, contentId, typeId, data);
+      break;
+    case IDENTITY_TYPE:
+      getIdentityView(titleId, contentId, typeId, data);
+      break;
+    case INCIDENT_TYPE:
+      getIncidentView(titleId, contentId, typeId, data);
+      break;
+    case INDICATOR_TYPE:
+      getIndicatorView(titleId, contentId, typeId, data);
+      break;
+    case INFRASTRUCTURE_TYPE:
+      getInfrastructureView(titleId, contentId, typeId, data);
+      break;
+    case INTRUSION_SET_TYPE:
+      getIntrusionSetView(titleId, contentId, typeId, data);
+      break;
+    case LOCATION_TYPE:
+      getLocationView(titleId, contentId, typeId, data);
+      break;
+    case MALWARE_TYPE:
+      getMalwareView(titleId, contentId, typeId, data);
+      break;
+    case MALWARE_ANALYSIS_TYPE:
+      getMalwareAnalysisView(titleId, contentId, typeId, data);
+      break;
+    case NOTE_TYPE:
+      getNoteView(titleId, contentId, typeId, data);
+      break;
+    case OBSERVED_DATA_TYPE:
+      getObservedDataView(titleId, contentId, typeId, data);
+      break;
+    case THREAT_ACTOR_TYPE:
+      getThreatActorView(titleId, contentId, typeId, data);
+      break;
+    case OPINION_TYPE:
+      getOpinionView(titleId, contentId, typeId, data);
+      break;
+    case REPORT_TYPE:
+      getReportView(titleId, contentId, typeId, data);
+      break;
+    case TOOL_TYPE:
+      getToolView(titleId, contentId, typeId, data);
+      break;
+    case VULNERABILITY_TYPE:
+      getVulnerabilityView(titleId, contentId, typeId, data);
+      break;
+    case IPV4_TYPE:
+      getIPvView(IPV4_TYPE, titleId, contentId, typeId, data);
+      break;
+    case IPV6_TYPE:
+      getIPvView(IPV6_TYPE, titleId, contentId, typeId, data);
+      break;
+    case DOMAIN_TYPE:
+      getDomainView(titleId, contentId, typeId, data);
+      break;
+    case URL_TYPE:
+      getUrlView(titleId, contentId, typeId, data);
+      break;
+    case FILE_TYPE:
+      getFileView(titleId, contentId, typeId, data);
+      break;
+    case DIRECTORY_TYPE:
+      getDirectoryView(titleId, contentId, typeId, data);
+      break;
+    case PROCESS_TYPE:
+      getProcessView(titleId, contentId, typeId, data);
+      break;
+    default:
+      getCustomSTIXView(titleId, contentId, typeId, data);
+      break;
   }
 }

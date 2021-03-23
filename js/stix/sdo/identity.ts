@@ -1,4 +1,12 @@
-import {BasicSDOSRO, STIXField, STIXObject} from '../basic';
+import {
+  addNodeViewText, addNodeViewTextList,
+  addNodeViewTitle, addNodeViewTitleAndText, addNodeViewTitleAndTextList,
+  BasicSDOSRO,
+  customFieldView,
+  externalReferencesView,
+  STIXField,
+  STIXObject
+} from '../basic';
 
 export const IDENTITY_TYPE = "identity"
 
@@ -18,4 +26,29 @@ export interface IdentitySDO extends BasicSDOSRO {
   contact_information: string;
   name: string;
   identity_class?: string;
+}
+
+export function getIdentityView(titleId: string, contentId: string, typeId: string, identitySDO: IdentitySDO) {
+  document.getElementById(titleId).innerHTML += identitySDO.name;
+  document.getElementById(typeId).innerHTML += "Identity";
+
+  let el = document.getElementById(contentId);
+  const identityDIV = document.createElement("div");
+  identityDIV.id = "identity";
+
+  if (identitySDO?.description) addNodeViewText(identityDIV, identitySDO.description);
+  if (identitySDO?.roles) addNodeViewTitleAndTextList(identityDIV, "Roles:", identitySDO.roles,
+    "badge-dark");
+  if (identitySDO?.sectors) addNodeViewTitleAndTextList(identityDIV, "Sectors:", identitySDO.sectors,
+    "badge-dark");
+  if (identitySDO?.identity_class) addNodeViewTitleAndText(identityDIV, "Identity class:",
+    identitySDO.identity_class)
+  if (identitySDO?.contact_information) addNodeViewTitleAndText(identityDIV, "Contact Information:",
+    identitySDO.contact_information)
+
+  el.appendChild(identityDIV);
+  customFieldView(identityDIV.id, identitySDO);
+  if (identitySDO?.external_references) {
+    externalReferencesView(identityDIV.id, identitySDO.external_references);
+  }
 }

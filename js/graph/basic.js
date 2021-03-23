@@ -6,9 +6,9 @@ import {
   MITRE_ATTACK_CATEGORIES,
   parseBundleToGraph,
   parseTacticNameToXAxis,
-  getDiamondModelCategoryLayer, getNodeLabel
+  getDiamondModelCategoryLayer, getNodeLabel, createView, DIAMOND_MODEL_META_FEATURE_CATEGORIES
 } from "./mapper";
-import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern";
+import {ATTACK_PATTERN_TYPE, getAttackPatternView} from "../stix/sdo/attack-pattern";
 import {GROUPING_TYPE} from "../stix/sdo/grouping";
 import {TOOL_TYPE} from "../stix/sdo/tool";
 import {MALWARE_TYPE} from "../stix/sdo/malware";
@@ -36,6 +36,14 @@ const MARGIN = {
   RIGHT: 30,
   LEFT: 60
 }
+
+const LAYER_COLOR_SCHEMA = [
+  '#CFD8DC',
+  '#90A4AE',
+  '#607D8B',
+  '#455A64'
+]
+
 
 const WIDTH = 1000;
 const HEIGHT = 500;
@@ -210,12 +218,30 @@ function buildSubGraph(groupingNode) {
   let links = subGraph.links;
 
   let y = d3.scaleBand()
-    .domain(["Victim", "Infrastructure", "Capabilities", "Adversary"])
+    .domain(DIAMOND_MODEL_META_FEATURE_CATEGORIES)
     .range([HEIGHT, 0])
   let yAxis = svg.append("g")
     .attr("id", "yAxis")
     .attr("style", "color: white; font-size: 8px")
     .call(d3.axisLeft(y))
+    .call(g => g.select(".domain")
+      .remove())
+
+  // Build layer background
+  svg.selectAll("background-rect")
+    .data(DIAMOND_MODEL_META_FEATURE_CATEGORIES)
+    .join("g")
+    .attr("id", "layer")
+    .append("rect")
+    .attr("y", (d, i) => {
+      return (HEIGHT / 4) * i;
+    })
+    .attr("height", HEIGHT / 4)
+    .attr("width", WIDTH)
+    .attr("opacity", 0.6)
+    .attr("fill", function (d, i) {
+      return LAYER_COLOR_SCHEMA[i];
+    });
 
   let link = svg
     .selectAll(".link")
@@ -252,9 +278,6 @@ function buildSubGraph(groupingNode) {
     .style("fill", (n) => getNodeImage(n))
     .classed("fixed", d => d.fx !== undefined)
     .classed("subNode", true)
-    .on("mouseover", showTooltip)
-    .on("mousemove", subGraphMousemove)
-    .on("mouseout", hideTooltip)
 
   svg.selectAll("#node")
     .append("text")
@@ -267,13 +290,16 @@ function buildSubGraph(groupingNode) {
   let simulation = d3.forceSimulation()
     .nodes(subGraph.nodes)
     .force("charge", d3.forceManyBody().strength(-100))
-    .force("link", d3.forceLink(links))
+    .force("link", d3.forceLink(links).distance(60))
     .on("tick", () => forceDirectedTick("#node-circle", "#node-label", "#link-line",
       "#link-label"))
 
   let drag = d3.drag()
     .on("start", (event, d) => nodeDragStart(event, d, simulation))
-    .on("drag", (event, d) => nodeDragged(event, d, simulation))
+    .on("drag", (event, d) => {
+      nodeClick(event, d, simulation)
+      return nodeDragged(event, d, simulation);
+    })
 
   node.call(drag).on("click", (event, d) => nodeClick(event, d, simulation))
 }
@@ -391,13 +417,6 @@ function attackPatternMousemove(event, d) {
     .html(d.data.description)
 }
 
-function subGraphMousemove(event, d) {
-  d3.select("#tooltip")
-    .style("top", (event.pageY - 20) + "px")
-    .style("left", () => calcLeftPosition(event, 300))
-    .html(d.data.name)
-}
-
 function hideTooltip() {
   d3.select("#tooltip").style("visibility", "hidden");
 }
@@ -440,8 +459,10 @@ function removeGraphComponents() {
   svg.selectAll("#node").remove();
   svg.selectAll("#node-label").remove();
   d3.selectAll("#tooltip").remove();
+  d3.selectAll("#nodeView").remove();
   svg.selectAll("#link").remove();
   svg.selectAll("#scatter").remove();
+  svg.selectAll("#layer").remove();
 }
 
 createGraph();
@@ -516,24 +537,46 @@ function eraseSyntaxError() {
   document.getElementById("syntaxError").innerText = "";
 }
 
-function getNodeHTML(node) {
-  switch (node.data.type) {
-    case ATTACK_PATTERN_TYPE:
-      // return getAttackPatternView(node.data);
-      return ""
-  }
-}
-
 function showNode(node) {
-  d3.select("#nodeView").remove();
-  createNodeView();
+  removeNodeView();
+  createNodeView(node);
 }
 
-function createNodeView() {
+function createNodeView(node) {
   const nodeViewDIV = document.createElement("div");
   nodeViewDIV.id = "nodeView"
   nodeViewDIV.className = "nodeView"
-  nodeViewDIV.innerHTML = "<b>something</b>"
+  nodeViewDIV.innerHTML =
+    "<div class='card'>" +
+    "<div class='card-header'>" +
+    "<button type='button' class='btn' id='view-close-btn'>" +
+    "  <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-arrow-right\" viewBox=\"0 0 16 16\">\n" +
+    "  <path fill-rule=\"evenodd\" d=\"M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z\"/>\n" +
+    "</svg>" +
+    "</button>" +
+    "</div>" +
+    "<div class='card-body'>" +
+    "<h6><div class='row-flex'>" +
+    "<div><svg id='node-view-img' width='60' height='70' viewBox='0 -12 1 28'>" +
+    "</svg></div>" +
+    "<div class='column-flex'><span id='node-title'></span><span class='node-type' id='node-type'></span></div>" +
+    "</div></h6>" +
+    "<div id='node-content'></div>" +
+    "</div>" +
+    "</div>"
 
   document.getElementById("workspace").appendChild(nodeViewDIV);
+
+  createView(node.data, "node-title", "node-content", "node-type")
+
+  d3.select("#node-view-img")
+    .append("circle")
+    .attr("r", 10)
+    .style("fill", () => getNodeImage(node))
+
+  document.getElementById("view-close-btn").addEventListener("click", removeNodeView)
+}
+
+function removeNodeView() {
+  d3.select("#nodeView").remove();
 }
