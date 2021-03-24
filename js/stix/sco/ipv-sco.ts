@@ -1,17 +1,35 @@
-import {BasicSTIX, STIXField} from '../basic';
+import {
+  addNodeViewText,
+  addNodeViewTitleAndText,
+  addNodeViewTitleAndTextList,
+  BasicSTIX,
+  customFieldView, externalReferencesView,
+  STIXField
+} from '../basic';
 
-export const IPV4_SCO_FIELDS: STIXField [] = [
-  {key: 'x_ip', viewValue: 'IPv4 Address', type: 'ipv4-addr', typeName: 'IPv4 SCO'}
-];
+export const IPV4_TYPE = "ipv4-addr";
+export const IPV6_TYPE = "ipv6-addr";
 
-export const IPV6_SCO_FIELDS: STIXField [] = [
-  {key: 'x_ip', viewValue: 'IPv6 Address', type: 'ipv6-addr', typeName: 'IPv6 SCO'}
-];
-
-export interface IPv4SCO extends BasicSTIX {
-  x_ip: string;
+interface IP extends BasicSTIX {
+  value: string;
+  resolves_to_refs?: string [];
+  belongs_to_refs?: string [];
 }
 
-export interface IPv6SCO extends BasicSTIX {
-  x_ip: string;
+export interface IPv4SCO extends IP {
+}
+
+export interface IPv6SCO extends IP {
+}
+
+export function getIPvView(ipvType: string, titleId: string, contentId: string, typeId: string, ip: IP) {
+  document.getElementById(titleId).innerHTML += ip.value;
+  document.getElementById(typeId).innerHTML += ipvType === IPV4_TYPE ? "IPv4-Addr": "IPv6-Addr";
+
+  let el = document.getElementById(contentId);
+  const ipDIV = document.createElement("div");
+  ipDIV.id = ipvType;
+
+  el.appendChild(ipDIV);
+  customFieldView(ipDIV.id, ip);
 }

@@ -1,12 +1,41 @@
-import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern";
+import {ATTACK_PATTERN_TYPE, getAttackPatternView} from "../stix/sdo/attack-pattern";
 import {Graph, Link, Node} from "./node";
 import {GROUPING_TYPE} from "../stix/sdo/grouping";
 import {RELATIONSHIP_TYPE} from "../stix/sro/relationship";
+import {getThreatActorView, THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor";
+import {CAMPAIGN_TYPE, getCampaignView} from "../stix/sdo/campaign";
+import {getIntrusionSetView, INTRUSION_SET_TYPE} from "../stix/sdo/intrusion-set";
+import {getVulnerabilityView, VULNERABILITY_TYPE} from "../stix/sdo/vulnerability";
+import {getToolView, TOOL_TYPE} from "../stix/sdo/tool";
+import {getMalwareView, MALWARE_TYPE} from "../stix/sdo/malware";
+import {getInfrastructureView, INFRASTRUCTURE_TYPE} from "../stix/sdo/infrastructure";
+import {getObservedDataView, OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo";
+import {getIdentityView, IDENTITY_TYPE} from "../stix/sdo/identity";
+import {getIndicatorView, INDICATOR_TYPE} from "../stix/sdo/indicator";
+import {getLocationView, LOCATION_TYPE} from "../stix/sdo/location";
+import {getMalwareAnalysisView, MALWARE_ANALYSIS_TYPE} from "../stix/sdo/malware-analysis";
+import {COURSE_OF_ACTION_TYPE, getCourseOfActionView} from "../stix/sdo/course-of-action";
+import {getIncidentView, INCIDENT_TYPE} from "../stix/sdo/incident";
+import {capitalize} from "./utils";
+import {getNoteView, NOTE_TYPE} from "../stix/sdo/note";
+import {getOpinionView, OPINION_TYPE} from "../stix/sdo/opinion";
+import {getReportView, REPORT_TYPE} from "../stix/sdo/report";
+import {getIPvView, IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco";
+import {DOMAIN_TYPE, getDomainView} from "../stix/sco/domain";
+import {getUrlView, URL_TYPE} from "../stix/sco/url";
+import {FILE_TYPE, getFileView} from "../stix/sco/file";
+import {DIRECTORY_TYPE, getDirectoryView} from "../stix/sco/directory";
+import {getProcessView, PROCESS_TYPE} from "../stix/sco/process";
+import {getCustomSTIXView} from "../stix/basic";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
   "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control",
   "Exfiltration", "Impact"]
+
+export const DIAMOND_MODEL_META_FEATURE_CATEGORIES = [
+  "Victim", "Infrastructure", "Capabilities", "Adversary"
+]
 
 export const TTP_Y_AXIS = [
   [
@@ -330,7 +359,7 @@ export function parseTacticNameToXAxis(tactic) {
     if (word.toLowerCase() === "and") {
       string += "and";
     } else {
-      string += word.charAt(0).toUpperCase() + word.slice(1);
+      string += capitalize(word);
     }
   })
   return string;
@@ -345,19 +374,22 @@ export function parseTacticNameToXAxis(tactic) {
 export function parseBundleToGraph(bundle) {
   let nodes = [];
   let groupingLinks = [];
-  bundle.objects.forEach(obj => {
-    if (obj.type === GROUPING_TYPE) {
-      let node = new Node(obj.id, obj, obj.type, buildSubGraphForGrouping(obj, bundle))
-      nodes.push(node);
-    } else if (obj.type === RELATIONSHIP_TYPE) {
-      if (obj.source_ref.includes(GROUPING_TYPE) && obj.target_ref.includes(GROUPING_TYPE)) {
-        groupingLinks.push(
-          new Link(
-            nodes.findIndex(no => no.id === obj.source_ref),
-            nodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type));
-      }
-    }
-  })
+
+  // Add all Grouping SDOs
+  bundle.objects
+    .filter(obj => obj.type === GROUPING_TYPE)
+    .forEach(obj => nodes.push(new Node(obj.id, obj, obj.type, buildSubGraphForGrouping(obj, bundle))))
+
+  // Add all Grouping relationships
+  bundle.objects
+    .filter(obj => obj.type === RELATIONSHIP_TYPE)
+    .filter(obj => obj.source_ref.includes(GROUPING_TYPE) && obj.target_ref.includes(GROUPING_TYPE))
+    .forEach(obj =>
+      groupingLinks.push(
+        new Link(
+          nodes.findIndex(no => no.id === obj.source_ref),
+          nodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type)));
+
   return new Graph(nodes, groupingLinks);
 }
 
@@ -365,32 +397,45 @@ function buildSubGraphForGrouping(grouping, bundle) {
   let childNodes = [];
   let childLinks = [];
   grouping.object_refs.forEach(ref => {
+    // The grouping reference object that is found in the bundle
     let foundObj = bundle.objects.find(obj => obj.id === ref);
 
     // Grouping Objects are not allowed in the Subgraph
     if (!foundObj.id.includes(GROUPING_TYPE)) {
       if (!foundObj.id.includes(RELATIONSHIP_TYPE)) {
-        childNodes.push(new Node(foundObj.id, foundObj, foundObj.type));
-      } else {
-        // Dont push relationship obj if target or source ref is a grouping object or relationship obj already exists in childlinks
-        if (!foundObj.source_ref.includes(GROUPING_TYPE) && !foundObj.target_ref.includes(GROUPING_TYPE)
-          && !childLinks.find(link => link.id === foundObj.id))
+        childNodes.push(new Node(foundObj.id, foundObj, foundObj.type, undefined, grouping.id));
+      }
+    }
+  });
+
+  // Get all links
+  grouping.object_refs.forEach(ref => {
+    let foundObj = bundle.objects.find(obj => obj.id === ref);
+
+    if (foundObj.id.includes(RELATIONSHIP_TYPE)) {
+      // Dont push relationship obj if target or source ref is a grouping object or relationship obj already exists in childlinks
+      if (!foundObj.source_ref.includes(GROUPING_TYPE) && !foundObj.target_ref.includes(GROUPING_TYPE)
+        && !childLinks.find(link => link.data.id === foundObj.id))
+        childLinks.push(
+          new Link(
+            childNodes.findIndex(no => no.id === foundObj.source_ref),
+            childNodes.findIndex(no => no.id === foundObj.target_ref), foundObj, foundObj.relationship_type));
+    }
+    // Get all relationship objects for foundObj
+    bundle.objects.forEach(obj => {
+      if (obj.id.includes(RELATIONSHIP_TYPE)) {
+        if (!childLinks.find(rel => rel.data.id === obj.id)
+          && (obj.source_ref === foundObj.id || obj.target_ref === foundObj.id)) {
           childLinks.push(
             new Link(
-              childNodes.findIndex(no => no.id === foundObj.source_ref),
-              childNodes.findIndex(no => no.id === foundObj.target_ref), foundObj, foundObj.relationship_type));
-      }
-      // Get all relationship objects for foundObj
-      bundle.objects.forEach(obj => {
-        if (obj.id.includes(RELATIONSHIP_TYPE)) {
-          if (!childLinks.find(rel => rel.id === obj.id)
-            && (obj.source_ref === foundObj.id || obj.target_ref === foundObj.id)) {
-            childLinks.push(obj);
-          }
+              childNodes.findIndex(no => no.id === obj.source_ref),
+              childNodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type
+            )
+          );
         }
-      })
-    }
-  })
+      }
+    })
+  });
   return new Graph(childNodes, childLinks);
 }
 
@@ -408,4 +453,201 @@ export function getNodesWithAttackPattern(graph) {
     }).filter(n => n !== undefined);
     if (attackPattern.length > 0) return attackPattern;
   }).filter(n => n !== undefined));
+}
+
+/**
+ * For the Sub Attack Graph the node with sequence number 1 or the min date is the first relative node
+ * @param nodes
+ */
+export function getFirstRelativeNodeTime(nodes) {
+  let relativeTime = nodes.filter(node => "x_sequence_number" in node.data)
+    .find(n => n.data.x_sequence_number === 1)
+
+  if (relativeTime !== undefined) {
+    return Date.parse(relativeTime.created);
+  } else {
+    return getMinNodeDate(nodes);
+  }
+}
+
+/**
+ * Get the minimum Date from a list of Nodes
+ * @param nodes
+ * @return {Date}
+ */
+export function getMinNodeDate(nodes) {
+  return new Date(Math.min.apply(null, nodes.map(node => Date.parse(node.data.created))))
+}
+
+/**
+ * The sub graph is split into 5 layers. Layer 1-4 are the Diamond Event Categories. The fifth layer is a floating
+ * layer where STIX Cyber observable objects are displayed over all layers.
+ *
+ *              --|---------------------------------------------------------------------------------------------|
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *                |                                                                                             |
+ * Adversary------|---------------------------------------------------------------------------------------------|
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *                |                                                                                             |
+ * Capability-----|---------------------------------------------------------------------------------------------|
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *                |                                                                                             |
+ * Infrastructure-|---------------------------------------------------------------------------------------------|
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *                |                                                                                             |
+ * Victim---------|---------------------------------------------------------------------------------------------|
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *                |                                                                                             |
+ *              --|---------------------------------------------------------------------------------------------|
+ *
+ * @param node
+ */
+export function getDiamondModelCategoryLayer(node) {
+  // Layers
+  const ADVERSARY = 0;
+  const CAPABILITY = 1;
+  const INFRASTRUCTURE = 2;
+  const VICTIM = 3;
+  const OVERLAY = 4;
+
+  switch (node.data.type) {
+    case THREAT_ACTOR_TYPE:
+    case INTRUSION_SET_TYPE:
+    case CAMPAIGN_TYPE:
+      return ADVERSARY;
+    case VULNERABILITY_TYPE:
+    case TOOL_TYPE:
+    case ATTACK_PATTERN_TYPE:
+    case MALWARE_TYPE:
+    case MALWARE_ANALYSIS_TYPE:
+      return CAPABILITY;
+    case INFRASTRUCTURE_TYPE:
+      return INFRASTRUCTURE;
+    case OBSERVED_DATA_TYPE:
+    case IDENTITY_TYPE:
+    case COURSE_OF_ACTION_TYPE:
+    case INCIDENT_TYPE:
+      return VICTIM;
+    default:
+      return OVERLAY;
+  }
+}
+
+/**
+ * Get the Node label which should be displayed in the Graph
+ * @param node
+ */
+export function getNodeLabel(node) {
+  switch (node.data.type) {
+    case ATTACK_PATTERN_TYPE:
+      return node.data.name + " - " + getTTP(node);
+    case CAMPAIGN_TYPE:
+    case IDENTITY_TYPE:
+    case INDICATOR_TYPE:
+    case INFRASTRUCTURE_TYPE:
+    case INTRUSION_SET_TYPE:
+    case LOCATION_TYPE:
+    case MALWARE_TYPE:
+    case THREAT_ACTOR_TYPE:
+    case TOOL_TYPE:
+    case VULNERABILITY_TYPE:
+      return node.data.name;
+
+  }
+}
+
+
+/**
+ * Create the node view depending on the STIX object
+ * @param data: This is a Node (STIX) object
+ * @param titleId: The id of the title HTML element
+ * @param contentId: The id of the content HTML element
+ * @param typeId: The id of the type HTML element
+ */
+export function createView(data, titleId, contentId, typeId) {
+  switch (data.type) {
+    case ATTACK_PATTERN_TYPE:
+      getAttackPatternView(titleId, contentId, typeId, data);
+      break;
+    case CAMPAIGN_TYPE:
+      getCampaignView(titleId, contentId, typeId, data);
+      break;
+    case COURSE_OF_ACTION_TYPE:
+      getCourseOfActionView(titleId, contentId, typeId, data);
+      break;
+    case IDENTITY_TYPE:
+      getIdentityView(titleId, contentId, typeId, data);
+      break;
+    case INCIDENT_TYPE:
+      getIncidentView(titleId, contentId, typeId, data);
+      break;
+    case INDICATOR_TYPE:
+      getIndicatorView(titleId, contentId, typeId, data);
+      break;
+    case INFRASTRUCTURE_TYPE:
+      getInfrastructureView(titleId, contentId, typeId, data);
+      break;
+    case INTRUSION_SET_TYPE:
+      getIntrusionSetView(titleId, contentId, typeId, data);
+      break;
+    case LOCATION_TYPE:
+      getLocationView(titleId, contentId, typeId, data);
+      break;
+    case MALWARE_TYPE:
+      getMalwareView(titleId, contentId, typeId, data);
+      break;
+    case MALWARE_ANALYSIS_TYPE:
+      getMalwareAnalysisView(titleId, contentId, typeId, data);
+      break;
+    case NOTE_TYPE:
+      getNoteView(titleId, contentId, typeId, data);
+      break;
+    case OBSERVED_DATA_TYPE:
+      getObservedDataView(titleId, contentId, typeId, data);
+      break;
+    case THREAT_ACTOR_TYPE:
+      getThreatActorView(titleId, contentId, typeId, data);
+      break;
+    case OPINION_TYPE:
+      getOpinionView(titleId, contentId, typeId, data);
+      break;
+    case REPORT_TYPE:
+      getReportView(titleId, contentId, typeId, data);
+      break;
+    case TOOL_TYPE:
+      getToolView(titleId, contentId, typeId, data);
+      break;
+    case VULNERABILITY_TYPE:
+      getVulnerabilityView(titleId, contentId, typeId, data);
+      break;
+    case IPV4_TYPE:
+      getIPvView(IPV4_TYPE, titleId, contentId, typeId, data);
+      break;
+    case IPV6_TYPE:
+      getIPvView(IPV6_TYPE, titleId, contentId, typeId, data);
+      break;
+    case DOMAIN_TYPE:
+      getDomainView(titleId, contentId, typeId, data);
+      break;
+    case URL_TYPE:
+      getUrlView(titleId, contentId, typeId, data);
+      break;
+    case FILE_TYPE:
+      getFileView(titleId, contentId, typeId, data);
+      break;
+    case DIRECTORY_TYPE:
+      getDirectoryView(titleId, contentId, typeId, data);
+      break;
+    case PROCESS_TYPE:
+      getProcessView(titleId, contentId, typeId, data);
+      break;
+    default:
+      getCustomSTIXView(contentId, typeId, data);
+      break;
+  }
 }

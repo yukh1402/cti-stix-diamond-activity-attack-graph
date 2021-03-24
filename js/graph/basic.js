@@ -6,9 +6,9 @@ import {
   MITRE_ATTACK_CATEGORIES,
   parseBundleToGraph,
   parseTacticNameToXAxis,
-  getLinksWithAttackPattern
+  getDiamondModelCategoryLayer, getNodeLabel, createView, DIAMOND_MODEL_META_FEATURE_CATEGORIES
 } from "./mapper";
-import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern";
+import {ATTACK_PATTERN_TYPE, getAttackPatternView} from "../stix/sdo/attack-pattern";
 import {GROUPING_TYPE} from "../stix/sdo/grouping";
 import {TOOL_TYPE} from "../stix/sdo/tool";
 import {MALWARE_TYPE} from "../stix/sdo/malware";
@@ -16,16 +16,18 @@ import {VULNERABILITY_TYPE} from "../stix/sdo/vulnerability";
 import {IDENTITY_TYPE} from "../stix/sdo/identity";
 import {THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor";
 import {OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo";
+import {CAMPAIGN_TYPE} from "../stix/sdo/campaign";
+import {INDICATOR_TYPE} from "../stix/sdo/indicator";
+import {Node} from "./node";
+
 
 let stixBundle = undefined;
 let stixGraph = undefined;
 
 const GRAPH_TYPE = {
   ACTIVITY_THREAD: "activity_thread", // hard coded graph
-  SUB_ACTIVITY_THREAD: "sub_activity_thread",
   ATTACK_GRAPH: "attack_graph", // hard coded graph
-  SUB_ATTACK_GRAPH: "sub_attack_graph",
-  NONE: "none", // Should be a forced directed sticky graph
+  SUB_GRAPH: "sub_attack_graph",
 }
 
 const MARGIN = {
@@ -35,10 +37,16 @@ const MARGIN = {
   LEFT: 60
 }
 
-let SUB_GRAPH_SELECTED = false;
+const LAYER_COLOR_SCHEMA = [
+  '#CFD8DC',
+  '#90A4AE',
+  '#607D8B',
+  '#455A64'
+]
 
-const width = 1000;
-const height = 500;
+
+const WIDTH = 1000;
+const HEIGHT = 500;
 
 let graphSelection = window.location.hash.replace("#", "") || GRAPH_TYPE.ATTACK_GRAPH;
 
@@ -48,7 +56,7 @@ let graphSelection = window.location.hash.replace("#", "") || GRAPH_TYPE.ATTACK_
 window.onhashchange = function () {
   graphSelection = window.location.hash.replace("#", "");
   setCurrentGraphSelection();
-  createGraph();
+  createGraph(stixGraph);
 }
 
 /**
@@ -58,186 +66,96 @@ window.onhashchange = function () {
  * @param height: Viewbox height
  */
 function initGraph(divId, width = 1000, height = 500) {
-  let divEl = document.getElementById(divId)
-  return d3.select(divEl)
-    .append("svg")
+  let svgEl = document.getElementById("svg")
+  return d3.select(svgEl)
     .attr("viewBox", [0, 0, width, height])
-    .attr("id", "svg")
     .classed("svg-background", true)
     .append("g")
     .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.TOP + ")");
 }
 
-let svg = initGraph('svg-container',
-  width + MARGIN.LEFT + MARGIN.RIGHT,
-  height + MARGIN.TOP + MARGIN.BOTTOM);
-
-let data = [
-  {
-    Sepal_Length: "Test3",
-    Petal_Length: new Date("2021-02-06 00:00:00"),
-  },
-  {
-    Sepal_Length: "Test6",
-    Petal_Length: new Date("2021-01-03 00:00:00"),
-  }
-]
-
-// let epoch = new Date(Date.UTC(2015, 11, 4, 12, 36, 47, 121));
-let epoch = new Date("2021-02-06 00:00:00")
+let svg = initGraph("svg-container",
+  WIDTH + MARGIN.LEFT + MARGIN.RIGHT,
+  HEIGHT + MARGIN.TOP + MARGIN.BOTTOM);
 
 
 /**
- * Build Activity Thread or Attack Sub Graph depending on the Graph selection
+ * This creates a X-Axis with all Mitre Attack Phases
  */
-function buildActivityAttackSubGraph() {
-  let x = d3.scaleLinear()
-    .domain([0, 9])
-    .range([0, width])
+function createXAxisWithMitrePhases() {
+  let x = d3.scalePoint()
+    .domain(MITRE_ATTACK_CATEGORIES)
+    .range([0, WIDTH])
   let xAxis = svg.append("g")
     .attr("id", "xAxis")
+    .attr("style", "color: white; font-size: 8px")
+    .call(d3.axisTop(x))
+  return x;
+}
+
+/**
+ * Build Activity Thread
+ * @param graph: These are all Grouping Events
+ */
+function buildActivityThreadGraph(graph) {
+  let attackPatterns = getNodesWithAttackPattern(graph);
+
+  let x = createXAxisWithMitrePhases();
+
+  let y = d3.scaleTime()
+    .domain([new Date("2021-01-01 00:00:00"), new Date("2021-12-31 23:59:59")])
+    .range([HEIGHT, 0]);
+  let yAxis = svg.append("g")
+    .attr("id", "yAxis")
     .attr("style", "color: white")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x))
-
-  let y = undefined;
-  let yAxis = undefined;
-
-  if (graphSelection === GRAPH_TYPE.SUB_ACTIVITY_THREAD) {
-    // Add Y axis
-    y = d3.scaleTime()
-      .domain([new Date("2021-01-01 00:00:00"), new Date("2021-12-31 23:59:59")])
-      .range([height, 0]);
-    yAxis = svg.append("g")
-      .attr("id", "yAxis")
-      .attr("style", "color: white")
-      .call(d3.axisLeft(y));
-
-  } else {
-    y = d3.scaleUtc()
-      .domain([d3.timeDay.offset(epoch, -1), d3.timeDay.offset(epoch, +5)])
-      .range([height, 0]);
-    yAxis = svg.append("g")
-      .attr("id", "yAxis")
-      .attr("style", "color: white")
-      .call(
-        d3.axisLeft(y)
-          .tickFormat(formatRelativeTime)
-          .tickValues(d3.scaleUtc()
-            .domain(y.domain().map(toRelative))
-            .ticks(10)
-            .map(toAbsolute)
-          )
-      );
-  }
+    .call(d3.axisLeft(y));
 
   // ClipPath is a boundary where everything outside is not be drawn
   let clip = svg.append("defs")
     .append("SVG:clipPath")
     .attr("id", "clip")
     .append("SVG:rect")
-    .attr("width", width)
-    .attr("height", height)
+    .attr("width", WIDTH)
+    .attr("height", HEIGHT)
     .attr("x", 0)
     .attr("y", 0);
 
   // Add the ClipPath
-  let scatter = svg.append('g')
+  let scatter = svg.append("g")
     .attr("id", "scatter")
     .attr("clip-path", "url(#clip)")
 
   // Add circles
   scatter
     .selectAll("circle")
-    .data(data)
+    .data(attackPatterns)
     .enter()
+    .append("g")
+    .attr("id", "node")
     .append("circle")
     .attr("id", "circle")
     .attr("cx", function (d) {
-      return x(d.Sepal_Length);
+      d.x = x(parseTacticNameToXAxis(getTactic(d)));
+      return d.x;
     })
-    .attr("cy", function (d) {
-      return y(d.Petal_Length);
+    .attr("cy", function (node) {
+      let grouping = graph.nodes.find(grouping => grouping.id === node.groupingId);
+      return y(Date.parse(grouping.data.created))
     })
-    .attr("r", 8)
-    .style("fill", "#61a3a9")
-    .style("opacity", 0.5)
-
-  if (y && yAxis) {
-    graphZoom(scatter, x, xAxis, y, yAxis)
-  }
-}
-
-/**
- * This adds zoom functionality to the svg by using a rect element
- */
-function graphZoom(scatter, x, xAxis, y, yAxis) {
-  let zoom = d3.zoom()
-    .on("zoom", (event) => onZoom(event, scatter, x, xAxis, y, yAxis));
-
-  svg.append("rect")
-    .attr("id", "zoom-rect")
-    .attr("width", width)
-    .attr("height", height)
-    .style("fill", "none")
-    .style("pointer-events", "all")
-    .attr('transform', 'translate(' + MARGIN.LEFT + ',' + MARGIN.RIGHT + ')')
-    .call(zoom);
-}
-
-/**
- * This updates the graph view on a zoom event
- * @param event: Zoom event that is triggered
- * @param scatter:
- * @param x
- * @param xAxis
- * @param y
- * @param yAxis
- */
-function onZoom(event, scatter, x = undefined, xAxis = undefined, y = undefined, yAxis = undefined) {
-  // Retrieve the new scale position and update the axis boundaries
-  if (x && xAxis) {
-    let newX = event.transform.rescaleX(x);
-    xAxis.call(d3.axisBottom(newX));
-    // Update node position
-    scatter
-      .selectAll("circle")
-      .attr('cx', function (d) {
-        return newX(d.Sepal_Length)
-      })
-  }
-  if (y && yAxis) {
-    let newY = event.transform.rescaleY(y);
-    if (graphSelection === GRAPH_TYPE.SUB_ATTACK_GRAPH) {
-      yAxis.call(d3.axisLeft(newY)
-        .tickFormat(formatRelativeTime)
-      );
-    } else {
-      yAxis.call(d3.axisLeft(newY));
-    }
-    // Update node position
-    scatter
-      .selectAll("circle")
-      .attr('cy', function (d) {
-        return newY(d.Petal_Length)
-      })
-  }
+    .attr("r", 10)
+    .style("fill", () => getNodeImage(new Node(undefined, undefined, GROUPING_TYPE)))
+  //todo: Create node labels
+  graphZoom(scatter, y, yAxis)
 }
 
 function buildAttackGraph(graph) {
   let attackPatterns = getNodesWithAttackPattern(graph);
 
-  let x = d3.scalePoint()
-    .domain(MITRE_ATTACK_CATEGORIES)
-    .range([0, width])
-  let xAxis = svg.append("g")
-    .attr("id", "xAxis")
-    .attr("style", "color: white; font-size: 8px")
-    .call(d3.axisTop(x))
+  let x = createXAxisWithMitrePhases();
 
   let y = d3.scaleLinear()
     .domain([37, 0])
-    .range([height, 0]);
+    .range([HEIGHT, 0]);
   let yAxis = svg.append("g")
     .attr("id", "yAxis")
     .attr("style", "color: transparent")
@@ -249,6 +167,15 @@ function buildAttackGraph(graph) {
     .attr("id", "tooltip")
     .attr("class", "tooltipAttackGraph")
     .style("visibility", "hidden");
+
+  // Create links
+  svg.selectAll(".link")
+    .data(graph.links)
+    .join("g")
+    .attr("id", "link")
+    .append("path")
+    .attr("id", "linkPath")
+    .classed("link", true);
 
   // Add circles
   svg.selectAll("circle")
@@ -266,103 +193,260 @@ function buildAttackGraph(graph) {
       return d.y;
     })
     .attr("r", 10)
-    // .style('fill', (n) => getNodeImage(n))
-    .style('fill', "#FFFFFF")
-    .style("opacity", 0.5)
-    .on("mouseover", attackPatternMouseover)
+    .style("fill", () => getNodeImage(new Node(undefined, undefined, GROUPING_TYPE)))
+    .on("mouseover", showTooltip)
     .on("mousemove", attackPatternMousemove)
-    .on("mouseout", attackPatternMouseleave)
+    .on("mouseout", hideTooltip)
     .on("dblclick", attackPatternDoubleClick)
 
-  createTTPLabels("#node")
+  createNodeLabels("#node")
 
-  svg.selectAll('.link')
-    .data(graph.links)
-    .join('g')
-    .attr('id', 'link')
-    .append('path')
-    .attr("id", "linkPath")
-    .classed('link', true)
+  // Draw links
+  svg.selectAll("#linkPath")
     .attr("d", (d) => {
       return "M " + attackPatterns[d.source].x + " " + attackPatterns[d.source].y + " L "
         + attackPatterns[d.target].x + " " + attackPatterns[d.target].y
+    })
+}
+
+/**
+ * Build a force directed sticky sub graph with a Y-Axis where all Meta Features are divided into Layers.
+ * @param groupingNode
+ */
+function buildSubGraph(groupingNode) {
+  let subGraph = groupingNode.subGraph;
+  let links = subGraph.links;
+
+  let y = d3.scaleBand()
+    .domain(DIAMOND_MODEL_META_FEATURE_CATEGORIES)
+    .range([HEIGHT, 0])
+  let yAxis = svg.append("g")
+    .attr("id", "yAxis")
+    .attr("style", "color: white; font-size: 8px")
+    .call(d3.axisLeft(y))
+    .call(g => g.select(".domain")
+      .remove())
+
+  // Build layer background
+  svg.selectAll("background-rect")
+    .data(DIAMOND_MODEL_META_FEATURE_CATEGORIES)
+    .join("g")
+    .attr("id", "layer")
+    .append("rect")
+    .attr("y", (d, i) => {
+      return (HEIGHT / 4) * i;
+    })
+    .attr("height", HEIGHT / 4)
+    .attr("width", WIDTH)
+    .attr("opacity", 0.6)
+    .attr("fill", function (d, i) {
+      return LAYER_COLOR_SCHEMA[i];
     });
-}
 
-function createTTPLabels(id) {
-  svg.selectAll(id)
-    .append('text')
+  let link = svg
+    .selectAll(".link")
+    .data(links)
+    .join("g")
+    .attr("id", "link")
+    .append("line")
+    .attr("id", "link-line")
+    .classed("link", true)
+
+  let linkLabel = svg.selectAll("#link")
+    .append("text")
+    .attr("dy", "12")
+    .attr("id", "link-label")
+    .attr("font-size", "0.4em")
+    .attr("text-anchor", "middle")
+    .attr("fill", "#FFFFFF")
+    .text(d => d.relation);
+
+  // Create DIV element for Tooltip
+  d3.select("#svg-container")
+    .append("div")
+    .attr("id", "tooltip")
+    .attr("class", "tooltipSubGraph")
+    .style("visibility", "hidden");
+
+  let node = svg.selectAll(".node")
+    .data(subGraph.nodes)
+    .join("g")
+    .attr("id", "node")
+    .append("circle")
+    .attr("id", "node-circle")
+    .attr("r", 10)
+    .style("fill", (n) => getNodeImage(n))
+    .classed("fixed", d => d.fx !== undefined)
+    .classed("subNode", true)
+
+  svg.selectAll("#node")
+    .append("text")
     .attr("id", "node-label")
-    .attr('font-size', '0.5em')
-    .attr('text-anchor', 'middle')
-    .attr('x', d => d.x)
-    .attr('y', d => d.y + 20)
-    .attr('fill', '#FFFFFF')
-    .text((n) => n.data.name + " - " + getTTP(n));
+    .attr("font-size", "0.5em")
+    .attr("text-anchor", "middle")
+    .attr("fill", "#FFFFFF")
+    .text((n) => getNodeLabel(n));
+
+  let simulation = d3.forceSimulation()
+    .nodes(subGraph.nodes)
+    .force("charge", d3.forceManyBody().strength(-100))
+    .force("link", d3.forceLink(links).distance(60))
+    .on("tick", () => forceDirectedTick("#node-circle", "#node-label", "#link-line",
+      "#link-label"))
+
+  let drag = d3.drag()
+    .on("start", (event, d) => nodeDragStart(event, d, simulation))
+    .on("drag", (event, d) => {
+      nodeClick(event, d, simulation)
+      return nodeDragged(event, d, simulation);
+    })
+
+  node.call(drag).on("click", (event, d) => nodeClick(event, d, simulation))
 }
 
-function attackPatternMouseover() {
+function forceDirectedTick(nodeId, nodeLabel, linkId, linkLabel) {
+  let radius = 1;
+  let currentLayer = 0;
+
+  // The nodes are divided into multiple layers depending on the node type
+  d3.selectAll(nodeId)
+    .attr("cx", function (d) {
+      return d.x = Math.max(radius, Math.min(WIDTH - radius, d.x));
+    })
+    .attr("cy", function (d) {
+      currentLayer = getDiamondModelCategoryLayer(d);
+      if (currentLayer <= 3) {
+        return d.y = Math.max((HEIGHT / 4) * currentLayer + radius,
+          Math.min(((HEIGHT / 4) + (HEIGHT / 4) * currentLayer) - radius, d.y));
+      } else {
+        return d.y = Math.max(radius, Math.min(HEIGHT - radius, d.y));
+      }
+    });
+
+  d3.selectAll(linkId)
+    .attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x)
+    .attr("y2", d => d.target.y);
+
+  d3.selectAll(nodeLabel)
+    .attr("x", d => d.x)
+    .attr("y", d => d.y + 20);
+
+  d3.selectAll(linkLabel)
+    .attr("x", d => d.source.x + ((d.target.x - d.source.x) / 2))
+    .attr("y", d => d.source.y + ((d.target.y - d.source.y) / 2));
+}
+
+function nodeDragStart() {
+  d3.select(this).classed("fixed", true);
+}
+
+function nodeDragged(event, d, simulation) {
+  d.fx = clamp(event.x, 0, WIDTH);
+  d.fy = clamp(event.y, 0, HEIGHT);
+  simulation.alpha(1).restart();
+}
+
+function nodeClick(event, d, simulation) {
+  delete d.fx;
+  delete d.fy;
+  d3.select(this).classed("fixed", false);
+  simulation.alpha(1).restart();
+  showNode(d);
+}
+
+/**
+ * This adds zoom functionality to the svg by using a rect element
+ */
+function graphZoom(scatter, y, yAxis) {
+  let zoom = d3.zoom()
+    .on("zoom", (event) => onZoom(event, scatter, y, yAxis));
+
+  svg.append("rect")
+    .attr("id", "zoom-rect")
+    .attr("width", WIDTH)
+    .attr("height", HEIGHT)
+    .style("fill", "none")
+    .style("pointer-events", "all")
+    .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.RIGHT + ")")
+    .call(zoom);
+}
+
+/**
+ * This updates the graph view on a zoom event
+ * @param event: Zoom event that is triggered
+ * @param scatter:
+ * @param y
+ * @param yAxis
+ *
+ */
+function onZoom(event, scatter, y, yAxis) {
+  let newY = event.transform.rescaleY(y);
+  yAxis.call(d3.axisLeft(newY));
+
+  // Update node position
+  scatter
+    .selectAll("circle")
+    .attr("cy", function (d) {
+      let grouping = stixGraph.nodes.find(grouping => grouping.id === d.groupingId);
+      return newY(Date.parse(grouping.data.created))
+    })
+}
+
+function createNodeLabels(id) {
+  svg.selectAll(id)
+    .append("text")
+    .attr("id", "node-label")
+    .attr("font-size", "0.5em")
+    .attr("text-anchor", "middle")
+    .attr("x", d => d.x)
+    .attr("y", d => d.y + 20)
+    .attr("fill", "#FFFFFF")
+    .text((n) => getNodeLabel(n));
+}
+
+function showTooltip() {
   d3.select("#tooltip").style("visibility", "visible")
 }
 
 function attackPatternMousemove(event, d) {
   d3.select("#tooltip")
-    .style("top", (event.pageY - 20)+"px")
-    .style("left",(event.pageX)+"px")
+    .style("top", (event.pageY - 20) + "px")
+    .style("left", () => calcLeftPosition(event, 300))
     .html(d.data.description)
 }
 
-function attackPatternMouseleave() {
+function hideTooltip() {
   d3.select("#tooltip").style("visibility", "hidden");
 }
 
-function attackPatternDoubleClick(event, node) {
-
-  console.log(node)
-}
-
-function createGraph(graph) {
-  if (graph !== undefined) {
-    removeGraphComponents();
-    addSTIXImages();
-
-    if (graphSelection === GRAPH_TYPE.SUB_ATTACK_GRAPH || graphSelection === GRAPH_TYPE.SUB_ACTIVITY_THREAD) {
-      buildActivityAttackSubGraph(graph);
-    } else if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH) {
-      buildAttackGraph(graph);
-    }
+function calcLeftPosition(event, tooltipWidth) {
+  if ((event.pageX + tooltipWidth) >= event.view.screen.availWidth) {
+    return (event.view.screen.availWidth - tooltipWidth) + "px";
+  } else {
+    return (event.pageX) + "px";
   }
 }
 
-/**
- * This defines several STIX SDO and SCO images in the SVG-Tree
- */
-function addSTIXImages() {
-  const baseImagePath = "../img";
-  let images = [
-    {id: "groupingImage", fileName: "grouping.png"},
-    {id: "attackPatternImage", fileName: "attack_pattern.png"},
-    {id: "toolImage", fileName: "tool.png"},
-    {id: "malwareImage", fileName: "malware.png"},
-    {id: "vulnerabilityImage", fileName: "vulnerability.png"},
-    {id: "identityImage", fileName: "identity.png"},
-    {id: "observedDataImage", fileName: "observed_data.png"},
-    {id: "threatActorImage", fileName: "threat_actor.png"},
-  ];
-  d3.select("#svg")
-    .append("defs")
-    .attr("id", "mdef")
-    .selectAll(".def")
-    // .append("pattern")
-    .data(images)
-    .join("svg:pattern")
-    .attr("id", (d) => d.id)
-    .attr("height", "40")
-    .attr("width", "10")
-    .append("svg:image")
-    .attr("width", "16")
-    .attr("height", "16")
-    .attr("xlink:href", (d) => baseImagePath + "/" + d.fileName)
+function attackPatternDoubleClick(event, node) {
+  graphSelection = GRAPH_TYPE.SUB_GRAPH;
+  setCurrentGraphSelection();
+  let relevantGroupingNode = stixGraph.nodes.find(n => n.id === node.groupingId);
+  createGraph(relevantGroupingNode.subGraph, relevantGroupingNode)
+}
+
+function createGraph(graph, node = undefined) {
+  if (graph !== undefined) {
+    removeGraphComponents();
+    if (graphSelection === GRAPH_TYPE.SUB_GRAPH || graphSelection === GRAPH_TYPE.SUB_ACTIVITY_THREAD) {
+      buildSubGraph(node);
+    } else if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH) {
+      buildAttackGraph(graph);
+    } else if (graphSelection === GRAPH_TYPE.ACTIVITY_THREAD) {
+      buildActivityThreadGraph(graph);
+    }
+  }
 }
 
 /**
@@ -374,68 +458,41 @@ function removeGraphComponents() {
   svg.selectAll("#clip").remove();
   svg.selectAll("#node").remove();
   svg.selectAll("#node-label").remove();
+  d3.selectAll("#tooltip").remove();
+  d3.selectAll("#nodeView").remove();
   svg.selectAll("#link").remove();
   svg.selectAll("#scatter").remove();
+  svg.selectAll("#layer").remove();
 }
 
 createGraph();
 
-function formatRelativeTime(absolute) {
-  let pad = d3.format("02d");
-  let delta = absolute - epoch;
-  if (!delta) return "0";
-  let milliseconds = Math.abs(delta);
-  let viewValue = (delta < 0 ? "-" : "+")
-
-  if (milliseconds >= 3.154e10) {
-    // Milliseconds > 12 months then display in years
-    viewValue += Math.floor(milliseconds / 3.154e10) + "yr"
-  } else if (milliseconds >= 2.628e9) {
-    // Milliseconds > 30 days then display in months
-    viewValue += Math.floor(milliseconds / 2.628e9) + "mo"
-  } else if (milliseconds >= 8.64e7) {
-    // Milliseconds > 24 Hours then display in days
-    viewValue += Math.floor(milliseconds / 8.64e7) + "d"
-  } else if (milliseconds >= 3.6e6) {
-    // Milliseconds > 60 min then display in hours
-    viewValue += Math.floor(milliseconds / 3.6e6) + "hr"
-  } else {
-    // Milliseconds < 60 min then display in minutes
-    viewValue += Math.floor(milliseconds / 6e4) + ":"
-      + pad(Math.floor(milliseconds % 6e4 / 1e3)) + "min"
-  }
-  return viewValue;
-}
-
-// Convert an absolute time to a time relative to the epoch.
-function toRelative(absolute) {
-  return new Date(absolute - epoch);
-}
-
-// Convert a time relative to the epoch to an absolute time.
-function toAbsolute(relative) {
-  return new Date(+relative + +epoch);
+function clamp(x, lo, hi) {
+  return x < lo ? lo : x > hi ? hi : x;
 }
 
 function getNodeImage(node) {
-  console.log(node.type)
   switch (node.type) {
     case GROUPING_TYPE:
-      return 'url(#groupingImage)';
+      return "url(#groupingImage)";
     case ATTACK_PATTERN_TYPE:
-      return 'url(#attackPatternImage)';
+      return "url(#attackPatternImage)";
     case TOOL_TYPE:
-      return 'url(#toolImage)';
+      return "url(#toolImage)";
     case MALWARE_TYPE:
-      return 'url(#malwareImage)';
+      return "url(#malwareImage)";
     case VULNERABILITY_TYPE:
-      return 'url(#vulnerabilityImage)';
+      return "url(#vulnerabilityImage)";
     case IDENTITY_TYPE:
-      return 'url(#identityImage)';
+      return "url(#identityImage)";
+    case INDICATOR_TYPE:
+      return "url(#indicatorImage)"
     case THREAT_ACTOR_TYPE:
-      return 'url(#threatActorImage)';
+      return "url(#threatActorImage)";
     case OBSERVED_DATA_TYPE:
-      return 'url(#observedDataImage)';
+      return "url(#observedDataImage)";
+    case CAMPAIGN_TYPE:
+      return "url(#campaignImage)";
   }
 }
 
@@ -444,12 +501,12 @@ function getNodeImage(node) {
  */
 function setCurrentGraphSelection() {
   let currentSelection = document.getElementById("currentSelection")
-  if (graphSelection === GRAPH_TYPE.SUB_ATTACK_GRAPH) {
-    currentSelection.textContent = "Current Graph: Sub Attack Graph";
-  } else if (graphSelection === GRAPH_TYPE.SUB_ACTIVITY_THREAD) {
-    currentSelection.textContent = "Current Graph: Sub Activity Thread";
+  if (graphSelection === GRAPH_TYPE.SUB_GRAPH) {
+    currentSelection.textContent = "Current Graph: Sub-Graph";
   } else if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH) {
     currentSelection.textContent = "Current Graph: Attack Graph";
+  } else if (graphSelection === GRAPH_TYPE.ACTIVITY_THREAD) {
+    currentSelection.textContent = "Current Graph: Activity Thread";
   }
 }
 
@@ -458,13 +515,17 @@ setCurrentGraphSelection();
 document.getElementById("parseButton").addEventListener("click", parseSTIXContent)
 
 function parseSTIXContent() {
+  let valid = false;
   eraseSyntaxError();
   stixBundle = document.getElementById("stixContent").value;
   try {
     stixGraph = parseBundleToGraph(JSON.parse(stixBundle));
-    createGraph(stixGraph);
+    valid = true;
   } catch (e) {
     showSyntaxError(e)
+  }
+  if (valid) {
+    createGraph(stixGraph);
   }
 }
 
@@ -474,4 +535,48 @@ function showSyntaxError(message) {
 
 function eraseSyntaxError() {
   document.getElementById("syntaxError").innerText = "";
+}
+
+function showNode(node) {
+  removeNodeView();
+  createNodeView(node);
+}
+
+function createNodeView(node) {
+  const nodeViewDIV = document.createElement("div");
+  nodeViewDIV.id = "nodeView"
+  nodeViewDIV.className = "nodeView"
+  nodeViewDIV.innerHTML =
+    "<div class='card'>" +
+    "<div class='card-header'>" +
+    "<button type='button' class='btn' id='view-close-btn'>" +
+    "  <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-arrow-right\" viewBox=\"0 0 16 16\">\n" +
+    "  <path fill-rule=\"evenodd\" d=\"M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z\"/>\n" +
+    "</svg>" +
+    "</button>" +
+    "</div>" +
+    "<div class='card-body node-body'>" +
+    "<h6><div class='row-flex'>" +
+    "<div><svg id='node-view-img' width='60' height='70' viewBox='0 -12 1 28'>" +
+    "</svg></div>" +
+    "<div class='column-flex'><span id='node-title'></span><span class='node-type' id='node-type'></span></div>" +
+    "</div></h6>" +
+    "<div id='node-content'></div>" +
+    "</div>" +
+    "</div>"
+
+  document.getElementById("workspace").appendChild(nodeViewDIV);
+
+  createView(node.data, "node-title", "node-content", "node-type")
+
+  d3.select("#node-view-img")
+    .append("circle")
+    .attr("r", 10)
+    .style("fill", () => getNodeImage(node))
+
+  document.getElementById("view-close-btn").addEventListener("click", removeNodeView)
+}
+
+function removeNodeView() {
+  d3.select("#nodeView").remove();
 }

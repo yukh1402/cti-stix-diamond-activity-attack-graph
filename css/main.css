@@ -286,6 +286,11 @@ textarea {
   flex-direction: row;
 }
 
+.column-flex {
+  display: flex;
+  flex-direction: column;
+}
+
 .selectionText {
   right: 10px;
 }
@@ -302,6 +307,10 @@ textarea {
 .bmd-layout-drawer {
   width: 600px !important;
   transform: translateX(-610px) !important;
+}
+
+.subNode {
+  cursor: move;
 }
 
 .link {
@@ -322,6 +331,57 @@ textarea {
   border-radius: 8px;
 }
 
+.tooltipSubGraph {
+  position: absolute;
+  /*text-align: center;*/
+  min-height: 28px;
+  min-width: 200px;
+  max-width: 400px;
+  word-break: break-word;
+  padding: 2px;
+  font: 14px sans-serif;
+  background: white;
+  border: 0;
+  opacity: 0.9;
+  border-radius: 8px;
+}
+
+.nodeView {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 300px;
+  height: 1050px;
+  background: white;
+  overflow-y: auto;
+  /*opacity: 0.7;*/
+}
+
+.nodeViewImg {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+}
+
+.nodeContainer {
+  margin: 5px;
+}
+
+.node-type {
+  font-size: 14px;
+  color: lightgrey;
+}
+
 .overflow-y-hidden {
   overflow-y: hidden !important;
+}
+
+.node-body {
+  overflow-y: auto;
+  max-height: 700px;
+}
+
+.view-border-bottom {
+  padding-bottom: 15px;
+  border-bottom: 1px solid lightgrey;
 }

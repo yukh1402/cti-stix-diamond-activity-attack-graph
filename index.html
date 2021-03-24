@@ -55,8 +55,7 @@
         Graph selection
       </button>
       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" id="attack-graph" href="#attack_attack">Attack Graph</a>
-        <a class="dropdown-item" id="sub_attack-graph" href="#sub_attack_graph">Sub Attack Graph</a>
+        <a class="dropdown-item" id="attack-graph" href="#attack_graph">Attack Graph</a>
         <a class="dropdown-item" id="activity-thread" href="#activity_thread">Activity Thread Graph</a>
       </div>
     </div>
@@ -68,19 +67,54 @@
         <label for="stixContent" class="bmd-label-floating">STIX 2.1 JSON</label>
         <textarea class="form-control" id="stixContent" rows="35"></textarea>
         <button type="button" class="mt-2 btn btn-raised btn-primary"
-                id="parseButton">Parse</button>
+                id="parseButton">Parse
+        </button>
         <div id="syntaxError" class="alert-warning"></div>
       </div>
     </div>
   </div>
+
   <main class="bmd-layout-content overflow-y-hidden">
-    <div>
+    <div id="workspace">
       <div id="svg-container">
+        <svg id="svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs id="mdef">
+            <pattern id="groupingImage" height="24" width="24" x="0" y="0">
+              <image width="24" height="24" x="0" y="-3" xlink:href="img/grouping.png"></image>
+            </pattern>
+            <pattern id="attackPatternImage" height="24" width="24" x="0" y="0">
+              <image width="24" height="24" x="0" y="-3" xlink:href="img/attack_pattern.png"></image>
+            </pattern>
+            <pattern id="campaignImage" height="24" width="24" x="0" y="0">
+              <image width="24" height="24" x="0" y="-3" xlink:href="img/campaign.png"></image>
+            </pattern>
+            <pattern id="toolImage" height="24" width="24" x="0" y="0">
+              <image width="24" height="24" x="0" y="-3" xlink:href="img/tool.png"></image>
+            </pattern>
+            <pattern id="malwareImage" height="24" width="24" x="0" y="0">
+              <image width="24" height="24" x="0" y="-3" xlink:href="img/malware.png"></image>
+            </pattern>
+            <pattern id="vulnerabilityImage" height="24" width="24" x="0" y="0">
+              <image width="24" height="24" x="0" y="-3" xlink:href="img/vulnerability.png"></image>
+            </pattern>
+            <pattern id="identityImage" height="24" width="24" x="0" y="0">
+              <image width="24" height="24" x="0" y="-3" xlink:href="img/identity.png"></image>
+            </pattern>
+            <pattern id="indicatorImage" height="24" width="24" x="0" y="0">
+              <image width="24" height="24" x="0" y="-3" xlink:href="img/indicator.png"></image>
+            </pattern>
+            <pattern id="observedDataImage" height="24" width="24" x="0" y="0">
+              <image width="24" height="24" x="0" y="-3" xlink:href="img/observed_data.png"></image>
+            </pattern>
+            <pattern id="threatActorImage" height="24" width="24" x="0" y="0">
+              <image width="24" height="24" x="0" y="-3" xlink:href="img/threat_actor.png"></image>
+            </pattern>
+          </defs>
+        </svg>
         <b><span id="currentSelection" class="position-absolute text-white selectionText"></span></b>
       </div>
     </div>
   </main>
-
 </div>
 <script type="module" src="js/graph/basic.js"></script>
 
