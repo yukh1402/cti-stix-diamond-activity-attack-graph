@@ -59,19 +59,25 @@ export const STIX_FIELDS = [...OBSERVED_SDO_FIELDS, ...IDENTITY_SDO_FIELDS, ...S
  * All custom keys defined in a SDO/SCO that start with x_ are displayed in a specific pattern
  * @param divId: The DIV id where the custom field values should be displayed
  * @param obj: Any SDO or SCO
+ * @param allKeys: Display all fields and not only custom fields
  */
-export function customFieldView (divId, obj) {
-  let customKeys = Object.keys(obj).filter((key) => key.charAt(0) == "x" && key.charAt(1) == "_" );
+export function customFieldView (divId, obj, allKeys = false) {
+  let customKeys = [];
+  if (allKeys === false) {
+    customKeys = Object.keys(obj).filter((key) => key.charAt(0) == "x" && key.charAt(1) == "_" );
+  } else {
+    customKeys = Object.keys(obj).filter((key) => key !== "id" && key !== "type" && key !== "spec_version");
+  }
+
   if (customKeys.length > 0) {
     const customDIV = document.createElement("div");
     customKeys.forEach(key => {
-      customDIV.innerHTML += "<div class='mt-2'><b>" + reformatCustomKey(key) + ":</b></div>"
+      addNodeViewTitle(customDIV, reformatCustomKey(key) + ":");
       if (Array.isArray(obj[key])) {
         //  Show as badges
-        obj[key].forEach(item => customDIV.innerHTML +=
-          "<span class='badge badge-pill badge-dark m-1'>" + item +"</span>")
+        addNodeViewTextList(customDIV, obj[key], "badge-dark");
       } else {
-        customDIV.innerHTML += "<div><span>" + obj[key] + "</span></div>"
+        addNodeViewText(customDIV, obj[key]);
       }
     });
     document.getElementById(divId).appendChild(customDIV);
@@ -93,7 +99,8 @@ function reformatCustomKey (customKey: string) {
  */
 export function externalReferencesView(divId, externalReferences: Reference []) {
   const referenceDIV = document.createElement("div");
-  referenceDIV.innerHTML += "<span class='mt-2'><b>External References:</b></span><div id='accordion' class='mt-2'>";
+  referenceDIV.className = "mt-3";
+  referenceDIV.innerHTML += "<span><b>External References:</b></span><div id='accordion' class='mt-2'>";
   let index = 0;
   externalReferences.forEach(ref => {
     referenceDIV.innerHTML += "<div class='card'><div class='card-header' id='heading" + index + "'>" +
@@ -136,19 +143,37 @@ export function addNodeViewText(divEl, text) {
 }
 
 export function addNodeViewTextList(divEl, textList: string [], badgeColor = "badge-primary") {
+  let badgeDIV = document.createElement("div");
+  badgeDIV.className = "view-border-bottom";
   textList.forEach(alias => {
-    divEl.innerHTML += "<span class='badge badge-pill m-1 " + badgeColor + "'>" + alias +"</span>";
+    badgeDIV.innerHTML += "<span class='badge badge-pill m-1 " + badgeColor + "'>" + alias +"</span>";
   })
+  divEl.appendChild(badgeDIV);
 }
 
 export function addKillChainPhases (divEl, killChainPhases: KillChainPhase []) {
+  addNodeViewTitle(divEl, "Kill Chain Phases:");
+  let killChainDIV = document.createElement("div");
+  killChainDIV.className = "view-border-bottom";
   killChainPhases.forEach(phase => {
     if (phase?.phase_name && phase?.kill_chain_name) {
-      divEl.innerHTML += "<li class='list-group-item'>" + capitalize(phase.kill_chain_name) +
+      killChainDIV.innerHTML += "<li class='list-group-item'>" + capitalize(phase.kill_chain_name) +
         "<span class='badge badge-dark ml-1'>" + capitalize(phase.phase_name) + "</span>"
         + "</li>";
     }
   })
+  divEl.appendChild(killChainDIV);
+}
+
+export function getCustomSTIXView(contentId: string, typeId: string, data) {
+  document.getElementById(typeId).innerHTML += capitalize(data.type);
+
+  let el = document.getElementById(contentId);
+  const dataDIV = document.createElement("div");
+  dataDIV.id = data.type;
+
+  el.appendChild(dataDIV);
+  customFieldView(dataDIV.id, data, true);
 }
 
 /**

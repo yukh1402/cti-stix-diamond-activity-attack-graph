@@ -1,4 +1,11 @@
-import {addNodeViewText, addNodeViewTextList, BasicSDOSRO, customFieldView, externalReferencesView} from "../basic";
+import {
+  addNodeViewText,
+  addNodeViewTextList,
+  addNodeViewTitleAndText, addNodeViewTitleAndTextList,
+  BasicSDOSRO,
+  customFieldView,
+  externalReferencesView
+} from "../basic";
 
 export const CAMPAIGN_TYPE = "campaign";
 
@@ -19,8 +26,8 @@ export function getCampaignView(titleId: string, contentId: string, typeId: stri
   const campaignDIV = document.createElement("div");
   campaignDIV.id = "campaign";
 
-  if (campaignSDO?.aliases) addNodeViewTextList(campaignDIV, campaignSDO.aliases);
-  if (campaignSDO?.description) addNodeViewText(campaignDIV, campaignSDO.description);
+  if (campaignSDO?.aliases) addNodeViewTitleAndTextList(campaignDIV, "Aliases:", campaignSDO.aliases);
+  if (campaignSDO?.description) addNodeViewTitleAndText(campaignDIV, "Description:", campaignSDO.description);
   if (campaignSDO?.first_seen) {
     campaignDIV.innerHTML += "<span class='mt-2'><b>First seen:</b></span>"
     addNodeViewText(campaignDIV, new Date(campaignSDO.first_seen).toString())

@@ -26,6 +26,7 @@ import {getUrlView, URL_TYPE} from "../stix/sco/url";
 import {FILE_TYPE, getFileView} from "../stix/sco/file";
 import {DIRECTORY_TYPE, getDirectoryView} from "../stix/sco/directory";
 import {getProcessView, PROCESS_TYPE} from "../stix/sco/process";
+import {getCustomSTIXView} from "../stix/basic";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
@@ -646,7 +647,7 @@ export function createView(data, titleId, contentId, typeId) {
       getProcessView(titleId, contentId, typeId, data);
       break;
     default:
-      getCustomSTIXView(titleId, contentId, typeId, data);
+      getCustomSTIXView(contentId, typeId, data);
       break;
   }
 }

@@ -10,9 +10,9 @@ function getToolView(titleId, contentId, typeId, toolSDO) {
     var toolDIV = document.createElement("div");
     toolDIV.id = "tool";
     if (toolSDO === null || toolSDO === void 0 ? void 0 : toolSDO.aliases)
-        basic_1.addNodeViewTextList(toolDIV, toolSDO.aliases);
+        basic_1.addNodeViewTitleAndTextList(toolDIV, "Aliases:", toolSDO.aliases);
     if (toolSDO === null || toolSDO === void 0 ? void 0 : toolSDO.description)
-        basic_1.addNodeViewText(toolDIV, toolSDO.description);
+        basic_1.addNodeViewTitleAndText(toolDIV, "Description:", toolSDO.description);
     if (toolSDO === null || toolSDO === void 0 ? void 0 : toolSDO.tool_types)
         basic_1.addNodeViewTitleAndTextList(toolDIV, "Tool types:", toolSDO.tool_types, "badge-dark");
     if (toolSDO === null || toolSDO === void 0 ? void 0 : toolSDO.tool_version)

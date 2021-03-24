@@ -17,7 +17,7 @@ function getIdentityView(titleId, contentId, typeId, identitySDO) {
     var identityDIV = document.createElement("div");
     identityDIV.id = "identity";
     if (identitySDO === null || identitySDO === void 0 ? void 0 : identitySDO.description)
-        basic_1.addNodeViewText(identityDIV, identitySDO.description);
+        basic_1.addNodeViewTitleAndText(identityDIV, "Description:", identitySDO.description);
     if (identitySDO === null || identitySDO === void 0 ? void 0 : identitySDO.roles)
         basic_1.addNodeViewTitleAndTextList(identityDIV, "Roles:", identitySDO.roles, "badge-dark");
     if (identitySDO === null || identitySDO === void 0 ? void 0 : identitySDO.sectors)

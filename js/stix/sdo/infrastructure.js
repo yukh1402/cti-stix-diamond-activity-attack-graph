@@ -10,9 +10,9 @@ function getInfrastructureView(titleId, contentId, typeId, infrastructureSDO) {
     var infrastructureDIV = document.createElement("div");
     infrastructureDIV.id = "infrastructure";
     if (infrastructureSDO === null || infrastructureSDO === void 0 ? void 0 : infrastructureSDO.aliases)
-        basic_1.addNodeViewTextList(infrastructureDIV, infrastructureSDO.aliases);
+        basic_1.addNodeViewTitleAndTextList(infrastructureDIV, "Aliases:", infrastructureSDO.aliases);
     if (infrastructureSDO === null || infrastructureSDO === void 0 ? void 0 : infrastructureSDO.description)
-        basic_1.addNodeViewText(infrastructureDIV, infrastructureSDO.description);
+        basic_1.addNodeViewTitleAndText(infrastructureDIV, "Description:", infrastructureSDO.description);
     if (infrastructureSDO === null || infrastructureSDO === void 0 ? void 0 : infrastructureSDO.infrastructure_types)
         basic_1.addNodeViewTitleAndTextList(infrastructureDIV, "Infrastructure types:", infrastructureSDO.infrastructure_types, "badge-dark");
     if (infrastructureSDO === null || infrastructureSDO === void 0 ? void 0 : infrastructureSDO.first_seen)

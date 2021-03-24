@@ -28,8 +28,8 @@ export function getToolView(titleId: string, contentId: string, typeId: string, 
   const toolDIV = document.createElement("div");
   toolDIV.id = "tool";
 
-  if (toolSDO?.aliases) addNodeViewTextList(toolDIV, toolSDO.aliases);
-  if (toolSDO?.description) addNodeViewText(toolDIV, toolSDO.description);
+  if (toolSDO?.aliases) addNodeViewTitleAndTextList(toolDIV, "Aliases:", toolSDO.aliases);
+  if (toolSDO?.description) addNodeViewTitleAndText(toolDIV, "Description:", toolSDO.description);
   if (toolSDO?.tool_types) addNodeViewTitleAndTextList(toolDIV, "Tool types:", toolSDO.tool_types,
     "badge-dark");
   if (toolSDO?.tool_version) addNodeViewTitleAndText(toolDIV, "Version:", toolSDO.tool_version)

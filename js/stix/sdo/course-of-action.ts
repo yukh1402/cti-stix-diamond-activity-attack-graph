@@ -1,4 +1,4 @@
-import {addNodeViewText, BasicSDOSRO, customFieldView, externalReferencesView} from "../basic";
+import {addNodeViewText, addNodeViewTitleAndText, BasicSDOSRO, customFieldView, externalReferencesView} from "../basic";
 
 export const COURSE_OF_ACTION_TYPE = "course-of-action";
 
@@ -17,7 +17,8 @@ export function getCourseOfActionView(titleId: string, contentId: string, typeId
   const courseOfActionDIV = document.createElement("div");
   courseOfActionDIV.id = "course-of-action";
 
-  if (courseOfActionSDO?.description) addNodeViewText(courseOfActionDIV, courseOfActionSDO.description);
+  if (courseOfActionSDO?.description) addNodeViewTitleAndText(courseOfActionDIV, "Description:",
+    courseOfActionSDO.description);
   el.appendChild(courseOfActionDIV);
 
   customFieldView(courseOfActionDIV.id, courseOfActionSDO);

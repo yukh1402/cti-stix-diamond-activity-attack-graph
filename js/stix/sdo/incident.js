@@ -10,7 +10,7 @@ function getIncidentView(titleId, contentId, typeId, incidentSDO) {
     var incidentDIV = document.createElement("div");
     incidentDIV.id = "incident";
     if (incidentSDO === null || incidentSDO === void 0 ? void 0 : incidentSDO.description)
-        basic_1.addNodeViewText(incidentDIV, incidentSDO.description);
+        basic_1.addNodeViewTitleAndText(incidentDIV, "Description:", incidentSDO.description);
     el.appendChild(incidentDIV);
     basic_1.customFieldView(incidentDIV.id, incidentSDO);
     if (incidentSDO === null || incidentSDO === void 0 ? void 0 : incidentSDO.external_references) {

@@ -28,8 +28,9 @@ export function getInfrastructureView(titleId: string, contentId: string, typeId
   const infrastructureDIV = document.createElement("div");
   infrastructureDIV.id = "infrastructure";
 
-  if (infrastructureSDO?.aliases) addNodeViewTextList(infrastructureDIV, infrastructureSDO.aliases);
-  if (infrastructureSDO?.description) addNodeViewText(infrastructureDIV, infrastructureSDO.description);
+  if (infrastructureSDO?.aliases) addNodeViewTitleAndTextList(infrastructureDIV, "Aliases:",
+    infrastructureSDO.aliases);
+  if (infrastructureSDO?.description) addNodeViewTitleAndText(infrastructureDIV, "Description:" ,infrastructureSDO.description);
   if (infrastructureSDO?.infrastructure_types) addNodeViewTitleAndTextList(infrastructureDIV,
     "Infrastructure types:", infrastructureSDO.infrastructure_types, "badge-dark");
   if(infrastructureSDO?.first_seen) addNodeViewTitleAndText(infrastructureDIV, "First seen: ",

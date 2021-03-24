@@ -1,7 +1,7 @@
 import {
   addKillChainPhases,
   addNodeViewText,
-  addNodeViewTextList,
+  addNodeViewTextList, addNodeViewTitle, addNodeViewTitleAndText, addNodeViewTitleAndTextList,
   BasicSDOSRO,
   customFieldView,
   externalReferencesView,
@@ -26,13 +26,13 @@ export function getAttackPatternView(titleId: string, contentId: string, typeId:
   const attackPatternDIV = document.createElement("div");
   attackPatternDIV.id = "attack-pattern";
 
-  if (attackPatternSDO?.aliases) addNodeViewTextList(attackPatternDIV, attackPatternSDO.aliases);
-  if (attackPatternSDO?.description) addNodeViewText(attackPatternDIV, attackPatternSDO.description);
+  if (attackPatternSDO?.aliases) addNodeViewTitleAndTextList(attackPatternDIV, "Aliases:",
+    attackPatternSDO.aliases);
+  if (attackPatternSDO?.description) addNodeViewTitleAndText(attackPatternDIV, "Description:",
+    attackPatternSDO.description);
 
-  if (attackPatternSDO?.kill_chain_phases) {
-    attackPatternDIV.innerHTML += "<span class='mt-2'><b>Kill Chain Phases:</b></span>"
-    addKillChainPhases(attackPatternDIV, attackPatternSDO.kill_chain_phases);
-  }
+  if (attackPatternSDO?.kill_chain_phases) addKillChainPhases(attackPatternDIV, attackPatternSDO.kill_chain_phases);
+
   el.appendChild(attackPatternDIV);
 
   customFieldView("attack-pattern", attackPatternSDO);

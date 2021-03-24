@@ -10,9 +10,9 @@ function getCampaignView(titleId, contentId, typeId, campaignSDO) {
     var campaignDIV = document.createElement("div");
     campaignDIV.id = "campaign";
     if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.aliases)
-        basic_1.addNodeViewTextList(campaignDIV, campaignSDO.aliases);
+        basic_1.addNodeViewTitleAndTextList(campaignDIV, "Aliases:", campaignSDO.aliases);
     if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.description)
-        basic_1.addNodeViewText(campaignDIV, campaignSDO.description);
+        basic_1.addNodeViewTitleAndText(campaignDIV, "Description:", campaignSDO.description);
     if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.first_seen) {
         campaignDIV.innerHTML += "<span class='mt-2'><b>First seen:</b></span>";
         basic_1.addNodeViewText(campaignDIV, new Date(campaignSDO.first_seen).toString());

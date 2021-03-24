@@ -36,7 +36,7 @@ export function getIdentityView(titleId: string, contentId: string, typeId: stri
   const identityDIV = document.createElement("div");
   identityDIV.id = "identity";
 
-  if (identitySDO?.description) addNodeViewText(identityDIV, identitySDO.description);
+  if (identitySDO?.description) addNodeViewTitleAndText(identityDIV, "Description:" ,identitySDO.description);
   if (identitySDO?.roles) addNodeViewTitleAndTextList(identityDIV, "Roles:", identitySDO.roles,
     "badge-dark");
   if (identitySDO?.sectors) addNodeViewTitleAndTextList(identityDIV, "Sectors:", identitySDO.sectors,

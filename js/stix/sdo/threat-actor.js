@@ -21,9 +21,9 @@ function getThreatActorView(titleId, contentId, typeId, threatActorSDO) {
     var threatActorDIV = document.createElement("div");
     threatActorDIV.id = "threat-actor";
     if (threatActorSDO === null || threatActorSDO === void 0 ? void 0 : threatActorSDO.aliases)
-        basic_1.addNodeViewTextList(threatActorDIV, threatActorSDO.aliases);
+        basic_1.addNodeViewTitleAndTextList(threatActorDIV, "Aliases:", threatActorSDO.aliases);
     if (threatActorSDO === null || threatActorSDO === void 0 ? void 0 : threatActorSDO.description)
-        basic_1.addNodeViewText(threatActorDIV, threatActorSDO.description);
+        basic_1.addNodeViewTitleAndText(threatActorDIV, "Description:", threatActorSDO.description);
     if (threatActorSDO === null || threatActorSDO === void 0 ? void 0 : threatActorSDO.goals)
         basic_1.addNodeViewTitleAndTextList(threatActorDIV, "Goals:", threatActorSDO.goals, "badge-dark");
     if (threatActorSDO === null || threatActorSDO === void 0 ? void 0 : threatActorSDO.first_seen)

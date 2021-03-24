@@ -10,7 +10,7 @@ function getIndicatorView(titleId, contentId, typeId, indicatorSDO) {
     var indicatorDIV = document.createElement("div");
     indicatorDIV.id = "indicator";
     if (indicatorSDO === null || indicatorSDO === void 0 ? void 0 : indicatorSDO.description)
-        basic_1.addNodeViewText(indicatorDIV, indicatorSDO.description);
+        basic_1.addNodeViewTitleAndText(indicatorDIV, "Description:", indicatorSDO.description);
     if (indicatorSDO === null || indicatorSDO === void 0 ? void 0 : indicatorSDO.indicator_types)
         basic_1.addNodeViewTitleAndTextList(indicatorDIV, "Indicator types:", indicatorSDO.indicator_types, "badge-dark");
     if (indicatorSDO === null || indicatorSDO === void 0 ? void 0 : indicatorSDO.pattern)

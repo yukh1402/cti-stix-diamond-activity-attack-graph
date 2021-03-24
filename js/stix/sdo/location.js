@@ -10,7 +10,7 @@ function getLocationView(titleId, contentId, typeId, locationSDO) {
     var locationDIV = document.createElement("div");
     locationDIV.id = "location";
     if (locationSDO === null || locationSDO === void 0 ? void 0 : locationSDO.description)
-        basic_1.addNodeViewText(locationDIV, locationSDO.description);
+        basic_1.addNodeViewTitleAndText(locationDIV, "Description:", locationSDO.description);
     if (locationSDO === null || locationSDO === void 0 ? void 0 : locationSDO.latitude)
         basic_1.addNodeViewTitleAndText(locationDIV, "Latitude:", locationSDO.latitude.toString());
     if (locationSDO === null || locationSDO === void 0 ? void 0 : locationSDO.longitude)

@@ -10,7 +10,7 @@ function getCourseOfActionView(titleId, contentId, typeId, courseOfActionSDO) {
     var courseOfActionDIV = document.createElement("div");
     courseOfActionDIV.id = "course-of-action";
     if (courseOfActionSDO === null || courseOfActionSDO === void 0 ? void 0 : courseOfActionSDO.description)
-        basic_1.addNodeViewText(courseOfActionDIV, courseOfActionSDO.description);
+        basic_1.addNodeViewTitleAndText(courseOfActionDIV, "Description:", courseOfActionSDO.description);
     el.appendChild(courseOfActionDIV);
     basic_1.customFieldView(courseOfActionDIV.id, courseOfActionSDO);
     if (courseOfActionSDO === null || courseOfActionSDO === void 0 ? void 0 : courseOfActionSDO.external_references) {

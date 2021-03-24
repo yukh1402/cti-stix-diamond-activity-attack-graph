@@ -10,7 +10,7 @@ function getReportView(titleId, contentId, typeId, reportSDO) {
     var reportDIV = document.createElement("div");
     reportDIV.id = "report";
     if (reportSDO === null || reportSDO === void 0 ? void 0 : reportSDO.description)
-        basic_1.addNodeViewText(reportDIV, reportSDO.description);
+        basic_1.addNodeViewTitleAndText(reportDIV, "Description:", reportSDO.description);
     if (reportSDO === null || reportSDO === void 0 ? void 0 : reportSDO.report_types)
         basic_1.addNodeViewTitleAndTextList(reportDIV, "Report types:", reportSDO.report_types, "badge-dark");
     if (reportSDO === null || reportSDO === void 0 ? void 0 : reportSDO.published)

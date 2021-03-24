@@ -555,7 +555,7 @@ function createNodeView(node) {
     "</svg>" +
     "</button>" +
     "</div>" +
-    "<div class='card-body'>" +
+    "<div class='card-body node-body'>" +
     "<h6><div class='row-flex'>" +
     "<div><svg id='node-view-img' width='60' height='70' viewBox='0 -12 1 28'>" +
     "</svg></div>" +

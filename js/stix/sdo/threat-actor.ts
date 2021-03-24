@@ -46,8 +46,8 @@ export function getThreatActorView(titleId: string, contentId: string, typeId: s
   const threatActorDIV = document.createElement("div");
   threatActorDIV.id = "threat-actor";
 
-  if(threatActorSDO?.aliases) addNodeViewTextList(threatActorDIV, threatActorSDO.aliases);
-  if (threatActorSDO?.description) addNodeViewText(threatActorDIV, threatActorSDO.description);
+  if(threatActorSDO?.aliases) addNodeViewTitleAndTextList(threatActorDIV, "Aliases:", threatActorSDO.aliases);
+  if (threatActorSDO?.description) addNodeViewTitleAndText(threatActorDIV, "Description:", threatActorSDO.description);
   if (threatActorSDO?.goals) addNodeViewTitleAndTextList(threatActorDIV, "Goals:", threatActorSDO.goals,
     "badge-dark");
   if (threatActorSDO?.first_seen) addNodeViewTitleAndText(threatActorDIV, "First seen:",

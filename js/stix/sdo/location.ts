@@ -31,7 +31,7 @@ export function getLocationView(titleId: string, contentId: string, typeId: stri
   const locationDIV = document.createElement("div");
   locationDIV.id = "location";
 
-  if (locationSDO?.description) addNodeViewText(locationDIV, locationSDO.description);
+  if (locationSDO?.description) addNodeViewTitleAndText(locationDIV, "Description:", locationSDO.description);
   if (locationSDO?.latitude) addNodeViewTitleAndText(locationDIV, "Latitude:", locationSDO.latitude.toString());
   if (locationSDO?.longitude) addNodeViewTitleAndText(locationDIV, "Longitude:", locationSDO.longitude.toString());
   if (locationSDO?.precision) addNodeViewTitleAndText(locationDIV, "Precision:", locationSDO.precision.toString());

@@ -1,5 +1,5 @@
 import {
-  addNodeViewText,
+  addNodeViewText, addNodeViewTitleAndText,
   BasicSDOSRO,
   customFieldView, externalReferencesView
 } from "../basic";
@@ -19,7 +19,7 @@ export function getIncidentView(titleId: string, contentId: string, typeId: stri
   const incidentDIV = document.createElement("div");
   incidentDIV.id = "incident";
 
-  if (incidentSDO?.description) addNodeViewText(incidentDIV, incidentSDO.description);
+  if (incidentSDO?.description) addNodeViewTitleAndText(incidentDIV, "Description:", incidentSDO.description);
 
   el.appendChild(incidentDIV);
   customFieldView(incidentDIV.id, incidentSDO);

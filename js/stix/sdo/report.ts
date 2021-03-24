@@ -24,7 +24,7 @@ export function getReportView(titleId: string, contentId: string, typeId: string
   const reportDIV = document.createElement("div");
   reportDIV.id = "report";
 
-  if (reportSDO?.description) addNodeViewText(reportDIV, reportSDO.description);
+  if (reportSDO?.description) addNodeViewTitleAndText(reportDIV, "Description:", reportSDO.description);
   if (reportSDO?.report_types) addNodeViewTitleAndTextList(reportDIV, "Report types:", reportSDO.report_types,
     "badge-dark");
   if (reportSDO?.published) addNodeViewTitleAndText(reportDIV, "Published:",

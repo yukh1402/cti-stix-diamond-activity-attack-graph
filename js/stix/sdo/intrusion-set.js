@@ -10,9 +10,9 @@ function getIntrusionSetView(titleId, contentId, typeId, intrusionSDO) {
     var intrusionDIV = document.createElement("div");
     intrusionDIV.id = "intrusion-set";
     if (intrusionSDO === null || intrusionSDO === void 0 ? void 0 : intrusionSDO.aliases)
-        basic_1.addNodeViewTextList(intrusionDIV, intrusionSDO.aliases);
+        basic_1.addNodeViewTitleAndTextList(intrusionDIV, "Aliases:", intrusionSDO.aliases);
     if (intrusionSDO === null || intrusionSDO === void 0 ? void 0 : intrusionSDO.description)
-        basic_1.addNodeViewText(intrusionDIV, intrusionSDO.description);
+        basic_1.addNodeViewTitleAndText(intrusionDIV, "Description:", intrusionSDO.description);
     if (intrusionSDO === null || intrusionSDO === void 0 ? void 0 : intrusionSDO.first_seen)
         basic_1.addNodeViewTitleAndText(intrusionDIV, "First seen:", new Date(intrusionSDO.first_seen).toString());
     if (intrusionSDO === null || intrusionSDO === void 0 ? void 0 : intrusionSDO.last_seen)

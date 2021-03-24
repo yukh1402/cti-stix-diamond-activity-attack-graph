@@ -28,8 +28,8 @@ export function getIntrusionSetView(titleId: string, contentId: string, typeId: 
   const intrusionDIV = document.createElement("div");
   intrusionDIV.id = "intrusion-set";
 
-  if (intrusionSDO?.aliases) addNodeViewTextList(intrusionDIV, intrusionSDO.aliases);
-  if (intrusionSDO?.description) addNodeViewText(intrusionDIV, intrusionSDO.description);
+  if (intrusionSDO?.aliases) addNodeViewTitleAndTextList(intrusionDIV, "Aliases:", intrusionSDO.aliases);
+  if (intrusionSDO?.description) addNodeViewTitleAndText(intrusionDIV, "Description:", intrusionSDO.description);
 
   if (intrusionSDO?.first_seen) addNodeViewTitleAndText(intrusionDIV, "First seen:",
     new Date(intrusionSDO.first_seen).toString());

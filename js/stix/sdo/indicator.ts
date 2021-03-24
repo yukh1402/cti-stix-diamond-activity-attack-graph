@@ -29,7 +29,7 @@ export function getIndicatorView(titleId: string, contentId: string, typeId: str
   const indicatorDIV = document.createElement("div");
   indicatorDIV.id = "indicator";
 
-  if (indicatorSDO?.description) addNodeViewText(indicatorDIV, indicatorSDO.description);
+  if (indicatorSDO?.description) addNodeViewTitleAndText(indicatorDIV, "Description:", indicatorSDO.description);
   if (indicatorSDO?.indicator_types) addNodeViewTitleAndTextList(indicatorDIV, "Indicator types:" ,
     indicatorSDO.indicator_types, "badge-dark");
   if (indicatorSDO?.pattern) addNodeViewTitleAndText(indicatorDIV, "Pattern:", indicatorSDO.pattern);
