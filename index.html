@@ -47,7 +47,7 @@
 
   <header class="bmd-layout-header">
     <div class="navbar navbar-light ">
-      <button class="btn btn-secondary" type="button" data-toggle="drawer" data-target="#dw">
+      <button class="btn btn-raised btn-primary" type="button" data-toggle="drawer" data-target="#dw">
         Parse STIX
       </button>
       <button class="btn btn-secondary dropdown-toggle" type="button" id="graphDropdown" data-toggle="dropdown"
@@ -79,35 +79,39 @@
       <div id="svg-container">
         <svg id="svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
           <defs id="mdef">
+            <marker id="arrow" viewBox="0,0,10,10" refX="18" refY="5" markerWidth="10" markerHeight="10"
+                    orient="auto-start-reverse">
+              <path d="M0,0L0,10L10,5"></path>
+            </marker>
             <pattern id="groupingImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/grouping.png"></image>
+              <image width="21" height="21" x="0" y="-1" xlink:href="img/grouping.png"></image>
             </pattern>
             <pattern id="attackPatternImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/attack_pattern.png"></image>
+              <image width="21" height="21" x="0" y="-1" xlink:href="img/attack_pattern.png"></image>
             </pattern>
             <pattern id="campaignImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/campaign.png"></image>
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/campaign.png"></image>
             </pattern>
             <pattern id="toolImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/tool.png"></image>
+              <image width="22" height="22" x="-1" y="-1" xlink:href="img/tool.png"></image>
             </pattern>
             <pattern id="malwareImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/malware.png"></image>
+              <image width="21" height="21" x="-0.5" y="-1" xlink:href="img/malware.png"></image>
             </pattern>
             <pattern id="vulnerabilityImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/vulnerability.png"></image>
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/vulnerability.png"></image>
             </pattern>
             <pattern id="identityImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/identity.png"></image>
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/identity.png"></image>
             </pattern>
             <pattern id="indicatorImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/indicator.png"></image>
+              <image width="20" height="20" x="0" y="0" xlink:href="img/indicator.png"></image>
             </pattern>
             <pattern id="observedDataImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/observed_data.png"></image>
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/observed_data.png"></image>
             </pattern>
             <pattern id="threatActorImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/threat_actor.png"></image>
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/threat_actor.png"></image>
             </pattern>
           </defs>
         </svg>

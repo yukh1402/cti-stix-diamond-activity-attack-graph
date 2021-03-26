@@ -471,7 +471,16 @@ export function getFirstRelativeNodeTime(nodes) {
 }
 
 /**
- * Get the minimum Date from a list of Nodes
+ * Get the maximum Date from a list of STIX Nodes
+ * @param nodes
+ * @return {Date}
+ */
+export function getMaxNodeDate(nodes) {
+  return new Date(Math.max.apply(null, nodes.map(node => Date.parse(node.data.created))))
+}
+
+/**
+ * Get the minimum Date from a list of STIX Nodes
  * @param nodes
  * @return {Date}
  */

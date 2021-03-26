@@ -6,7 +6,12 @@ import {
   MITRE_ATTACK_CATEGORIES,
   parseBundleToGraph,
   parseTacticNameToXAxis,
-  getDiamondModelCategoryLayer, getNodeLabel, createView, DIAMOND_MODEL_META_FEATURE_CATEGORIES
+  getDiamondModelCategoryLayer,
+  getNodeLabel,
+  createView,
+  DIAMOND_MODEL_META_FEATURE_CATEGORIES,
+  getMinNodeDate,
+  getMaxNodeDate
 } from "./mapper";
 import {ATTACK_PATTERN_TYPE, getAttackPatternView} from "../stix/sdo/attack-pattern";
 import {GROUPING_TYPE} from "../stix/sdo/grouping";
@@ -54,9 +59,12 @@ let graphSelection = window.location.hash.replace("#", "") || GRAPH_TYPE.ATTACK_
  * Get Graph selection through change in URL hash
  */
 window.onhashchange = function () {
-  graphSelection = window.location.hash.replace("#", "");
-  setCurrentGraphSelection();
-  createGraph(stixGraph);
+  let selection = window.location.hash.replace("#", "");
+  if (selection !== "") {
+    graphSelection = selection;
+    setCurrentGraphSelection();
+    createGraph(stixGraph);
+  }
 }
 
 /**
@@ -83,13 +91,30 @@ let svg = initGraph("svg-container",
  * This creates a X-Axis with all Mitre Attack Phases
  */
 function createXAxisWithMitrePhases() {
-  let x = d3.scalePoint()
+  let x = d3.scaleBand()
     .domain(MITRE_ATTACK_CATEGORIES)
     .range([0, WIDTH])
   let xAxis = svg.append("g")
     .attr("id", "xAxis")
     .attr("style", "color: white; font-size: 8px")
     .call(d3.axisTop(x))
+
+  // Build layer background
+  svg.selectAll("background-rect")
+    .data(MITRE_ATTACK_CATEGORIES)
+    .join("g")
+    .attr("id", "layer")
+    .append("rect")
+    .attr("x", (d, i) => {
+      return (WIDTH / MITRE_ATTACK_CATEGORIES.length) * i;
+    })
+    .attr("height", HEIGHT)
+    .attr("width", WIDTH / MITRE_ATTACK_CATEGORIES.length)
+    .attr("opacity", 0.6)
+    .attr("fill", function (d, i) {
+      return i % 2 === 0 ? LAYER_COLOR_SCHEMA[0] : LAYER_COLOR_SCHEMA[1];
+    });
+
   return x;
 }
 
@@ -98,20 +123,34 @@ function createXAxisWithMitrePhases() {
  * @param graph: These are all Grouping Events
  */
 function buildActivityThreadGraph(graph) {
+  let relevantGroupings = graph.nodes.filter(grouping => {
+    if (grouping.data.object_refs.find(ref => ref.includes(ATTACK_PATTERN_TYPE))) {
+      return grouping;
+    }
+  });
   let attackPatterns = getNodesWithAttackPattern(graph);
-
   let x = createXAxisWithMitrePhases();
 
   let y = d3.scaleTime()
-    .domain([new Date("2021-01-01 00:00:00"), new Date("2021-12-31 23:59:59")])
+    .domain([
+      new Date(getMinNodeDate(relevantGroupings).getFullYear() + "-01-01 00:00:00"),
+      new Date(getMaxNodeDate(relevantGroupings).getFullYear() + "-12-31 23:59:59")])
     .range([HEIGHT, 0]);
   let yAxis = svg.append("g")
     .attr("id", "yAxis")
     .attr("style", "color: white")
     .call(d3.axisLeft(y));
 
+  // Create DIV element for Tooltip
+  d3.select("#svg-container")
+    .append("div")
+    .attr("id", "tooltip")
+    .attr("class", "tooltipAttackGraph")
+    .style("visibility", "hidden");
+
   // ClipPath is a boundary where everything outside is not be drawn
-  let clip = svg.append("defs")
+  svg.append("defs")
+    .attr("id", "clip-def")
     .append("SVG:clipPath")
     .attr("id", "clip")
     .append("SVG:rect")
@@ -120,10 +159,28 @@ function buildActivityThreadGraph(graph) {
     .attr("x", 0)
     .attr("y", 0);
 
+  svg.append("rect")
+    .attr("id", "zoom-rect")
+    .attr("width", WIDTH)
+    .attr("height", HEIGHT)
+    .style("fill", "none")
+    .style("pointer-events", "all")
+    .attr("transform", "translate(0," + MARGIN.RIGHT + ")")
+
   // Add the ClipPath
   let scatter = svg.append("g")
     .attr("id", "scatter")
     .attr("clip-path", "url(#clip)")
+
+  // Create links
+  scatter.selectAll(".link")
+    .data(graph.links)
+    .join("g")
+    .attr("id", "link")
+    .append("path")
+    .attr("id", "linkPath")
+    .attr('marker-end', 'url(#arrow)')
+    .classed("link", true);
 
   // Add circles
   scatter
@@ -134,23 +191,64 @@ function buildActivityThreadGraph(graph) {
     .attr("id", "node")
     .append("circle")
     .attr("id", "circle")
+    .style("cursor", "pointer")
     .attr("cx", function (d) {
       d.x = x(parseTacticNameToXAxis(getTactic(d)));
       return d.x;
     })
     .attr("cy", function (node) {
       let grouping = graph.nodes.find(grouping => grouping.id === node.groupingId);
-      return y(Date.parse(grouping.data.created))
+      node.y = y(Date.parse(grouping.data.created));
+      return node.y;
     })
     .attr("r", 10)
     .style("fill", () => getNodeImage(new Node(undefined, undefined, GROUPING_TYPE)))
-  //todo: Create node labels
-  graphZoom(scatter, y, yAxis)
+    .on("mouseover", showTooltip)
+    .on("mousemove", attackPatternMousemove)
+    .on("mouseout", hideTooltip)
+    .on("click", attackPatternDoubleClick)
+
+  svg.selectAll("#node")
+    .append("text")
+    .attr("id", "node-label")
+    .attr("font-size", "0.5em")
+    .attr("text-anchor", "middle")
+    .attr("x", d => d.x)
+    .attr("y", function (node) {
+      let grouping = graph.nodes.find(grouping => grouping.id === node.groupingId);
+      return y(Date.parse(grouping.data.created)) + 20
+    })
+    .attr("fill", "#FFFFFF")
+    .text((n) => getNodeLabel(n));
+
+  // Draw links
+  svg.selectAll("#linkPath")
+    .attr("d", (d) => {
+      return "M " + attackPatterns[d.source].x + " " + attackPatterns[d.source].y + " L "
+        + attackPatterns[d.target].x + " " + attackPatterns[d.target].y
+    })
+
+  // Set link labels
+  let linkLabel = svg.selectAll("#link")
+    .append("text")
+    .attr("dy", "12")
+    .attr("id", "link-label")
+    .attr("font-size", "0.4em")
+    .attr("text-anchor", "middle")
+    .attr("fill", "#FFFFFF")
+    .text(d => d.relation)
+    .attr("x", d => attackPatterns[d.source].x + ((attackPatterns[d.target].x - attackPatterns[d.source].x) / 2))
+    .attr("y", d => attackPatterns[d.source].y + ((attackPatterns[d.target].y - attackPatterns[d.source].y) / 2));
+
+  graphZoom(scatter, y, yAxis, attackPatterns)
 }
 
+/**
+ * Build the Attack Graph based on the Attack Pattern SDO that are available in the Grouping SDO
+ * @param graph
+ */
 function buildAttackGraph(graph) {
   let attackPatterns = getNodesWithAttackPattern(graph);
-
   let x = createXAxisWithMitrePhases();
 
   let y = d3.scaleLinear()
@@ -175,6 +273,7 @@ function buildAttackGraph(graph) {
     .attr("id", "link")
     .append("path")
     .attr("id", "linkPath")
+    .attr('marker-end', 'url(#arrow)')
     .classed("link", true);
 
   // Add circles
@@ -184,6 +283,7 @@ function buildAttackGraph(graph) {
     .attr("id", "node")
     .append("circle")
     .attr("id", "circle")
+    .style("cursor", "pointer")
     .attr("cx", function (d) {
       d.x = x(parseTacticNameToXAxis(getTactic(d)));
       return d.x;
@@ -197,7 +297,7 @@ function buildAttackGraph(graph) {
     .on("mouseover", showTooltip)
     .on("mousemove", attackPatternMousemove)
     .on("mouseout", hideTooltip)
-    .on("dblclick", attackPatternDoubleClick)
+    .on("click", attackPatternDoubleClick)
 
   createNodeLabels("#node")
 
@@ -207,6 +307,18 @@ function buildAttackGraph(graph) {
       return "M " + attackPatterns[d.source].x + " " + attackPatterns[d.source].y + " L "
         + attackPatterns[d.target].x + " " + attackPatterns[d.target].y
     })
+
+  // Set link labels
+  let linkLabel = svg.selectAll("#link")
+    .append("text")
+    .attr("dy", "12")
+    .attr("id", "link-label")
+    .attr("font-size", "0.4em")
+    .attr("text-anchor", "middle")
+    .attr("fill", "#FFFFFF")
+    .text(d => d.relation)
+    .attr("x", d => attackPatterns[d.source].x + ((attackPatterns[d.target].x - attackPatterns[d.source].x) / 2))
+    .attr("y", d => attackPatterns[d.source].y + ((attackPatterns[d.target].y - attackPatterns[d.source].y) / 2));
 }
 
 /**
@@ -250,7 +362,8 @@ function buildSubGraph(groupingNode) {
     .attr("id", "link")
     .append("line")
     .attr("id", "link-line")
-    .classed("link", true)
+    .attr('marker-end', 'url(#arrow)')
+    .classed("link-sub-graph", true)
 
   let linkLabel = svg.selectAll("#link")
     .append("text")
@@ -359,17 +472,11 @@ function nodeClick(event, d, simulation) {
 /**
  * This adds zoom functionality to the svg by using a rect element
  */
-function graphZoom(scatter, y, yAxis) {
+function graphZoom(scatter, y, yAxis, attackPatternNodes) {
   let zoom = d3.zoom()
-    .on("zoom", (event) => onZoom(event, scatter, y, yAxis));
+    .on("zoom", (event) => onZoom(event, scatter, y, yAxis, attackPatternNodes));
 
-  svg.append("rect")
-    .attr("id", "zoom-rect")
-    .attr("width", WIDTH)
-    .attr("height", HEIGHT)
-    .style("fill", "none")
-    .style("pointer-events", "all")
-    .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.RIGHT + ")")
+  svg.select("#zoom-rect")
     .call(zoom);
 }
 
@@ -379,19 +486,37 @@ function graphZoom(scatter, y, yAxis) {
  * @param scatter:
  * @param y
  * @param yAxis
- *
+ * @param attackPatternNodes
  */
-function onZoom(event, scatter, y, yAxis) {
+function onZoom(event, scatter, y, yAxis, attackPatternNodes) {
   let newY = event.transform.rescaleY(y);
   yAxis.call(d3.axisLeft(newY));
 
   // Update node position
-  scatter
-    .selectAll("circle")
+  scatter.selectAll("circle")
     .attr("cy", function (d) {
       let grouping = stixGraph.nodes.find(grouping => grouping.id === d.groupingId);
-      return newY(Date.parse(grouping.data.created))
+      d.y = newY(Date.parse(grouping.data.created))
+      return d.y;
     })
+  // Update Node label position
+  svg.selectAll("#node-label")
+    .attr("y", function (d) {
+      let grouping = stixGraph.nodes.find(grouping => grouping.id === d.groupingId);
+      return newY(Date.parse(grouping.data.created)) + 20;
+    })
+  // Update Link position
+  svg.selectAll("#linkPath")
+    .attr("d", (d) => {
+      return "M " + attackPatternNodes[d.source].x + " " + attackPatternNodes[d.source].y + " L "
+        + attackPatternNodes[d.target].x + " " + attackPatternNodes[d.target].y
+    })
+  // Update Link label position
+  svg.selectAll("#link-label")
+    .attr("x", d =>
+      attackPatternNodes[d.source].x + ((attackPatternNodes[d.target].x - attackPatternNodes[d.source].x) / 2))
+    .attr("y", d =>
+      attackPatternNodes[d.source].y + ((attackPatternNodes[d.target].y - attackPatternNodes[d.source].y) / 2));
 }
 
 function createNodeLabels(id) {
@@ -430,6 +555,7 @@ function calcLeftPosition(event, tooltipWidth) {
 }
 
 function attackPatternDoubleClick(event, node) {
+  history.replaceState(null, null, ' '); // Remove hash from URL
   graphSelection = GRAPH_TYPE.SUB_GRAPH;
   setCurrentGraphSelection();
   let relevantGroupingNode = stixGraph.nodes.find(n => n.id === node.groupingId);
@@ -455,7 +581,7 @@ function createGraph(graph, node = undefined) {
 function removeGraphComponents() {
   svg.selectAll("#xAxis").remove();
   svg.selectAll("#yAxis").remove();
-  svg.selectAll("#clip").remove();
+  svg.selectAll("#clip-def").remove();
   svg.selectAll("#node").remove();
   svg.selectAll("#node-label").remove();
   d3.selectAll("#tooltip").remove();
@@ -463,6 +589,7 @@ function removeGraphComponents() {
   svg.selectAll("#link").remove();
   svg.selectAll("#scatter").remove();
   svg.selectAll("#layer").remove();
+  svg.selectAll("#zoom-rect").remove();
 }
 
 createGraph();
@@ -515,6 +642,10 @@ setCurrentGraphSelection();
 document.getElementById("parseButton").addEventListener("click", parseSTIXContent)
 
 function parseSTIXContent() {
+  if (graphSelection === GRAPH_TYPE.SUB_GRAPH) {
+    graphSelection = GRAPH_TYPE.ATTACK_GRAPH;
+    setCurrentGraphSelection();
+  }
   let valid = false;
   eraseSyntaxError();
   stixBundle = document.getElementById("stixContent").value;

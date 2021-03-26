@@ -13,18 +13,12 @@ function getCampaignView(titleId, contentId, typeId, campaignSDO) {
         basic_1.addNodeViewTitleAndTextList(campaignDIV, "Aliases:", campaignSDO.aliases);
     if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.description)
         basic_1.addNodeViewTitleAndText(campaignDIV, "Description:", campaignSDO.description);
-    if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.first_seen) {
-        campaignDIV.innerHTML += "<span class='mt-2'><b>First seen:</b></span>";
-        basic_1.addNodeViewText(campaignDIV, new Date(campaignSDO.first_seen).toString());
-    }
-    if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.last_seen) {
-        campaignDIV.innerHTML += "<span class='mt-2'><b>Last seen:</b></span>";
-        basic_1.addNodeViewText(campaignDIV, new Date(campaignSDO.last_seen).toString());
-    }
-    if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.objective) {
-        campaignDIV.innerHTML += "<span class='mt-2'><b>Objective:</b></span>";
-        basic_1.addNodeViewText(campaignDIV, campaignSDO.objective);
-    }
+    if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.first_seen)
+        basic_1.addNodeViewTitleAndText(campaignDIV, "First seen:", new Date(campaignSDO.first_seen).toString());
+    if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.last_seen)
+        basic_1.addNodeViewTitleAndText(campaignDIV, "Last seen:", new Date(campaignSDO.last_seen).toString());
+    if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.objective)
+        basic_1.addNodeViewTitleAndText(campaignDIV, "Objective:", campaignSDO.objective);
     el.appendChild(campaignDIV);
     basic_1.customFieldView("campaign", campaignSDO);
     if (campaignSDO === null || campaignSDO === void 0 ? void 0 : campaignSDO.external_references) {

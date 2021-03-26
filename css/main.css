@@ -314,8 +314,11 @@ textarea {
 }
 
 .link {
-  stroke: #ffffff;
-  stroke-opacity: .6;
+  stroke: black;
+}
+
+.link-sub-graph {
+  stroke: black;
 }
 
 .tooltipAttackGraph {
