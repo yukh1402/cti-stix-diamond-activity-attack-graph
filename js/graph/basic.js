@@ -30,6 +30,10 @@ import {INFRASTRUCTURE_TYPE} from "../stix/sdo/infrastructure";
 import {MALWARE_ANALYSIS_TYPE} from "../stix/sdo/malware-analysis";
 import {NOTE_TYPE} from "../stix/sdo/note";
 import {OPINION_TYPE} from "../stix/sdo/opinion";
+import {FILE_TYPE} from "../stix/sco/file";
+import {DIRECTORY_TYPE} from "../stix/sco/directory";
+import {NETWORK_TRAFFIC_TYPE} from "../stix/sco/network-traffic";
+import {PROCESS_TYPE} from "../stix/sco/process";
 
 
 let stixBundle = undefined;
@@ -637,6 +641,14 @@ function getNodeImage(node) {
       return "url(#noteImage)";
     case OPINION_TYPE:
       return "url(#opinionImage)";
+    case FILE_TYPE:
+      return "url(#fileImage)";
+    case DIRECTORY_TYPE:
+      return "url(#directoryImage)";
+    case NETWORK_TRAFFIC_TYPE:
+      return "url(#networkTrafficImage)";
+    case PROCESS_TYPE:
+      return "url(#processImage)";
   }
 }
 
