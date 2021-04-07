@@ -13,7 +13,7 @@ import {
   getMinNodeDate,
   getMaxNodeDate
 } from "./mapper";
-import {ATTACK_PATTERN_TYPE, getAttackPatternView} from "../stix/sdo/attack-pattern";
+import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern";
 import {GROUPING_TYPE} from "../stix/sdo/grouping";
 import {TOOL_TYPE} from "../stix/sdo/tool";
 import {MALWARE_TYPE} from "../stix/sdo/malware";
@@ -24,6 +24,12 @@ import {OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo";
 import {CAMPAIGN_TYPE} from "../stix/sdo/campaign";
 import {INDICATOR_TYPE} from "../stix/sdo/indicator";
 import {Node} from "./node";
+import {checkSyntax, Warning} from "./syntax-checker";
+import {LOCATION_TYPE} from "../stix/sdo/location";
+import {INFRASTRUCTURE_TYPE} from "../stix/sdo/infrastructure";
+import {MALWARE_ANALYSIS_TYPE} from "../stix/sdo/malware-analysis";
+import {NOTE_TYPE} from "../stix/sdo/note";
+import {OPINION_TYPE} from "../stix/sdo/opinion";
 
 
 let stixBundle = undefined;
@@ -193,7 +199,7 @@ function buildActivityThreadGraph(graph) {
     .attr("id", "circle")
     .style("cursor", "pointer")
     .attr("cx", function (d) {
-      d.x = x(parseTacticNameToXAxis(getTactic(d)));
+      d.x = x(parseTacticNameToXAxis(getTactic(d))) + 35;
       return d.x;
     })
     .attr("cy", function (node) {
@@ -224,6 +230,7 @@ function buildActivityThreadGraph(graph) {
   // Draw links
   svg.selectAll("#linkPath")
     .attr("d", (d) => {
+      console.log(d)
       return "M " + attackPatterns[d.source].x + " " + attackPatterns[d.source].y + " L "
         + attackPatterns[d.target].x + " " + attackPatterns[d.target].y
     })
@@ -285,7 +292,7 @@ function buildAttackGraph(graph) {
     .attr("id", "circle")
     .style("cursor", "pointer")
     .attr("cx", function (d) {
-      d.x = x(parseTacticNameToXAxis(getTactic(d)));
+      d.x = x(parseTacticNameToXAxis(getTactic(d))) + 35;
       return d.x;
     })
     .attr("cy", function (d) {
@@ -620,6 +627,16 @@ function getNodeImage(node) {
       return "url(#observedDataImage)";
     case CAMPAIGN_TYPE:
       return "url(#campaignImage)";
+    case LOCATION_TYPE:
+      return "url(#locationImage)";
+    case INFRASTRUCTURE_TYPE:
+      return "url(#infrastructure)";
+    case MALWARE_ANALYSIS_TYPE:
+      return "url(#malwareAnalysisImage)";
+    case NOTE_TYPE:
+      return "url(#noteImage)";
+    case OPINION_TYPE:
+      return "url(#opinionImage)";
   }
 }
 
@@ -649,19 +666,30 @@ function parseSTIXContent() {
   let valid = false;
   eraseSyntaxError();
   stixBundle = document.getElementById("stixContent").value;
+  let bundle = undefined;
   try {
-    stixGraph = parseBundleToGraph(JSON.parse(stixBundle));
+    bundle = JSON.parse(stixBundle);
+    checkSyntax(bundle);
     valid = true;
   } catch (e) {
-    showSyntaxError(e)
+    if (e instanceof Warning) {
+      showSyntaxError(e, true)
+      valid = true;
+    } else {
+      showSyntaxError(e)
+    }
   }
   if (valid) {
+    stixGraph = parseBundleToGraph(bundle);
+    console.log(stixGraph)
     createGraph(stixGraph);
   }
 }
 
-function showSyntaxError(message) {
-  document.getElementById("syntaxError").innerText = message;
+function showSyntaxError(message, warning = false) {
+  let error = document.getElementById("syntaxError");
+  error.className =  warning === false ? "alert-danger": "alert-warning";
+  error.innerText = message;
 }
 
 function eraseSyntaxError() {

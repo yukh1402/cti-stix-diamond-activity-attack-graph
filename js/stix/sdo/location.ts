@@ -45,7 +45,7 @@ export function getLocationView(titleId: string, contentId: string, typeId: stri
   if (locationSDO?.postal_code) addNodeViewTitleAndText(locationDIV, "Postal Code:", locationSDO.postal_code);
 
   el.appendChild(locationDIV);
-  customFieldView(locationDIV, locationSDO);
+  customFieldView(locationDIV.id, locationSDO);
 
   if (locationSDO?.external_references) {
     externalReferencesView(locationDIV, locationSDO.external_references);

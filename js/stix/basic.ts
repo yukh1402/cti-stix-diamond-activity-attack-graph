@@ -5,7 +5,6 @@ import {DIRECTORY_SCO_FIELDS} from './sco/directory';
 import {FILE_SCO_FIELDS} from './sco/file';
 import {USER_ACCOUNT_SCO_FIELDS} from './sco/user-account';
 import {NETWORK_TRAFFIC_SCO_FIELDS} from './sco/network-traffic';
-// import {IPV4_SCO_FIELDS, IPV6_SCO_FIELDS} from './sco/ipv-sco';
 import {SCHEDULED_TASK_SCO_FIELDS} from './sco/scheduled-task';
 import {capitalize} from '../../js/graph/utils';
 
@@ -68,7 +67,6 @@ export function customFieldView (divId, obj, allKeys = false) {
   } else {
     customKeys = Object.keys(obj).filter((key) => key !== "id" && key !== "type" && key !== "spec_version");
   }
-
   if (customKeys.length > 0) {
     const customDIV = document.createElement("div");
     customKeys.forEach(key => {
