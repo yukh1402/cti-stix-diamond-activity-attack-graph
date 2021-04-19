@@ -384,12 +384,14 @@ export function parseBundleToGraph(bundle) {
   bundle.objects
     .filter(obj => obj.type === RELATIONSHIP_TYPE)
     .filter(obj => obj.source_ref.includes(GROUPING_TYPE) && obj.target_ref.includes(GROUPING_TYPE))
-    .forEach(obj =>
-      groupingLinks.push(
-        new Link(
-          nodes.findIndex(no => no.id === obj.source_ref),
-          nodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type)));
-
+    .forEach(obj => {
+      let source_index = nodes.findIndex(no => no.id === obj.source_ref);
+      let target_index = nodes.findIndex(no => no.id === obj.target_ref);
+      if (source_index > -1 && target_index > -1) {
+        groupingLinks.push(
+          new Link(source_index, target_index, obj, obj.relationship_type));
+      }
+    })
   return new Graph(nodes, groupingLinks);
 }
 
@@ -420,26 +422,49 @@ function buildSubGraphForGrouping(grouping, bundle) {
       if (foundObj.id.includes(RELATIONSHIP_TYPE)) {
         // Dont push relationship obj if target or source ref is a grouping object or relationship obj already exists in childlinks
         if (!foundObj.source_ref.includes(GROUPING_TYPE) && !foundObj.target_ref.includes(GROUPING_TYPE)
-          && !childLinks.find(link => link.data.id === foundObj.id))
+          && !childLinks.find(link => link.data.id === foundObj.id)) {
+          let source_ref_index = childNodes.findIndex(no => no.id === foundObj.source_ref);
+          let target_ref_index = childNodes.findIndex(no => no.id === foundObj.target_ref);
+          if (source_ref_index === -1) {
+            let findSourceObj = bundle.objects.find(obj => obj.id === foundObj.source_ref);
+            childNodes.push(new Node(findSourceObj.id, findSourceObj, findSourceObj.type, undefined, grouping.id));
+          }
+          if (target_ref_index === -1) {
+            let findTargetObj = bundle.objects.find(obj => obj.id === foundObj.target_ref);
+            childNodes.push(new Node(findTargetObj.id, findTargetObj, findTargetObj.type, undefined, grouping.id));
+          }
           childLinks.push(
             new Link(
               childNodes.findIndex(no => no.id === foundObj.source_ref),
               childNodes.findIndex(no => no.id === foundObj.target_ref), foundObj, foundObj.relationship_type));
+        }
       }
       // Get all relationship objects for foundObj
-      bundle.objects.forEach(obj => {
-        if (obj.id.includes(RELATIONSHIP_TYPE)) {
-          if (!childLinks.find(rel => rel.data.id === obj.id)
-            && (obj.source_ref === foundObj.id || obj.target_ref === foundObj.id)) {
-            childLinks.push(
-              new Link(
-                childNodes.findIndex(no => no.id === obj.source_ref),
-                childNodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type
-              )
-            );
-          }
-        }
-      })
+      // bundle.objects.forEach(obj => {
+      //   if (obj.id.includes(RELATIONSHIP_TYPE)) {
+      //     if (!childLinks.find(rel => rel.data.id === obj.id)
+      //       && (obj.source_ref === foundObj.id || obj.target_ref === foundObj.id)) {
+      //
+      //       let source_ref_index = childNodes.findIndex(no => no.id === obj.source_ref);
+      //       let target_ref_index = childNodes.findIndex(no => no.id === obj.target_ref);
+      //       if (source_ref_index === -1) {
+      //         let findSourceObj = bundle.objects.find(ob => ob.id === obj.source_ref);
+      //         childNodes.push(new Node(findSourceObj.id, findSourceObj, findSourceObj.type, undefined, grouping.id));
+      //       }
+      //       if (target_ref_index === -1) {
+      //         let findTargetObj = bundle.objects.find(ob => ob.id === obj.target_ref);
+      //         childNodes.push(new Node(findTargetObj.id, findTargetObj, findTargetObj.type, undefined, grouping.id));
+      //       }
+      //
+      //       childLinks.push(
+      //         new Link(
+      //           childNodes.findIndex(no => no.id === obj.source_ref),
+      //           childNodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type
+      //         )
+      //       );
+      //     }
+      //   }
+      // })
     }
   });
   return new Graph(childNodes, childLinks);

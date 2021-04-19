@@ -18,16 +18,24 @@ export function checkSyntax(bundle) {
   let groupingWithAttackPattern = groupingSDOs.filter(grouping => grouping.object_refs
     .find(ref => ref.includes(ATTACK_PATTERN_TYPE)))
 
+  checkIfBundleProvided(bundle);
   checkGroupingAttackPatternExists(groupingSDOs, groupingWithAttackPattern);
   checkAttackPatternJSON(bundle, groupingWithAttackPattern);
 }
 
 /**
- * Check if bundle is provided
+ * Check if bundle schema is provided
  * @param bundle
  */
 function checkIfBundleProvided(bundle) {
-
+  let keys = Object.keys(bundle);
+  if (keys.includes("id") === false || keys.includes("type") === false || keys.includes("objects") === false) {
+    throw new Error("STIX Bundle schema is not provided. Please refer to the STIX specification for further " +
+      "information.");
+  }
+  if (bundle.type !== "bundle") {
+    throw new Error("The STIX Bundle type is not correct. Type needs to be 'bundle'.");
+  }
 }
 
 /**
@@ -45,7 +53,11 @@ function checkGroupingAttackPatternExists(groupingSDOs, groupingWithAttackPatter
     throw new Error("All Grouping SDOs inside the Bundle do not include an Attack Pattern SDO. The Grouping SDOs " +
       "needs one Attack Pattern SDO for visualization.")
   } else if (groupingSDOs.length > groupingWithAttackPattern.length) {
-    throw new Warning("All Grouping SDOs should include one Attack Pattern SDO.")
+    let groupingSDOsWithoutAttackPattern = groupingSDOs.filter(grouping =>
+      !grouping.object_refs.find(ref => ref.includes(ATTACK_PATTERN_TYPE))).map(g => g.id);
+    let ids = groupingSDOsWithoutAttackPattern.join(", ");
+    throw new Warning("All Grouping SDOs should include one Attack Pattern SDO. Grouping SDOs with " +
+      "ID: " + ids + " do not include an Attack Pattern SDO reference.")
   }
 }
 

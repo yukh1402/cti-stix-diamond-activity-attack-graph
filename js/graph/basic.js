@@ -34,6 +34,10 @@ import {FILE_TYPE} from "../stix/sco/file";
 import {DIRECTORY_TYPE} from "../stix/sco/directory";
 import {NETWORK_TRAFFIC_TYPE} from "../stix/sco/network-traffic";
 import {PROCESS_TYPE} from "../stix/sco/process";
+import {URL_TYPE} from "../stix/sco/url";
+import {IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco";
+import {DOMAIN_TYPE} from "../stix/sco/domain";
+import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system";
 
 
 let stixBundle = undefined;
@@ -108,6 +112,8 @@ function createXAxisWithMitrePhases() {
     .attr("id", "xAxis")
     .attr("style", "color: white; font-size: 8px")
     .call(d3.axisTop(x))
+    .selectAll(".tick text")
+    .call(wrap, x.bandwidth())
 
   // Build layer background
   svg.selectAll("background-rect")
@@ -124,7 +130,6 @@ function createXAxisWithMitrePhases() {
     .attr("fill", function (d, i) {
       return i % 2 === 0 ? LAYER_COLOR_SCHEMA[0] : LAYER_COLOR_SCHEMA[1];
     });
-
   return x;
 }
 
@@ -339,7 +344,6 @@ function buildAttackGraph(graph) {
 function buildSubGraph(groupingNode) {
   let subGraph = groupingNode.subGraph;
   let links = subGraph.links;
-
   let y = d3.scaleBand()
     .domain(DIAMOND_MODEL_META_FEATURE_CATEGORIES)
     .range([HEIGHT, 0])
@@ -429,37 +433,37 @@ function buildSubGraph(groupingNode) {
 }
 
 function forceDirectedTick(nodeId, nodeLabel, linkId, linkLabel) {
-  let radius = 1;
-  let currentLayer = 0;
+  if (graphSelection === GRAPH_TYPE.SUB_GRAPH) {
+    let radius = 1;
+    let currentLayer = 0;
+    // The nodes are divided into multiple layers depending on the node type
+    d3.selectAll(nodeId)
+      .attr("cx", function (d) {
+        return d.x = Math.max(radius, Math.min(WIDTH - radius, d.x));
+      })
+      .attr("cy", function (d) {
+        currentLayer = getDiamondModelCategoryLayer(d);
+        if (currentLayer <= 3) {
+          return d.y = Math.max((HEIGHT / 4) * currentLayer + radius,
+            Math.min(((HEIGHT / 4) + (HEIGHT / 4) * currentLayer) - radius, d.y));
+        } else {
+          return d.y = Math.max(radius, Math.min(HEIGHT - radius, d.y));
+        }
+      });
 
-  // The nodes are divided into multiple layers depending on the node type
-  d3.selectAll(nodeId)
-    .attr("cx", function (d) {
-      return d.x = Math.max(radius, Math.min(WIDTH - radius, d.x));
-    })
-    .attr("cy", function (d) {
-      currentLayer = getDiamondModelCategoryLayer(d);
-      if (currentLayer <= 3) {
-        return d.y = Math.max((HEIGHT / 4) * currentLayer + radius,
-          Math.min(((HEIGHT / 4) + (HEIGHT / 4) * currentLayer) - radius, d.y));
-      } else {
-        return d.y = Math.max(radius, Math.min(HEIGHT - radius, d.y));
-      }
-    });
+    d3.selectAll(linkId)
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y);
 
-  d3.selectAll(linkId)
-    .attr("x1", d => d.source.x)
-    .attr("y1", d => d.source.y)
-    .attr("x2", d => d.target.x)
-    .attr("y2", d => d.target.y);
-
-  d3.selectAll(nodeLabel)
-    .attr("x", d => d.x)
-    .attr("y", d => d.y + 20);
-
-  d3.selectAll(linkLabel)
-    .attr("x", d => d.source.x + ((d.target.x - d.source.x) / 2))
-    .attr("y", d => d.source.y + ((d.target.y - d.source.y) / 2));
+    d3.selectAll(nodeLabel)
+      .attr("x", d => d.x)
+      .attr("y", d => d.y + 20);
+    d3.selectAll(linkLabel)
+      .attr("x", d => d.source.x + ((d.target.x - d.source.x) / 2))
+      .attr("y", d => d.source.y + ((d.target.y - d.source.y) / 2));
+  }
 }
 
 function nodeDragStart() {
@@ -598,6 +602,7 @@ function removeGraphComponents() {
   d3.selectAll("#tooltip").remove();
   d3.selectAll("#nodeView").remove();
   svg.selectAll("#link").remove();
+  svg.selectAll("#link-label").remove();
   svg.selectAll("#scatter").remove();
   svg.selectAll("#layer").remove();
   svg.selectAll("#zoom-rect").remove();
@@ -607,6 +612,39 @@ createGraph();
 
 function clamp(x, lo, hi) {
   return x < lo ? lo : x > hi ? hi : x;
+}
+
+function wrap(text, width) {
+  text.each(function() {
+    let text = d3.select(this),
+      words = text.text().split(/\s+/).reverse(),
+      word,
+      line = [],
+      lineNumber = 0,
+      lineHeight = 1.1, // ems
+      y = Number(text.attr("y")) - 10,
+      dy = parseFloat(text.attr("dy")),
+      tspan = text.text(null)
+        .append("tspan")
+        .attr("x", 0)
+        .attr("y", y)
+        .attr("dy", dy + "em")
+    while (word = words.pop()) {
+      line.push(word)
+      tspan.text(line.join(" "))
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop()
+        tspan.text(line.join(" "))
+        line = [word]
+        tspan = text
+          .append("tspan")
+          .attr("x", 0)
+          .attr("y", y)
+          .attr("dy", `${++lineNumber * lineHeight + dy}em`)
+          .text(word)
+      }
+    }
+  })
 }
 
 function getNodeImage(node) {
@@ -634,7 +672,7 @@ function getNodeImage(node) {
     case LOCATION_TYPE:
       return "url(#locationImage)";
     case INFRASTRUCTURE_TYPE:
-      return "url(#infrastructure)";
+      return "url(#infrastructureImage)";
     case MALWARE_ANALYSIS_TYPE:
       return "url(#malwareAnalysisImage)";
     case NOTE_TYPE:
@@ -649,6 +687,17 @@ function getNodeImage(node) {
       return "url(#networkTrafficImage)";
     case PROCESS_TYPE:
       return "url(#processImage)";
+    case URL_TYPE:
+      return "url(#urlImage)";
+    case IPV6_TYPE:
+    case IPV4_TYPE:
+      return "url(#ipImage)";
+    case DOMAIN_TYPE:
+      return "url(#domainImage)";
+    case AUTONOMOUS_SYSTEM_TYPE:
+      return "url(#autonomousImage)";
+    default:
+      return "url(#questionImage)";
   }
 }
 
@@ -693,7 +742,6 @@ function parseSTIXContent() {
   }
   if (valid) {
     stixGraph = parseBundleToGraph(bundle);
-    console.log(stixGraph)
     createGraph(stixGraph);
   }
 }
@@ -744,7 +792,6 @@ function createNodeView(node) {
     .append("circle")
     .attr("r", 10)
     .style("fill", () => getNodeImage(node))
-
   document.getElementById("view-close-btn").addEventListener("click", removeNodeView)
 }
 
