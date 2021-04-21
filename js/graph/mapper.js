@@ -399,7 +399,6 @@ function buildSubGraphForGrouping(grouping, bundle) {
   let childNodes = [];
   let childLinks = [];
   grouping.object_refs.forEach(ref => {
-    // console.log(ref)
     // The grouping reference object that is found in the bundle
     let foundObj = bundle.objects.find(obj => {
       return obj.id === ref
@@ -439,36 +438,53 @@ function buildSubGraphForGrouping(grouping, bundle) {
               childNodes.findIndex(no => no.id === foundObj.target_ref), foundObj, foundObj.relationship_type));
         }
       }
-      // Get all relationship objects for foundObj
-      // bundle.objects.forEach(obj => {
-      //   if (obj.id.includes(RELATIONSHIP_TYPE)) {
-      //     if (!childLinks.find(rel => rel.data.id === obj.id)
-      //       && (obj.source_ref === foundObj.id || obj.target_ref === foundObj.id)) {
-      //
-      //       let source_ref_index = childNodes.findIndex(no => no.id === obj.source_ref);
-      //       let target_ref_index = childNodes.findIndex(no => no.id === obj.target_ref);
-      //       if (source_ref_index === -1) {
-      //         let findSourceObj = bundle.objects.find(ob => ob.id === obj.source_ref);
-      //         childNodes.push(new Node(findSourceObj.id, findSourceObj, findSourceObj.type, undefined, grouping.id));
-      //       }
-      //       if (target_ref_index === -1) {
-      //         let findTargetObj = bundle.objects.find(ob => ob.id === obj.target_ref);
-      //         childNodes.push(new Node(findTargetObj.id, findTargetObj, findTargetObj.type, undefined, grouping.id));
-      //       }
-      //
-      //       childLinks.push(
-      //         new Link(
-      //           childNodes.findIndex(no => no.id === obj.source_ref),
-      //           childNodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type
-      //         )
-      //       );
-      //     }
-      //   }
-      // })
     }
+  });
+  // Process links based on _ref fields
+  let counter = 0;
+  childNodes.forEach(node => {
+    processRefFields(bundle, childNodes, childLinks, node.data, counter);
+    counter++
   });
   return new Graph(childNodes, childLinks);
 }
+
+/**
+ * Process the _ref fields by creating the correct links between SDO and SCOs
+ */
+function processRefFields(bundle, childNodes, childLinks, node, sourceIndex) {
+  let keys = Object.keys(node).filter(key => key.endsWith("_ref") || key.endsWith("_refs"));
+  if (keys.length > 0) {
+    keys.forEach(key => {
+      let ids = [];
+      // If _ref field is an Array
+      if (Array.isArray(node[key])) {
+        ids = node[key];
+      } else {
+        ids.push(node[key]);
+      }
+      ids.forEach(refId => {
+        // First check in childNodes for referenced object
+        let refNodeIndex = childNodes.findIndex(node => node.data.id === refId);
+        if (refNodeIndex === -1) {
+          // Search referenced object in Bundle
+          let foundObj = bundle.objects.find(obj => obj.id === refId);
+          if (foundObj) {
+            let refNode = new Node(foundObj.id, foundObj, foundObj.type);
+            childNodes.push(refNode);
+            refNodeIndex = childNodes.findIndex(no => no.id === refNode.id);
+            // If the refNode contains additional ref fields then process them too
+            processRefFields(bundle, childNodes, childLinks, foundObj, refNodeIndex);
+          }
+        }
+        if (refNodeIndex > -1) {
+          childLinks.push(new Link(sourceIndex, refNodeIndex, undefined, "related-to"));
+        }
+      })
+    })
+  }
+}
+
 
 /**
  * Get all Attack Pattern STIX Domain objects from all Grouping SDOs
