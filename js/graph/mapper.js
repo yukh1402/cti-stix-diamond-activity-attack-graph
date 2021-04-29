@@ -27,6 +27,7 @@ import {FILE_TYPE, getFileView} from "../stix/sco/file";
 import {DIRECTORY_TYPE, getDirectoryView} from "../stix/sco/directory";
 import {getProcessView, PROCESS_TYPE} from "../stix/sco/process";
 import {getCustomSTIXView} from "../stix/basic";
+import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
@@ -491,7 +492,7 @@ function processRefFields(bundle, childNodes, childLinks, node, sourceIndex) {
  * @param graph
  */
 export function getNodesWithAttackPattern(graph) {
-  return [].concat.apply([], graph.nodes.map(node => {
+  let attackPatternNodes = [].concat.apply([], graph.nodes.map(node => {
     let attackPattern = node.subGraph.nodes.map(no => {
       if (no.type === ATTACK_PATTERN_TYPE) {
         no.groupingId = node.id;
@@ -500,7 +501,32 @@ export function getNodesWithAttackPattern(graph) {
     }).filter(n => n !== undefined);
     if (attackPattern.length > 0) return attackPattern;
   }).filter(n => n !== undefined));
+  attackPatternNodes = attackPatternNodes.map(attackNode => {
+    attackNode.count = attackPatternNodes.filter(node => {
+      let ttp = getTTP(node);
+      if (ttp.includes(".")) {
+        ttp = ttp.slice(0, -4);
+      }
+      if (getTTP(attackNode).includes(ttp) && getTactic(attackNode) === getTactic(node)) {
+        return node;
+      }
+    }).length;
+    return attackNode;
+  });
+  return attackPatternNodes;
 }
+
+/**
+ * Get Parent technique
+ */
+export function parentTechnique(subTechnique) {
+  if (subTechnique.includes(".")) {
+    return subTechnique.slice(0, -4);
+  } else {
+    return subTechnique;
+  }
+}
+
 
 /**
  * For the Sub Attack Graph the node with sequence number 1 or the min date is the first relative node
@@ -597,11 +623,16 @@ export function getDiamondModelCategoryLayer(node) {
 /**
  * Get the Node label which should be displayed in the Graph
  * @param node
+ * @param fullName: Labels used in the node overlay view
  */
-export function getNodeLabel(node) {
+export function getNodeLabel(node, fullName = true) {
   switch (node.data.type) {
     case ATTACK_PATTERN_TYPE:
-      return node.data.name + " - " + getTTP(node);
+      if (node.count > 1 && fullName === false) {
+        return parentTechnique(getTTP(node));
+      } else {
+        return node.data.name + " - " + getTTP(node);
+      }
     case CAMPAIGN_TYPE:
     case IDENTITY_TYPE:
     case INDICATOR_TYPE:
@@ -612,11 +643,29 @@ export function getNodeLabel(node) {
     case THREAT_ACTOR_TYPE:
     case TOOL_TYPE:
     case VULNERABILITY_TYPE:
-      return node.data.name;
-
+    case FILE_TYPE:
+    case AUTONOMOUS_SYSTEM_TYPE:
+      return showNodeLabel(node.data?.name);
+    case PROCESS_TYPE:
+      return showNodeLabel(node.data?.command_line);
+    case IPV4_TYPE:
+    case IPV6_TYPE:
+    case URL_TYPE:
+    case DOMAIN_TYPE:
+      return showNodeLabel(node.data?.value);
   }
 }
 
+/**
+ * Limit the node label to 30 characters
+ * @param val: Any node label
+ * @return {string}
+ */
+function showNodeLabel(val) {
+  if (val !== undefined) {
+    return val.length > 30 ? val.substr(0,30) + "..." : val;
+  }
+}
 
 /**
  * Create the node view depending on the STIX object

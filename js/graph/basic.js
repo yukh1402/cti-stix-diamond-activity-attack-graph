@@ -86,19 +86,21 @@ window.onhashchange = function () {
  * @param divId: Id of the DIV Element
  * @param width: Viewbox width
  * @param height: Viewbox height
+ * @param marginLeft: Left margin for translating the viewbox
+ * @param marginTop: Top margin for translating the viewbox
  */
-function initGraph(divId, width = 1000, height = 500) {
-  let svgEl = document.getElementById("svg")
+function initGraph(divId, width = 1000, height = 500, marginLeft, marginTop) {
+  let svgEl = document.getElementById(divId)
   return d3.select(svgEl)
     .attr("viewBox", [0, 0, width, height])
     .classed("svg-background", true)
     .append("g")
-    .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.TOP + ")");
+    .attr("transform", "translate(" + marginLeft + "," + marginTop + ")");
 }
 
-let svg = initGraph("svg-container",
+let svg = initGraph("svg",
   WIDTH + MARGIN.LEFT + MARGIN.RIGHT,
-  HEIGHT + MARGIN.TOP + MARGIN.BOTTOM);
+  HEIGHT + MARGIN.TOP + MARGIN.BOTTOM, MARGIN.LEFT, MARGIN.TOP);
 
 
 /**
@@ -221,7 +223,7 @@ function buildActivityThreadGraph(graph) {
     .on("mouseover", showTooltip)
     .on("mousemove", attackPatternMousemove)
     .on("mouseout", hideTooltip)
-    .on("click", attackPatternDoubleClick)
+    .on("click", attackPatternClick)
 
   svg.selectAll("#node")
     .append("text")
@@ -234,12 +236,13 @@ function buildActivityThreadGraph(graph) {
       return y(Date.parse(grouping.data.created)) + 20
     })
     .attr("fill", "#FFFFFF")
-    .text((n) => getNodeLabel(n));
+    .text((n) => getNodeLabel(n, true));
+
+  graphZoom(scatter, y, yAxis, attackPatterns);
 
   // Draw links
   svg.selectAll("#linkPath")
     .attr("d", (d) => {
-      console.log(d)
       return "M " + attackPatterns[d.source].x + " " + attackPatterns[d.source].y + " L "
         + attackPatterns[d.target].x + " " + attackPatterns[d.target].y
     })
@@ -255,8 +258,6 @@ function buildActivityThreadGraph(graph) {
     .text(d => d.relation)
     .attr("x", d => attackPatterns[d.source].x + ((attackPatterns[d.target].x - attackPatterns[d.source].x) / 2))
     .attr("y", d => attackPatterns[d.source].y + ((attackPatterns[d.target].y - attackPatterns[d.source].y) / 2));
-
-  graphZoom(scatter, y, yAxis, attackPatterns)
 }
 
 /**
@@ -305,17 +306,19 @@ function buildAttackGraph(graph) {
       return d.x;
     })
     .attr("cy", function (d) {
-      d.y = y(getTTPAxisId(getTTP(d), getTactic(d)) + 1)
+      d.y = y(getTTPAxisId(getTTP(d), getTactic(d)) + 1);
       return d.y;
     })
     .attr("r", 10)
     .style("fill", () => getNodeImage(new Node(undefined, undefined, GROUPING_TYPE)))
-    .on("mouseover", showTooltip)
-    .on("mousemove", attackPatternMousemove)
+    .on("mouseover", (event, n) => showTooltip(event, n))
+    .on("mousemove", (event, n) => attackPatternMousemove(event, n))
     .on("mouseout", hideTooltip)
-    .on("click", attackPatternDoubleClick)
+    .on("click", (event, n) => attackPatternClick(event, n, attackPatterns, true));
 
   createNodeLabels("#node")
+  // This view shows sub-techniques
+  createOverlayNodeViewCount();
 
   // Draw links
   svg.selectAll("#linkPath")
@@ -335,6 +338,36 @@ function buildAttackGraph(graph) {
     .text(d => d.relation)
     .attr("x", d => attackPatterns[d.source].x + ((attackPatterns[d.target].x - attackPatterns[d.source].x) / 2))
     .attr("y", d => attackPatterns[d.source].y + ((attackPatterns[d.target].y - attackPatterns[d.source].y) / 2));
+}
+
+/**
+ * If multiple Grouping SDOs with identical TTP exist, then we need a count view
+ */
+function createOverlayNodeViewCount() {
+  svg.selectAll('#node')
+    .filter((d) => d.count > 1)
+    .append("circle")
+    .attr("id", "count-circle")
+    .attr("cx", function (d) {
+      return d.x + 10;
+    })
+    .attr("cy", function (d) {
+      return d.y - 10;
+    })
+    .attr("r", 5)
+    .style("fill", "white")
+
+  svg.selectAll("#node")
+    .filter((d) => d.count > 1)
+    .append("text")
+    .attr("id", "node-label")
+    .attr("font-size", "0.5em")
+    .attr("text-anchor", "middle")
+    .attr("x", d => d.x + 10)
+    .attr("y", d => d.y - 8)
+    .attr("fill", "black")
+    .attr("font-weight", 700)
+    .text((n) => n.count.toString());
 }
 
 /**
@@ -389,13 +422,6 @@ function buildSubGraph(groupingNode) {
     .attr("fill", "#FFFFFF")
     .text(d => d.relation);
 
-  // Create DIV element for Tooltip
-  d3.select("#svg-container")
-    .append("div")
-    .attr("id", "tooltip")
-    .attr("class", "tooltipSubGraph")
-    .style("visibility", "hidden");
-
   let node = svg.selectAll(".node")
     .data(subGraph.nodes)
     .join("g")
@@ -429,7 +455,10 @@ function buildSubGraph(groupingNode) {
       return nodeDragged(event, d, simulation);
     })
 
-  node.call(drag).on("click", (event, d) => nodeClick(event, d, simulation))
+  node.call(drag)
+    .on("click", (event, d) => nodeClick(event, d, simulation))
+    .on("dblclick", (event, d) => nodeDblClick(event, d, simulation))
+
 }
 
 function forceDirectedTick(nodeId, nodeLabel, linkId, linkLabel) {
@@ -476,12 +505,15 @@ function nodeDragged(event, d, simulation) {
   simulation.alpha(1).restart();
 }
 
-function nodeClick(event, d, simulation) {
+function nodeClick(event, d, simulation, showNodeView = true) {
+  if (showNodeView) showNode(d);
+}
+
+function nodeDblClick(event, d, simulation) {
   delete d.fx;
   delete d.fy;
   d3.select(this).classed("fixed", false);
   simulation.alpha(1).restart();
-  showNode(d);
 }
 
 /**
@@ -543,18 +575,22 @@ function createNodeLabels(id) {
     .attr("x", d => d.x)
     .attr("y", d => d.y + 20)
     .attr("fill", "#FFFFFF")
-    .text((n) => getNodeLabel(n));
+    .text((n) => getNodeLabel(n, false));
 }
 
-function showTooltip() {
-  d3.select("#tooltip").style("visibility", "visible")
+function showTooltip(event, node, overlayView = false) {
+  if (overlayView === true || node.count === 1 || graphSelection === GRAPH_TYPE.ACTIVITY_THREAD) {
+    d3.select("#tooltip").style("visibility", "visible")
+  }
 }
 
-function attackPatternMousemove(event, d) {
-  d3.select("#tooltip")
-    .style("top", (event.pageY - 20) + "px")
-    .style("left", () => calcLeftPosition(event, 300))
-    .html(d.data.description)
+function attackPatternMousemove(event, d, overlayView = false) {
+  if (overlayView === true || d.count === 1 || graphSelection === GRAPH_TYPE.ACTIVITY_THREAD) {
+    d3.select("#tooltip")
+      .style("top", (event.pageY - 20) + "px")
+      .style("left", () => calcLeftPosition(event, 300))
+      .html(d.data.description)
+  }
 }
 
 function hideTooltip() {
@@ -569,18 +605,118 @@ function calcLeftPosition(event, tooltipWidth) {
   }
 }
 
-function attackPatternDoubleClick(event, node) {
-  history.replaceState(null, null, ' '); // Remove hash from URL
-  graphSelection = GRAPH_TYPE.SUB_GRAPH;
-  setCurrentGraphSelection();
-  let relevantGroupingNode = stixGraph.nodes.find(n => n.id === node.groupingId);
-  createGraph(relevantGroupingNode.subGraph, relevantGroupingNode)
+function attackPatternClick(event, node, attackPatternNodes = [], showOverlay = false) {
+  if (node.count > 1 && showOverlay === true) {
+    let relNodes = attackPatternNodes.filter(n => {
+      let ttp = getTTP(n);
+      if (ttp.includes(".")) {
+        ttp = ttp.slice(0, -4);
+      }
+      if (getTTP(node).includes(ttp) && getTactic(node) === getTactic(n)) {
+        return n;
+      }
+    });
+    showOverlayGroupings(event, relNodes);
+  } else {
+    history.replaceState(null, null, ' '); // Remove hash from URL
+    graphSelection = GRAPH_TYPE.SUB_GRAPH;
+    setCurrentGraphSelection();
+    let relevantGroupingNode = stixGraph.nodes.find(n => n.id === node.groupingId);
+    createGraph(relevantGroupingNode.subGraph, relevantGroupingNode)
+  }
+}
+
+/**
+ * Show a overlay (tooltip) view for TTPs with sub categories.
+ * @param event
+ * @param attackPatternNodes
+ */
+function showOverlayGroupings(event, attackPatternNodes) {
+  d3.select("#overlayView").remove();
+
+  let ovHeight = 170;
+  let ovWidth = 200;
+
+  d3.select("#svg-container")
+    .append("div")
+    .attr("id", "overlayView")
+    .attr("class", "overlay-nodes")
+    .style("top", (event.pageY - 20) + "px")
+    .style("left", () => calcLeftPosition(event, ovWidth))
+    .append("svg")
+    .attr("id", "overlayNodes")
+    .style("height", "auto")
+
+  let overlaySVG = initGraph("overlayNodes", ovWidth, ovHeight, 0, 0);
+
+  let overlayNodes = overlaySVG.selectAll(".overlayNode")
+    .data(attackPatternNodes)
+    .join("g")
+    .attr("id", "overlayNode")
+    .append("circle")
+    .attr("id", "overlayCircle")
+    .style("cursor", "pointer")
+    .attr("r", 10)
+    .style("fill", () => getNodeImage(new Node(undefined, undefined, GROUPING_TYPE)))
+    .classed("fixed", d => d.fx !== undefined)
+    .on("mouseover", (event, n) => showTooltip(event, n, true))
+    .on("mousemove", (event, n) => attackPatternMousemove(event, n, true))
+    .on("mouseout", hideTooltip)
+    .on("dblclick", (event, n) => attackPatternClick(event, n, [], false));
+
+  overlaySVG.selectAll("#overlayNode")
+    .append("text")
+    .attr("id", "overlay-node-label")
+    .attr("font-size", "0.5em")
+    .attr("text-anchor", "middle")
+    .attr("fill", "#FFFFFF")
+    .text((n) => getNodeLabel(n, true));
+
+  let simulation = d3.forceSimulation()
+    .nodes(attackPatternNodes)
+    .force("charge", d3.forceManyBody().strength(-5))
+    .force("center", d3.forceCenter(ovWidth / 4, ovHeight / 4))
+    .on("tick", () => tickOverlay(ovWidth, ovHeight))
+
+  let drag = d3.drag()
+    .on("start", (event, d) => nodeDragStart(event, d, simulation))
+    .on("drag", (event, d) => nodeDragged(event, d, simulation, false))
+
+  overlayNodes.call(drag).on("click", (event, d) => nodeClick(event, d, simulation, false));
+
+  let overlayView = document.getElementById("overlayView");
+  let closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "btn btn-danger";
+  closeBtn.id = "overlay-close-btn";
+  closeBtn.innerHTML = "Close"
+  overlayView.appendChild(closeBtn);
+
+  closeBtn.addEventListener("click", function () {
+    d3.select("#overlayView").remove();
+  });
+}
+
+function tickOverlay(width, height) {
+  let radius = 5;
+  d3.selectAll("#overlayCircle")
+    .attr("cx", d => {
+      return d.x = Math.max(radius, Math.min(width - radius, d.x));
+    })
+    .attr("cy", d => {
+      return d.y = Math.max(radius, Math.min(height - radius, d.y));
+    })
+
+  d3.selectAll("#overlay-node-label")
+    .attr("x", d => d.x)
+    .attr("y", d => d.y + 20);
 }
 
 function createGraph(graph, node = undefined) {
+  console.log(graph)
   if (graph !== undefined) {
     removeGraphComponents();
-    if (graphSelection === GRAPH_TYPE.SUB_GRAPH || graphSelection === GRAPH_TYPE.SUB_ACTIVITY_THREAD) {
+    if (graphSelection === GRAPH_TYPE.SUB_GRAPH) {
       buildSubGraph(node);
     } else if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH) {
       buildAttackGraph(graph);
@@ -606,6 +742,7 @@ function removeGraphComponents() {
   svg.selectAll("#scatter").remove();
   svg.selectAll("#layer").remove();
   svg.selectAll("#zoom-rect").remove();
+  d3.select("#overlayView").remove();
 }
 
 createGraph();
@@ -615,7 +752,7 @@ function clamp(x, lo, hi) {
 }
 
 function wrap(text, width) {
-  text.each(function() {
+  text.each(function () {
     let text = d3.select(this),
       words = text.text().split(/\s+/).reverse(),
       word,
@@ -748,7 +885,7 @@ function parseSTIXContent() {
 
 function showSyntaxError(message, warning = false) {
   let error = document.getElementById("syntaxError");
-  error.className =  warning === false ? "alert-danger": "alert-warning";
+  error.className = warning === false ? "alert-danger" : "alert-warning";
   error.innerText = message;
 }
 

@@ -331,6 +331,7 @@ textarea {
   font: 14px sans-serif;
   background: white;
   border: 0;
+  z-index: 9999;
   border-radius: 8px;
 }
 
@@ -391,4 +392,17 @@ textarea {
 
 .fixed {
   border: 1px solid white;
+}
+
+.overlay-nodes {
+  position: absolute;
+  text-align: center;
+  height: 300px;
+  width: 300px;
+  word-break: break-word;
+  padding: 2px;
+  font: 14px sans-serif;
+  background: white;
+  border: 0;
+  z-index: 0;
 }
