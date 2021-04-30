@@ -25,7 +25,7 @@
   <meta name="theme-color" content="#fafafa">
 </head>
 
-<body>
+<body class="big-screen">
 <script src="js/vendor/modernizr-3.11.2.min.js"></script>
 <script src="js/plugins.js"></script>
 <script src="js/main.js"></script>
@@ -50,6 +50,7 @@
       <button class="btn btn-raised btn-primary" type="button" data-toggle="drawer" data-target="#dw">
         Parse STIX
       </button>
+      <b><span id="currentSelection" class="selectionText"></span></b>
       <button class="btn btn-secondary dropdown-toggle" type="button" id="graphDropdown" data-toggle="dropdown"
               aria-haspopup="true" aria-expanded="false">
         Graph selection
@@ -78,11 +79,15 @@
     <div id="workspace">
       <div id="svg-container">
         <svg id="svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <image x="40%" y="35%" xlink:href="img/logo.png" height="200" width="200" opacity="0.3"/>
           <defs id="mdef">
             <marker id="arrow" viewBox="0,0,10,10" refX="18" refY="5" markerWidth="10" markerHeight="10"
                     orient="auto-start-reverse">
               <path d="M0,0L0,10L10,5"></path>
             </marker>
+            <pattern id="logoImage" height="200" width="200" x="0" y="0">
+              <image width="200" height="200" x="0" y="0" xlink:href="img/logo.png"></image>
+            </pattern>
             <pattern id="groupingImage" height="24" width="24" x="0" y="0">
               <image width="21" height="21" x="0" y="-1" xlink:href="img/grouping.png"></image>
             </pattern>
@@ -157,10 +162,15 @@
             </pattern>
           </defs>
         </svg>
-        <b><span id="currentSelection" class="position-absolute text-white selectionText"></span></b>
       </div>
     </div>
   </main>
+</div>
+<div class="footer">
+  <div>
+    <span id="copyright"></span>
+    <a href="https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph" target="_blank">Github</a>
+  </div>
 </div>
 <script type="module" src="js/graph/basic.js"></script>
 

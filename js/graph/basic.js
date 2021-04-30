@@ -94,6 +94,7 @@ function initGraph(divId, width = 1000, height = 500, marginLeft, marginTop) {
   return d3.select(svgEl)
     .attr("viewBox", [0, 0, width, height])
     .classed("svg-background", true)
+    // .style("fill", () => "url(#logoImage)")
     .append("g")
     .attr("transform", "translate(" + marginLeft + "," + marginTop + ")");
 }
@@ -935,3 +936,6 @@ function createNodeView(node) {
 function removeNodeView() {
   d3.select("#nodeView").remove();
 }
+
+let copyright = document.getElementById("copyright");
+copyright.innerText = "© " + new Date().getFullYear() + " Yusuf Khan - ";
