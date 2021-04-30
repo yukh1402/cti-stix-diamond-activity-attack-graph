@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NETWORK_TRAFFIC_SCO_FIELDS = void 0;
+exports.NETWORK_TRAFFIC_SCO_FIELDS = exports.NETWORK_TRAFFIC_TYPE = void 0;
+exports.NETWORK_TRAFFIC_TYPE = "network-traffic";
 exports.NETWORK_TRAFFIC_SCO_FIELDS = [
     { key: 'start', viewValue: 'Start time', type: 'network-traffic', typeName: 'Network Traffic SCO' },
     { key: 'src_port', viewValue: 'Source port', type: 'network-traffic', typeName: 'Network Traffic SCO' },

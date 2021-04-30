@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "bootstrap-material-design": "^4.1.1",
-    "d3": "^6.5.0",
-    "lodash": "^4.17.21"
+    "d3": "^6.5.0"
   }
 }

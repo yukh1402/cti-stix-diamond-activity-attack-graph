@@ -1,5 +1,7 @@
 import {BasicSTIX, STIXField} from '../basic';
 
+export const NETWORK_TRAFFIC_TYPE = "network-traffic";
+
 export const NETWORK_TRAFFIC_SCO_FIELDS: STIXField [] = [
   {key: 'start', viewValue: 'Start time', type: 'network-traffic', typeName: 'Network Traffic SCO'},
   {key: 'src_port', viewValue: 'Source port', type: 'network-traffic', typeName: 'Network Traffic SCO'},

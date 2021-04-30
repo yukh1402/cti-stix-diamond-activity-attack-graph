@@ -27,6 +27,7 @@ import {FILE_TYPE, getFileView} from "../stix/sco/file";
 import {DIRECTORY_TYPE, getDirectoryView} from "../stix/sco/directory";
 import {getProcessView, PROCESS_TYPE} from "../stix/sco/process";
 import {getCustomSTIXView} from "../stix/basic";
+import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
@@ -354,15 +355,15 @@ export function getTactic(node) {
  */
 export function parseTacticNameToXAxis(tactic) {
   let string = "";
-  let words = tactic.split(" ");
+  let words = tactic.split("-");
   words.forEach(word => {
     if (word.toLowerCase() === "and") {
-      string += "and";
+      string += "and ";
     } else {
-      string += capitalize(word);
+      string += capitalize(word) + " ";
     }
   })
-  return string;
+  return string.trim();
 }
 
 /**
@@ -377,19 +378,21 @@ export function parseBundleToGraph(bundle) {
 
   // Add all Grouping SDOs
   bundle.objects
-    .filter(obj => obj.type === GROUPING_TYPE)
+    .filter(obj => obj.type === GROUPING_TYPE && obj?.object_refs.find(ref => ref.includes(ATTACK_PATTERN_TYPE)))
     .forEach(obj => nodes.push(new Node(obj.id, obj, obj.type, buildSubGraphForGrouping(obj, bundle))))
 
   // Add all Grouping relationships
   bundle.objects
     .filter(obj => obj.type === RELATIONSHIP_TYPE)
     .filter(obj => obj.source_ref.includes(GROUPING_TYPE) && obj.target_ref.includes(GROUPING_TYPE))
-    .forEach(obj =>
-      groupingLinks.push(
-        new Link(
-          nodes.findIndex(no => no.id === obj.source_ref),
-          nodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type)));
-
+    .forEach(obj => {
+      let source_index = nodes.findIndex(no => no.id === obj.source_ref);
+      let target_index = nodes.findIndex(no => no.id === obj.target_ref);
+      if (source_index > -1 && target_index > -1) {
+        groupingLinks.push(
+          new Link(source_index, target_index, obj, obj.relationship_type));
+      }
+    })
   return new Graph(nodes, groupingLinks);
 }
 
@@ -398,12 +401,16 @@ function buildSubGraphForGrouping(grouping, bundle) {
   let childLinks = [];
   grouping.object_refs.forEach(ref => {
     // The grouping reference object that is found in the bundle
-    let foundObj = bundle.objects.find(obj => obj.id === ref);
+    let foundObj = bundle.objects.find(obj => {
+      return obj.id === ref
+    });
 
-    // Grouping Objects are not allowed in the Subgraph
-    if (!foundObj.id.includes(GROUPING_TYPE)) {
-      if (!foundObj.id.includes(RELATIONSHIP_TYPE)) {
-        childNodes.push(new Node(foundObj.id, foundObj, foundObj.type, undefined, grouping.id));
+    if (foundObj !== undefined) {
+      // Grouping Objects are not allowed in the Subgraph
+      if (!foundObj.id.includes(GROUPING_TYPE)) {
+        if (!foundObj.id.includes(RELATIONSHIP_TYPE)) {
+          childNodes.push(new Node(foundObj.id, foundObj, foundObj.type, undefined, grouping.id));
+        }
       }
     }
   });
@@ -411,40 +418,81 @@ function buildSubGraphForGrouping(grouping, bundle) {
   // Get all links
   grouping.object_refs.forEach(ref => {
     let foundObj = bundle.objects.find(obj => obj.id === ref);
-
-    if (foundObj.id.includes(RELATIONSHIP_TYPE)) {
-      // Dont push relationship obj if target or source ref is a grouping object or relationship obj already exists in childlinks
-      if (!foundObj.source_ref.includes(GROUPING_TYPE) && !foundObj.target_ref.includes(GROUPING_TYPE)
-        && !childLinks.find(link => link.data.id === foundObj.id))
-        childLinks.push(
-          new Link(
-            childNodes.findIndex(no => no.id === foundObj.source_ref),
-            childNodes.findIndex(no => no.id === foundObj.target_ref), foundObj, foundObj.relationship_type));
-    }
-    // Get all relationship objects for foundObj
-    bundle.objects.forEach(obj => {
-      if (obj.id.includes(RELATIONSHIP_TYPE)) {
-        if (!childLinks.find(rel => rel.data.id === obj.id)
-          && (obj.source_ref === foundObj.id || obj.target_ref === foundObj.id)) {
+    if (foundObj !== undefined) {
+      if (foundObj.id.includes(RELATIONSHIP_TYPE)) {
+        // Dont push relationship obj if target or source ref is a grouping object or relationship obj already exists in childlinks
+        if (!foundObj.source_ref.includes(GROUPING_TYPE) && !foundObj.target_ref.includes(GROUPING_TYPE)
+          && !childLinks.find(link => link.data.id === foundObj.id)) {
+          let source_ref_index = childNodes.findIndex(no => no.id === foundObj.source_ref);
+          let target_ref_index = childNodes.findIndex(no => no.id === foundObj.target_ref);
+          if (source_ref_index === -1) {
+            let findSourceObj = bundle.objects.find(obj => obj.id === foundObj.source_ref);
+            childNodes.push(new Node(findSourceObj.id, findSourceObj, findSourceObj.type, undefined, grouping.id));
+          }
+          if (target_ref_index === -1) {
+            let findTargetObj = bundle.objects.find(obj => obj.id === foundObj.target_ref);
+            childNodes.push(new Node(findTargetObj.id, findTargetObj, findTargetObj.type, undefined, grouping.id));
+          }
           childLinks.push(
             new Link(
-              childNodes.findIndex(no => no.id === obj.source_ref),
-              childNodes.findIndex(no => no.id === obj.target_ref), obj, obj.relationship_type
-            )
-          );
+              childNodes.findIndex(no => no.id === foundObj.source_ref),
+              childNodes.findIndex(no => no.id === foundObj.target_ref), foundObj, foundObj.relationship_type));
         }
       }
-    })
+    }
+  });
+  // Process links based on _ref fields
+  let counter = 0;
+  childNodes.forEach(node => {
+    processRefFields(bundle, childNodes, childLinks, node.data, counter);
+    counter++
   });
   return new Graph(childNodes, childLinks);
 }
+
+/**
+ * Process the _ref fields by creating the correct links between SDO and SCOs
+ */
+function processRefFields(bundle, childNodes, childLinks, node, sourceIndex) {
+  let keys = Object.keys(node).filter(key => key.endsWith("_ref") || key.endsWith("_refs"));
+  if (keys.length > 0) {
+    keys.forEach(key => {
+      let ids = [];
+      // If _ref field is an Array
+      if (Array.isArray(node[key])) {
+        ids = node[key];
+      } else {
+        ids.push(node[key]);
+      }
+      ids.forEach(refId => {
+        // First check in childNodes for referenced object
+        let refNodeIndex = childNodes.findIndex(node => node.data.id === refId);
+        if (refNodeIndex === -1) {
+          // Search referenced object in Bundle
+          let foundObj = bundle.objects.find(obj => obj.id === refId);
+          if (foundObj) {
+            let refNode = new Node(foundObj.id, foundObj, foundObj.type);
+            childNodes.push(refNode);
+            refNodeIndex = childNodes.findIndex(no => no.id === refNode.id);
+            // If the refNode contains additional ref fields then process them too
+            processRefFields(bundle, childNodes, childLinks, foundObj, refNodeIndex);
+          }
+        }
+        if (refNodeIndex > -1) {
+          childLinks.push(new Link(sourceIndex, refNodeIndex, undefined, "related-to"));
+        }
+      })
+    })
+  }
+}
+
 
 /**
  * Get all Attack Pattern STIX Domain objects from all Grouping SDOs
  * @param graph
  */
 export function getNodesWithAttackPattern(graph) {
-  return [].concat.apply([], graph.nodes.map(node => {
+  let attackPatternNodes = [].concat.apply([], graph.nodes.map(node => {
     let attackPattern = node.subGraph.nodes.map(no => {
       if (no.type === ATTACK_PATTERN_TYPE) {
         no.groupingId = node.id;
@@ -453,7 +501,32 @@ export function getNodesWithAttackPattern(graph) {
     }).filter(n => n !== undefined);
     if (attackPattern.length > 0) return attackPattern;
   }).filter(n => n !== undefined));
+  attackPatternNodes = attackPatternNodes.map(attackNode => {
+    attackNode.count = attackPatternNodes.filter(node => {
+      let ttp = getTTP(node);
+      if (ttp.includes(".")) {
+        ttp = ttp.slice(0, -4);
+      }
+      if (getTTP(attackNode).includes(ttp) && getTactic(attackNode) === getTactic(node)) {
+        return node;
+      }
+    }).length;
+    return attackNode;
+  });
+  return attackPatternNodes;
 }
+
+/**
+ * Get Parent technique
+ */
+export function parentTechnique(subTechnique) {
+  if (subTechnique.includes(".")) {
+    return subTechnique.slice(0, -4);
+  } else {
+    return subTechnique;
+  }
+}
+
 
 /**
  * For the Sub Attack Graph the node with sequence number 1 or the min date is the first relative node
@@ -471,7 +544,16 @@ export function getFirstRelativeNodeTime(nodes) {
 }
 
 /**
- * Get the minimum Date from a list of Nodes
+ * Get the maximum Date from a list of STIX Nodes
+ * @param nodes
+ * @return {Date}
+ */
+export function getMaxNodeDate(nodes) {
+  return new Date(Math.max.apply(null, nodes.map(node => Date.parse(node.data.created))))
+}
+
+/**
+ * Get the minimum Date from a list of STIX Nodes
  * @param nodes
  * @return {Date}
  */
@@ -541,11 +623,16 @@ export function getDiamondModelCategoryLayer(node) {
 /**
  * Get the Node label which should be displayed in the Graph
  * @param node
+ * @param fullName: Labels used in the node overlay view
  */
-export function getNodeLabel(node) {
+export function getNodeLabel(node, fullName = true) {
   switch (node.data.type) {
     case ATTACK_PATTERN_TYPE:
-      return node.data.name + " - " + getTTP(node);
+      if (node.count > 1 && fullName === false) {
+        return parentTechnique(getTTP(node));
+      } else {
+        return node.data.name + " - " + getTTP(node);
+      }
     case CAMPAIGN_TYPE:
     case IDENTITY_TYPE:
     case INDICATOR_TYPE:
@@ -556,11 +643,29 @@ export function getNodeLabel(node) {
     case THREAT_ACTOR_TYPE:
     case TOOL_TYPE:
     case VULNERABILITY_TYPE:
-      return node.data.name;
-
+    case FILE_TYPE:
+    case AUTONOMOUS_SYSTEM_TYPE:
+      return showNodeLabel(node.data?.name);
+    case PROCESS_TYPE:
+      return showNodeLabel(node.data?.command_line);
+    case IPV4_TYPE:
+    case IPV6_TYPE:
+    case URL_TYPE:
+    case DOMAIN_TYPE:
+      return showNodeLabel(node.data?.value);
   }
 }
 
+/**
+ * Limit the node label to 30 characters
+ * @param val: Any node label
+ * @return {string}
+ */
+function showNodeLabel(val) {
+  if (val !== undefined) {
+    return val.length > 30 ? val.substr(0,30) + "..." : val;
+  }
+}
 
 /**
  * Create the node view depending on the STIX object

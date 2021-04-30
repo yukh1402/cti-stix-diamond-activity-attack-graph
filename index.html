@@ -13,7 +13,7 @@
   <meta property="og:image" content="">
 
   <!--  <link rel="manifest" href="site.webmanifest">-->
-  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <!-- Place favicon.ico in the root directory -->
 
   <link rel="stylesheet" href="css/normalize.css">
@@ -25,7 +25,7 @@
   <meta name="theme-color" content="#fafafa">
 </head>
 
-<body>
+<body class="big-screen">
 <script src="js/vendor/modernizr-3.11.2.min.js"></script>
 <script src="js/plugins.js"></script>
 <script src="js/main.js"></script>
@@ -47,9 +47,10 @@
 
   <header class="bmd-layout-header">
     <div class="navbar navbar-light ">
-      <button class="btn btn-secondary" type="button" data-toggle="drawer" data-target="#dw">
+      <button class="btn btn-raised btn-primary" type="button" data-toggle="drawer" data-target="#dw">
         Parse STIX
       </button>
+      <b><span id="currentSelection" class="selectionText"></span></b>
       <button class="btn btn-secondary dropdown-toggle" type="button" id="graphDropdown" data-toggle="dropdown"
               aria-haspopup="true" aria-expanded="false">
         Graph selection
@@ -69,7 +70,7 @@
         <button type="button" class="mt-2 btn btn-raised btn-primary"
                 id="parseButton">Parse
         </button>
-        <div id="syntaxError" class="alert-warning"></div>
+        <div id="syntaxError"></div>
       </div>
     </div>
   </div>
@@ -78,43 +79,98 @@
     <div id="workspace">
       <div id="svg-container">
         <svg id="svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <image x="40%" y="35%" xlink:href="img/logo.png" height="200" width="200" opacity="0.3"/>
           <defs id="mdef">
+            <marker id="arrow" viewBox="0,0,10,10" refX="18" refY="5" markerWidth="10" markerHeight="10"
+                    orient="auto-start-reverse">
+              <path d="M0,0L0,10L10,5"></path>
+            </marker>
+            <pattern id="logoImage" height="200" width="200" x="0" y="0">
+              <image width="200" height="200" x="0" y="0" xlink:href="img/logo.png"></image>
+            </pattern>
             <pattern id="groupingImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/grouping.png"></image>
+              <image width="21" height="21" x="0" y="-1" xlink:href="img/grouping.png"></image>
             </pattern>
             <pattern id="attackPatternImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/attack_pattern.png"></image>
+              <image width="21" height="21" x="0" y="-1" xlink:href="img/attack_pattern.png"></image>
             </pattern>
             <pattern id="campaignImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/campaign.png"></image>
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/campaign.png"></image>
             </pattern>
             <pattern id="toolImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/tool.png"></image>
+              <image width="22" height="22" x="-1" y="-1" xlink:href="img/tool.png"></image>
             </pattern>
             <pattern id="malwareImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/malware.png"></image>
+              <image width="21" height="21" x="-0.5" y="-1" xlink:href="img/malware.png"></image>
             </pattern>
             <pattern id="vulnerabilityImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/vulnerability.png"></image>
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/vulnerability.png"></image>
             </pattern>
             <pattern id="identityImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/identity.png"></image>
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/identity.png"></image>
             </pattern>
             <pattern id="indicatorImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/indicator.png"></image>
+              <image width="20" height="20" x="0" y="0" xlink:href="img/indicator.png"></image>
             </pattern>
             <pattern id="observedDataImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/observed_data.png"></image>
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/observed_data.png"></image>
             </pattern>
             <pattern id="threatActorImage" height="24" width="24" x="0" y="0">
-              <image width="24" height="24" x="0" y="-3" xlink:href="img/threat_actor.png"></image>
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/threat_actor.png"></image>
+            </pattern>
+            <pattern id="infrastructureImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/infrastructure.png"></image>
+            </pattern>
+            <pattern id="locationImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-1" xlink:href="img/location.png"></image>
+            </pattern>
+            <pattern id="malwareAnalysisImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/malware_analysis.png"></image>
+            </pattern>
+            <pattern id="noteImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/note.png"></image>
+            </pattern>
+            <pattern id="opinionImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/opinion.png"></image>
+            </pattern>
+            <pattern id="fileImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/file.png"></image>
+            </pattern>
+            <pattern id="directoryImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/directory.png"></image>
+            </pattern>
+            <pattern id="networkTrafficImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/networktraffic.png"></image>
+            </pattern>
+            <pattern id="processImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/process.png"></image>
+            </pattern>
+            <pattern id="domainImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/domain.png"></image>
+            </pattern>
+            <pattern id="ipImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/ip.png"></image>
+            </pattern>
+            <pattern id="urlImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/url.png"></image>
+            </pattern>
+            <pattern id="autonomousImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/autonomous.png"></image>
+            </pattern>
+            <pattern id="questionImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/question.png"></image>
             </pattern>
           </defs>
         </svg>
-        <b><span id="currentSelection" class="position-absolute text-white selectionText"></span></b>
       </div>
     </div>
   </main>
+</div>
+<div class="footer">
+  <div>
+    <span id="copyright"></span>
+    <a href="https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph" target="_blank">Github</a>
+  </div>
 </div>
 <script type="module" src="js/graph/basic.js"></script>
 

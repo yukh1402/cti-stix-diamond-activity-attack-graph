@@ -6,7 +6,8 @@ COPY . /app
 WORKDIR /app
 RUN npm install && npm run build
 
-# Stage 2 run angular project in nginx
-FROM nginx:alpine AS production-build
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 80
+ENTRYPOINT ["npm", "run", "dev"]
+# Stage 2 project in nginx
+#FROM nginx:alpine AS production-build
+#COPY --from=builder /app/dist /usr/share/nginx/html
+#EXPOSE 80

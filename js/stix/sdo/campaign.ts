@@ -28,18 +28,11 @@ export function getCampaignView(titleId: string, contentId: string, typeId: stri
 
   if (campaignSDO?.aliases) addNodeViewTitleAndTextList(campaignDIV, "Aliases:", campaignSDO.aliases);
   if (campaignSDO?.description) addNodeViewTitleAndText(campaignDIV, "Description:", campaignSDO.description);
-  if (campaignSDO?.first_seen) {
-    campaignDIV.innerHTML += "<span class='mt-2'><b>First seen:</b></span>"
-    addNodeViewText(campaignDIV, new Date(campaignSDO.first_seen).toString())
-  }
-  if (campaignSDO?.last_seen) {
-    campaignDIV.innerHTML += "<span class='mt-2'><b>Last seen:</b></span>"
-    addNodeViewText(campaignDIV, new Date(campaignSDO.last_seen).toString())
-  }
-  if(campaignSDO?.objective) {
-    campaignDIV.innerHTML += "<span class='mt-2'><b>Objective:</b></span>";
-    addNodeViewText(campaignDIV, campaignSDO.objective);
-  }
+  if (campaignSDO?.first_seen) addNodeViewTitleAndText(campaignDIV, "First seen:",
+    new Date(campaignSDO.first_seen).toString());
+  if (campaignSDO?.last_seen) addNodeViewTitleAndText(campaignDIV, "Last seen:",
+    new Date(campaignSDO.last_seen).toString());
+  if(campaignSDO?.objective) addNodeViewTitleAndText(campaignDIV, "Objective:", campaignSDO.objective);
 
   el.appendChild(campaignDIV);
   customFieldView("campaign", campaignSDO);

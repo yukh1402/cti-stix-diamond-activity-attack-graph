@@ -15,7 +15,6 @@ var directory_1 = require("./sco/directory");
 var file_1 = require("./sco/file");
 var user_account_1 = require("./sco/user-account");
 var network_traffic_1 = require("./sco/network-traffic");
-// import {IPV4_SCO_FIELDS, IPV6_SCO_FIELDS} from './sco/ipv-sco';
 var scheduled_task_1 = require("./sco/scheduled-task");
 var utils_1 = require("../../js/graph/utils");
 exports.STIX_FIELDS = __spreadArrays(observed_sdo_1.OBSERVED_SDO_FIELDS, identity_1.IDENTITY_SDO_FIELDS, software_1.SOFTWARE_SCO_FIELDS, directory_1.DIRECTORY_SCO_FIELDS, file_1.FILE_SCO_FIELDS, user_account_1.USER_ACCOUNT_SCO_FIELDS, network_traffic_1.NETWORK_TRAFFIC_SCO_FIELDS, scheduled_task_1.SCHEDULED_TASK_SCO_FIELDS);

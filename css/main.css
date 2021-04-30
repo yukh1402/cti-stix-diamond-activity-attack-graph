@@ -271,6 +271,18 @@ textarea {
 
 /* SVG CSS classes*/
 
+.big-screen {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media screen and (min-width: 1200px) {
+  .big-screen {
+    max-width: 1920px !important;
+  }
+}
+
 .svg-background {
   background-color: #1b1e27;
   background-image:
@@ -314,8 +326,11 @@ textarea {
 }
 
 .link {
-  stroke: #ffffff;
-  stroke-opacity: .6;
+  stroke: black;
+}
+
+.link-sub-graph {
+  stroke: black;
 }
 
 .tooltipAttackGraph {
@@ -328,6 +343,7 @@ textarea {
   font: 14px sans-serif;
   background: white;
   border: 0;
+  z-index: 9999;
   border-radius: 8px;
 }
 
@@ -384,4 +400,30 @@ textarea {
 .view-border-bottom {
   padding-bottom: 15px;
   border-bottom: 1px solid lightgrey;
+}
+
+.fixed {
+  border: 1px solid white;
+}
+
+.overlay-nodes {
+  position: absolute;
+  text-align: center;
+  height: 300px;
+  width: 300px;
+  word-break: break-word;
+  padding: 2px;
+  font: 14px sans-serif;
+  background: white;
+  border: 0;
+  z-index: 0;
+}
+
+.footer {
+  padding-top: 10px;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  height: 50px;
+  font-size: 12px;
 }

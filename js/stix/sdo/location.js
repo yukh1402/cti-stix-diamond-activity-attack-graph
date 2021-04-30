@@ -30,7 +30,7 @@ function getLocationView(titleId, contentId, typeId, locationSDO) {
     if (locationSDO === null || locationSDO === void 0 ? void 0 : locationSDO.postal_code)
         basic_1.addNodeViewTitleAndText(locationDIV, "Postal Code:", locationSDO.postal_code);
     el.appendChild(locationDIV);
-    basic_1.customFieldView(locationDIV, locationSDO);
+    basic_1.customFieldView(locationDIV.id, locationSDO);
     if (locationSDO === null || locationSDO === void 0 ? void 0 : locationSDO.external_references) {
         basic_1.externalReferencesView(locationDIV, locationSDO.external_references);
     }
