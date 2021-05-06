@@ -90,7 +90,9 @@ window.onhashchange = function () {
  * @param marginTop: Top margin for translating the viewbox
  */
 function initGraph(divId, width = 1000, height = 500, marginLeft, marginTop) {
+  console.log("Komm in init")
   let svgEl = document.getElementById(divId)
+  console.log(svgEl)
   return d3.select(svgEl)
     .attr("viewBox", [0, 0, width, height])
     .classed("svg-background", true)
@@ -98,11 +100,6 @@ function initGraph(divId, width = 1000, height = 500, marginLeft, marginTop) {
     .append("g")
     .attr("transform", "translate(" + marginLeft + "," + marginTop + ")");
 }
-
-let svg = initGraph("svg",
-  WIDTH + MARGIN.LEFT + MARGIN.RIGHT,
-  HEIGHT + MARGIN.TOP + MARGIN.BOTTOM, MARGIN.LEFT, MARGIN.TOP);
-
 
 /**
  * This creates a X-Axis with all Mitre Attack Phases
@@ -376,8 +373,21 @@ function createOverlayNodeViewCount() {
  * @param groupingNode
  */
 function buildSubGraph(groupingNode) {
+  console.log(groupingNode)
   let subGraph = groupingNode.subGraph;
+  let attackPattern = subGraph.nodes.find(node => node.data.type === ATTACK_PATTERN_TYPE);
   let links = subGraph.links;
+
+  svg.append("g")
+    .append("text")
+    .attr("id", "selectedGrouping")
+    .attr("dy", "-20")
+    .attr("dx", "40%")
+    .attr("font-size", "0.7em")
+    .attr("text-anchor", "middle")
+    .attr("fill", "#FFFFFF")
+    .text(() => getNodeLabel(attackPattern, true));
+
   let y = d3.scaleBand()
     .domain(DIAMOND_MODEL_META_FEATURE_CATEGORIES)
     .range([HEIGHT, 0])
@@ -744,9 +754,9 @@ function removeGraphComponents() {
   svg.selectAll("#layer").remove();
   svg.selectAll("#zoom-rect").remove();
   d3.select("#overlayView").remove();
+  d3.select("#selectedGrouping").remove();
 }
 
-createGraph();
 
 function clamp(x, lo, hi) {
   return x < lo ? lo : x > hi ? hi : x;
@@ -853,10 +863,6 @@ function setCurrentGraphSelection() {
   }
 }
 
-setCurrentGraphSelection();
-
-document.getElementById("parseButton").addEventListener("click", parseSTIXContent)
-
 function parseSTIXContent() {
   if (graphSelection === GRAPH_TYPE.SUB_GRAPH) {
     graphSelection = GRAPH_TYPE.ATTACK_GRAPH;
@@ -937,5 +943,23 @@ function removeNodeView() {
   d3.select("#nodeView").remove();
 }
 
+let svg = initGraph("svg",
+  WIDTH + MARGIN.LEFT + MARGIN.RIGHT,
+  HEIGHT + MARGIN.TOP + MARGIN.BOTTOM, MARGIN.LEFT, MARGIN.TOP);
+
+createGraph();
+setCurrentGraphSelection();
+
+document.getElementById("parseButton").addEventListener("click", parseSTIXContent)
+
+
 let copyright = document.getElementById("copyright");
 copyright.innerText = "© " + new Date().getFullYear() + " Yusuf Khan - ";
+
+// Open Github repo on logo click
+function openGithub() {
+  window.open("https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph", "_blank").focus();
+}
+
+d3.selectAll("#logo").on("click", openGithub)
+d3.selectAll("#logo-text").on("click", openGithub)
