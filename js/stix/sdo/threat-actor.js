@@ -2,7 +2,7 @@ import {
   addNodeViewTitleAndText,
   addNodeViewTitleAndTextList,
   customFieldView, externalReferencesView,
-} from '../basic.js';
+} from "../basic.js";
 
 export const THREAT_ACTOR_TYPE = "threat-actor"
 

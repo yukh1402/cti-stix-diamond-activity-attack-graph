@@ -1,6 +1,6 @@
 import {
   customFieldView,
-} from '../basic.js';
+} from "../basic.js";
 
 export const IPV4_TYPE = "ipv4-addr";
 export const IPV6_TYPE = "ipv6-addr";

@@ -2,7 +2,7 @@ import {
   addNodeViewTitleAndText,
   addNodeViewTitleAndTextList,
   customFieldView
-} from '../basic.js';
+} from "../basic.js";
 
 export const FILE_TYPE = "file";
 

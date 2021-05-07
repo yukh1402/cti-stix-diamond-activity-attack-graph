@@ -1,4 +1,4 @@
-import {addNodeViewTitleAndText, customFieldView} from '../basic.js';
+import {addNodeViewTitleAndText, customFieldView} from "../basic.js";
 
 export const PROCESS_TYPE = "process";
 
