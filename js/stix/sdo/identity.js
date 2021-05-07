@@ -2,7 +2,7 @@ import {
   addNodeViewTitleAndText, addNodeViewTitleAndTextList,
   customFieldView,
   externalReferencesView
-} from '../basic';
+} from '../basic.js';
 
 export const IDENTITY_TYPE = "identity"
 

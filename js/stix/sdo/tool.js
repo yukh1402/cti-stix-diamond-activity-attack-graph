@@ -3,7 +3,7 @@ import {
   addNodeViewTitleAndText,
   addNodeViewTitleAndTextList,
   customFieldView, externalReferencesView
-} from '../basic.js';
+} from "../basic.js";
 
 export const TOOL_TYPE = "tool"
 

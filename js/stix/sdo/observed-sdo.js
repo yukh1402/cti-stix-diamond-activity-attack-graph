@@ -1,7 +1,7 @@
 import {
   addNodeViewTitleAndText,
   customFieldView, externalReferencesView,
-} from '../basic';
+} from '../basic.js';
 
 export const OBSERVED_DATA_TYPE = "observed-data"
 
