@@ -1,4 +1,4 @@
-import {customFieldView} from "../basic";
+import {customFieldView} from "../basic.js";
 
 export const DOMAIN_TYPE = "domain-name";
 

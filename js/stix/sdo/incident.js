@@ -1,7 +1,7 @@
 import {
   addNodeViewTitleAndText,
   customFieldView, externalReferencesView
-} from "../basic";
+} from "../basic.js";
 
 export const INCIDENT_TYPE = "incident";
 

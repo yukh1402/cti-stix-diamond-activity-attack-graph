@@ -1,4 +1,4 @@
-import {customFieldView} from "../basic";
+import {customFieldView} from "../basic.js";
 
 export const URL_TYPE = "url";
 
