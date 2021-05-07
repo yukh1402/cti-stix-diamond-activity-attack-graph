@@ -12,32 +12,32 @@ import {
   DIAMOND_MODEL_META_FEATURE_CATEGORIES,
   getMinNodeDate,
   getMaxNodeDate
-} from "./mapper";
-import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern";
-import {GROUPING_TYPE} from "../stix/sdo/grouping";
-import {TOOL_TYPE} from "../stix/sdo/tool";
-import {MALWARE_TYPE} from "../stix/sdo/malware";
-import {VULNERABILITY_TYPE} from "../stix/sdo/vulnerability";
-import {IDENTITY_TYPE} from "../stix/sdo/identity";
-import {THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor";
-import {OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo";
-import {CAMPAIGN_TYPE} from "../stix/sdo/campaign";
-import {INDICATOR_TYPE} from "../stix/sdo/indicator";
-import {Node} from "./node";
-import {checkSyntax, Warning} from "./syntax-checker";
-import {LOCATION_TYPE} from "../stix/sdo/location";
-import {INFRASTRUCTURE_TYPE} from "../stix/sdo/infrastructure";
-import {MALWARE_ANALYSIS_TYPE} from "../stix/sdo/malware-analysis";
-import {NOTE_TYPE} from "../stix/sdo/note";
-import {OPINION_TYPE} from "../stix/sdo/opinion";
-import {FILE_TYPE} from "../stix/sco/file";
-import {DIRECTORY_TYPE} from "../stix/sco/directory";
-import {NETWORK_TRAFFIC_TYPE} from "../stix/sco/network-traffic";
-import {PROCESS_TYPE} from "../stix/sco/process";
-import {URL_TYPE} from "../stix/sco/url";
-import {IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco";
-import {DOMAIN_TYPE} from "../stix/sco/domain";
-import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system";
+} from "./mapper.js";
+import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern.ts";
+import {GROUPING_TYPE} from "../stix/sdo/grouping.ts";
+import {TOOL_TYPE} from "../stix/sdo/tool.ts";
+import {MALWARE_TYPE} from "../stix/sdo/malware.ts";
+import {VULNERABILITY_TYPE} from "../stix/sdo/vulnerability.ts";
+import {IDENTITY_TYPE} from "../stix/sdo/identity.ts";
+import {THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor.ts";
+import {OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo.ts";
+import {CAMPAIGN_TYPE} from "../stix/sdo/campaign.ts";
+import {INDICATOR_TYPE} from "../stix/sdo/indicator.ts";
+import {Node} from "./node.js";
+import {checkSyntax, Warning} from "./syntax-checker.js";
+import {LOCATION_TYPE} from "../stix/sdo/location.ts";
+import {INFRASTRUCTURE_TYPE} from "../stix/sdo/infrastructure.ts";
+import {MALWARE_ANALYSIS_TYPE} from "../stix/sdo/malware-analysis.ts";
+import {NOTE_TYPE} from "../stix/sdo/note.ts";
+import {OPINION_TYPE} from "../stix/sdo/opinion.ts";
+import {FILE_TYPE} from "../stix/sco/file.ts";
+import {DIRECTORY_TYPE} from "../stix/sco/directory.ts";
+import {NETWORK_TRAFFIC_TYPE} from "../stix/sco/network-traffic.ts";
+import {PROCESS_TYPE} from "../stix/sco/process.ts";
+import {URL_TYPE} from "../stix/sco/url.ts";
+import {IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco.ts";
+import {DOMAIN_TYPE} from "../stix/sco/domain.ts";
+import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.ts";
 
 
 let stixBundle = undefined;
@@ -90,13 +90,10 @@ window.onhashchange = function () {
  * @param marginTop: Top margin for translating the viewbox
  */
 function initGraph(divId, width = 1000, height = 500, marginLeft, marginTop) {
-  console.log("Komm in init")
   let svgEl = document.getElementById(divId)
-  console.log(svgEl)
   return d3.select(svgEl)
     .attr("viewBox", [0, 0, width, height])
     .classed("svg-background", true)
-    // .style("fill", () => "url(#logoImage)")
     .append("g")
     .attr("transform", "translate(" + marginLeft + "," + marginTop + ")");
 }
