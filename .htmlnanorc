@@ -1,7 +1,15 @@
 {
 	"minifySvg": {
 		"plugins": [
-			{ "cleanupIDs": false }
+			{ "cleanupIDs": false },
+			{ "cleanupAttrs": false },
+			{ "removeViewBox": false },
+			{ "removeMetadata": false },
+			{ "removeUselessDefs": false },
+			{ "cleanupNumericValues": false },
+			{ "removeUselessStrokeAndFill": false },
+			{ "removeTitle": false },
+			{ "removeDesc": false }
 		]
 	}
 }

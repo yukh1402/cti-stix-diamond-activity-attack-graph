@@ -13,31 +13,31 @@ import {
   getMinNodeDate,
   getMaxNodeDate
 } from "./mapper.js";
-import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern.ts";
-import {GROUPING_TYPE} from "../stix/sdo/grouping.ts";
-import {TOOL_TYPE} from "../stix/sdo/tool.ts";
-import {MALWARE_TYPE} from "../stix/sdo/malware.ts";
-import {VULNERABILITY_TYPE} from "../stix/sdo/vulnerability.ts";
-import {IDENTITY_TYPE} from "../stix/sdo/identity.ts";
-import {THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor.ts";
-import {OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo.ts";
-import {CAMPAIGN_TYPE} from "../stix/sdo/campaign.ts";
-import {INDICATOR_TYPE} from "../stix/sdo/indicator.ts";
+import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern.js";
+import {GROUPING_TYPE} from "../stix/sdo/grouping.js";
+import {TOOL_TYPE} from "../stix/sdo/tool.js";
+import {MALWARE_TYPE} from "../stix/sdo/malware.js";
+import {VULNERABILITY_TYPE} from "../stix/sdo/vulnerability.js";
+import {IDENTITY_TYPE} from "../stix/sdo/identity.js";
+import {THREAT_ACTOR_TYPE} from "../stix/sdo/threat-actor.js";
+import {OBSERVED_DATA_TYPE} from "../stix/sdo/observed-sdo.js";
+import {CAMPAIGN_TYPE} from "../stix/sdo/campaign.js";
+import {INDICATOR_TYPE} from "../stix/sdo/indicator.js";
 import {Node} from "./node.js";
 import {checkSyntax, Warning} from "./syntax-checker.js";
-import {LOCATION_TYPE} from "../stix/sdo/location.ts";
-import {INFRASTRUCTURE_TYPE} from "../stix/sdo/infrastructure.ts";
-import {MALWARE_ANALYSIS_TYPE} from "../stix/sdo/malware-analysis.ts";
-import {NOTE_TYPE} from "../stix/sdo/note.ts";
-import {OPINION_TYPE} from "../stix/sdo/opinion.ts";
-import {FILE_TYPE} from "../stix/sco/file.ts";
-import {DIRECTORY_TYPE} from "../stix/sco/directory.ts";
-import {NETWORK_TRAFFIC_TYPE} from "../stix/sco/network-traffic.ts";
-import {PROCESS_TYPE} from "../stix/sco/process.ts";
-import {URL_TYPE} from "../stix/sco/url.ts";
-import {IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco.ts";
-import {DOMAIN_TYPE} from "../stix/sco/domain.ts";
-import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.ts";
+import {LOCATION_TYPE} from "../stix/sdo/location.js";
+import {INFRASTRUCTURE_TYPE} from "../stix/sdo/infrastructure.js";
+import {MALWARE_ANALYSIS_TYPE} from "../stix/sdo/malware-analysis.js";
+import {NOTE_TYPE} from "../stix/sdo/note.js";
+import {OPINION_TYPE} from "../stix/sdo/opinion.js";
+import {FILE_TYPE} from "../stix/sco/file.js";
+import {DIRECTORY_TYPE} from "../stix/sco/directory.js";
+import {NETWORK_TRAFFIC_TYPE} from "../stix/sco/network-traffic.js";
+import {PROCESS_TYPE} from "../stix/sco/process.js";
+import {URL_TYPE} from "../stix/sco/url.js";
+import {IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco.js";
+import {DOMAIN_TYPE} from "../stix/sco/domain.js";
+import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
 
 
 let stixBundle = undefined;
@@ -96,6 +96,23 @@ function initGraph(divId, width = 1000, height = 500, marginLeft, marginTop) {
     .classed("svg-background", true)
     .append("g")
     .attr("transform", "translate(" + marginLeft + "," + marginTop + ")");
+}
+
+/**
+ * Add Arrow Marker into defs
+ */
+function addArrowMarker(defId) {
+  d3.selectAll(defId)
+    .append("marker")
+    .attr("id", "arrow")
+    .attr("viewbox", "0 0 10 10")
+    .attr("refX", 18)
+    .attr("refY", 5)
+    .attr("markerWidth", 10)
+    .attr("markerHeight", 10)
+    .attr("orient", "auto-start-reverse")
+    .append("path")
+    .attr("d", "M0,0L0,10L10,5");
 }
 
 /**
@@ -943,6 +960,8 @@ function removeNodeView() {
 let svg = initGraph("svg",
   WIDTH + MARGIN.LEFT + MARGIN.RIGHT,
   HEIGHT + MARGIN.TOP + MARGIN.BOTTOM, MARGIN.LEFT, MARGIN.TOP);
+
+addArrowMarker("#mdef")
 
 createGraph();
 setCurrentGraphSelection();

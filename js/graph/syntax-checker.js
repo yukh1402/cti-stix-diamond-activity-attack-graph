@@ -1,7 +1,7 @@
-import {GROUPING_TYPE} from "../stix/sdo/grouping";
-import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern";
-import {getTactic, getTTP} from "./mapper";
-import {Node} from "./node";
+import {GROUPING_TYPE} from "../stix/sdo/grouping.js";
+import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern.js";
+import {getTactic, getTTP} from "./mapper.js";
+import {Node} from "./node.js";
 
 /**
  * A warning class that indicates a bad practice
