@@ -1,4 +1,4 @@
-import {capitalize} from '../graph/utils';
+import {capitalize} from '../graph/utils.js';
 
 
 /**
