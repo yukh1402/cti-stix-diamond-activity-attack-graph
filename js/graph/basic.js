@@ -387,7 +387,6 @@ function createOverlayNodeViewCount() {
  * @param groupingNode
  */
 function buildSubGraph(groupingNode) {
-  console.log(groupingNode)
   let subGraph = groupingNode.subGraph;
   let attackPattern = subGraph.nodes.find(node => node.data.type === ATTACK_PATTERN_TYPE);
   let links = subGraph.links;
@@ -738,7 +737,6 @@ function tickOverlay(width, height) {
 }
 
 function createGraph(graph, node = undefined) {
-  console.log(graph)
   if (graph !== undefined) {
     removeGraphComponents();
     if (graphSelection === GRAPH_TYPE.SUB_GRAPH) {

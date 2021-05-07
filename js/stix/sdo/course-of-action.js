@@ -1,4 +1,4 @@
-import {addNodeViewTitleAndText, customFieldView, externalReferencesView} from "../basic";
+import {addNodeViewTitleAndText, customFieldView, externalReferencesView} from "../basic.js";
 
 export const COURSE_OF_ACTION_TYPE = "course-of-action";
 

@@ -1,4 +1,4 @@
-import {addNodeViewTitleAndText, customFieldView} from '../basic';
+import {addNodeViewTitleAndText, customFieldView} from "../basic.js";
 
 export const DIRECTORY_TYPE = "directory";
 

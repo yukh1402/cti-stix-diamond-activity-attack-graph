@@ -2,7 +2,7 @@ import {
   addNodeViewTitleAndText,
   customFieldView,
   externalReferencesView
-} from "../basic";
+} from "../basic.js";
 
 export const LOCATION_TYPE = "location";
 

@@ -2,7 +2,7 @@ import {
   addNodeViewTitleAndText,
   addNodeViewTitleAndTextList,
   customFieldView, externalReferencesView
-} from "../basic";
+} from "../basic.js";
 
 export const INTRUSION_SET_TYPE = "intrusion-set";
 

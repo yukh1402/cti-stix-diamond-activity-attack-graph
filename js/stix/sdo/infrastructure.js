@@ -3,7 +3,7 @@ import {
   addNodeViewTitleAndText,
   addNodeViewTitleAndTextList,
   customFieldView, externalReferencesView
-} from "../basic";
+} from "../basic.js";
 
 export const INFRASTRUCTURE_TYPE = "infrastructure";
 
