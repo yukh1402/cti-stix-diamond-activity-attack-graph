@@ -33,15 +33,15 @@ a correlated time/TTP graph. By selecting a TTP a Sub-Graph will appear with all
 
 ### Attack Graph
 
-![Attack Graph](https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph/tree/main/doc/images/Attack_graph.PNG)
+![Attack Graph](https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph/blob/main/doc/images/Attack_graph.PNG)
 
 ### Activity Thread Graph
-
-![Activity Thread Graph](https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph/tree/main/doc/images/Activity_graph.PNG)
+                        
+![Activity Thread Graph](https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph/blob/main/doc/images/Activity_graph.PNG)
 
 ### Sub-Graph
 
-![Sub-Graph](https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph/tree/main/doc/images/Sub_graph.PNG)
+![Sub-Graph](https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph/blob/main/doc/images/Sub_graph.PNG)
 
 ## How to use the tool?
 
