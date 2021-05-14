@@ -20,7 +20,7 @@ To use this tool as planned, some specific requirements related to STIX 2.1 obje
 To get a quick impression on the output and functionalities of the tool visit https://yukh1402.github.io/cti-stix-diamond-activity-attack-graph/ and load the following partial Ryuk Ransomware scenario example
 [STIX 2.1](https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph/tree/main/example/example-bundle.json) bundle into the tool. You can use this URL for leveraging the online version of this tool.
 
-If you want to deploy your own application instance we recommend to setup a docker container. The docker [image](https://hub.docker.com/repository/docker/1402/cti-stix-diamond-activity-attack-graph) is available on Docker Hub. For activating the image and mounting it to port 80 in your own environment, enter the following command on your docker system:
+If you want to deploy your own application instance we recommend to setup a docker container. The docker [image](https://hub.docker.com/r/1402/cti-stix-diamond-activity-attack-graph) is available on Docker Hub. For activating the image and mounting it to port 80 in your own environment, enter the following command on your docker system:
 
 ```
 docker run -d -p 80:80 1402/cti-stix-diamond-activity-attack-graph:latest
@@ -45,7 +45,7 @@ will be displayed in an Attack or Activity Thread Graph. An Attack Graph is time
 
 ## How to use the tool?
 
-The STIX Bundle MUST have a structured schema with at least one or multiple STIX Domain Objects (SDO) of type Grouping. All other SDOs, STIX Relationship Objects (SROs) and STIX Cyber-observable Objects (SCOs) that are related or employed in the same context will be referenced in the `` "object_refs" `` field of the associated Grouping SDO.
+The STIX Bundle MUST have a structured schema with at least one or multiple STIX Domain Objects (SDO) of type Grouping. All other SDOs, STIX Relationship Objects (SROs) and STIX Cyber-observable Objects (SCOs) that are related or employed in the same context will be referenced via id in the `` "object_refs" `` field of the associated Grouping SDO.
 
 For providing a valid STIX Bundle schema that can be processed in the tool, three requirements are necessary:
 
@@ -240,8 +240,8 @@ For providing a valid STIX Bundle schema that can be processed in the tool, thre
     }
 
    ````
-3. Relationships (SROs) between Grouping SDOs MUST NOT be registered in the `` "object_refs" `` field of the Grouping.
-   They MUST appear as individual object inside the bundle `` "objects" ``.
+3. Relationships (SROs) between Grouping SDOs MUST NOT be registered in the `` "object_refs" `` field of the Grouping SDO.
+   They MUST appear as individual objects inside the bundle `` "objects" ``.
 
      ````
    {
@@ -302,13 +302,13 @@ documentation files (the "Software"), to deal in the Software without restrictio
 rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
 persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+This copyright notice and this permission notice SHALL be included in all copies or substantial portions of the
 Software.
 
 The source code responsible for displaying the cti-stix-diamond-activity-attack-graph project watermark that links back
 to https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph
 as part of rendered diagrams MUST NOT be removed or changed. When this software is being used in a website or
-application,the watermark must stay fully visible and not visually overlapped by other elements.
+application,the watermark MUST stay fully visible and MUST NOT visually overlapped by other elements.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
 WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
