@@ -45,14 +45,14 @@ will be displayed in an Attack or Activity Thread Graph. An Attack Graph is time
 
 ## How to use the tool?
 
-The STIX Bundle needs to have a structured schema with several STIX Domain Objects (SDO) of type Grouping. All other SDOs and STIX Cyber-observable Objects (SCOs) that are related or employed in the same context will be referenced in the `` "object_refs" `` field of the associated Grouping SDO.
+The STIX Bundle MUST have a structured schema with at least one or multiple STIX Domain Objects (SDO) of type Grouping. All other SDOs, STIX Relationship Objects (SROs) and STIX Cyber-observable Objects (SCOs) that are related or employed in the same context will be referenced in the `` "object_refs" `` field of the associated Grouping SDO.
 
 For providing a valid STIX Bundle schema that can be processed in the tool, three requirements are necessary:
 
-1. Each Grouping SDO needs to have one Attack Pattern SDO reference. The Attack Pattern SDO schema is derived from the
+1. Each Grouping SDO MUST have one Attack Pattern SDO reference. The Attack Pattern SDO schema is derived from the
    MITRE ATT&CK framework and can be found on the
    [MITRE CTI](https://github.com/mitre/cti/tree/master/enterprise-attack/attack-pattern) repository or pulled from the
-   [MITRE ATT&CK TAXII Server](https://github.com/mitre/cti/blob/master/USAGE.md#access-from-the-attck-taxii-server).
+   [MITRE ATT&CK TAXII Server](https://github.com/mitre/cti/blob/master/USAGE.md#access-from-the-attck-taxii-server). See example below:
    ````
     {
     "id": "bundle--70d2c497-5717-5a3a-8b03-d2c1f74df433",
@@ -95,9 +95,7 @@ For providing a valid STIX Bundle schema that can be processed in the tool, thre
     ]
    }
     ````
-2. All STIX objects which are considered in the same context belong into one Grouping SDO. The references of these
-   objects will be registered in the `` "object_refs" `` field of the Grouping SDO. STIX relationship objects (SRO)
-   that are in the same context are registered in the `` "object_refs" `` field as well.
+2. All STIX objects (SDOs, SROs, SCOs) which are considered in the same context MUST belong to one Grouping SDO. The references of these objects will be registered in the `` "object_refs" `` field of the Grouping SDO. SROs that are in the same context MUST be registered in the `` "object_refs" `` field as well.
    ````
    {
     "id": "bundle--70d2c497-5717-5a3a-8b03-d2c1f74df433",
@@ -242,8 +240,8 @@ For providing a valid STIX Bundle schema that can be processed in the tool, thre
     }
 
    ````
-3. Relationships (SROs) between Grouping SDOs won't be registered in the `` "object_refs" `` field of the Grouping.
-   They will only appear as an individual object inside the bundle `` "objects" ``.
+3. Relationships (SROs) between Grouping SDOs MUST NOT be registered in the `` "object_refs" `` field of the Grouping.
+   They MUST appear as individual object inside the bundle `` "objects" ``.
 
      ````
    {
@@ -292,7 +290,7 @@ For providing a valid STIX Bundle schema that can be processed in the tool, thre
 
 ## Contribute
 
-In order to contribute in this project please contact the MAINTAINER [Yusuf Khan](https://github.com/yukh1402) under
+In order to contribute to this project please contact the MAINTAINER [Yusuf Khan](https://github.com/yukh1402) under
 following email address ykhan@rukhsarkhan.de .
 
 ## LICENSE
