@@ -1,12 +1,12 @@
 # cti-stix-diamond-activity-attack-graph
 
-This is an Open Source Tool for visualizing [STIX](https://oasis-open.github.io/cti-documentation/stix/intro.html)
-2.1 content in an Attack and Activity Thread Graph by applying the
-[Diamond Model of Intrusion Analysis](https://www.activeresponse.org/wp-content/uploads/2013/07/diamond.pdf)
-methodology and attack phases from [MITRE ATT&CK v8.2](https://attack.mitre.org/).
+This is an Open Source tool for visualizing [STIX](https://oasis-open.github.io/cti-documentation/stix/intro.html)
+2.1 content in an Attack and Activity Thread graph by applying
+[The Diamond Model of Intrusion Analysis](https://www.activeresponse.org/wp-content/uploads/2013/07/diamond.pdf)
+methodology and attack phases from the [MITRE ATT&CK v8.2](https://attack.mitre.org/) framework.
 
-The Tool is implemented in the [HTML 5 Boilerplate](https://html5boilerplate.com/) framework. The complete visualization
-is build with [d3.js](https://d3js.org/) a Javascript library for document manipulation and all is processed in the
+The tool is implemented in the [HTML 5 Boilerplate](https://html5boilerplate.com/) framework. The complete visualization
+is built with [d3.js](https://d3js.org/), a Javascript library for document manipulation, and all is processed in the
 browser without requiring a server (backend).
 
 ## Quick access
