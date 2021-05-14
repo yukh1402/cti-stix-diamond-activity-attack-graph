@@ -13,7 +13,7 @@ The tool is implemented in the [HTML 5 Boilerplate](https://html5boilerplate.com
 is built with [d3.js](https://d3js.org/), a Javascript library for document manipulation, and all is processed in the
 browser without requiring a server (backend).
 
-In order to 
+To use this tool as planned, some specific requirements related to STIX 2.1 objects, which are shown below, MUST be fulfilled.
 
 ## Quick access
 
