@@ -28,10 +28,8 @@ docker run -d -p 80:80 1402/cti-stix-diamond-activity-attack-graph:latest
 
 ## Graph types
 
-STIX objects can be easily visualized by providing a STIX 2.1 Bundle. Depending on the graph selection, STIX information
-will be displayed in an Attack or Activity Thread Graph. An Attack Graph is timeless and shows multiple TTPs (
-techniques, tactics and procedures) in MITRE phases. The Activity Thread Graph takes the time into account and generates
-a correlated time/TTP graph. By selecting a TTP a Sub-Graph will appear with all the related STIX objects.
+In this tool, STIX objects are visually represented by simply providing a STIX 2.1 Bundle. Depending on the graph selection, STIX information
+will be displayed in an Attack or Activity Thread Graph. An Attack Graph is timeless and shows multiple TTPs in context of the MITRE ATT&CK Matrix for Enterprise. The Activity Thread Graph takes the timestamp of local findngs into account and generates a correlated Timeline-Technique graph. By selecting a Technique the corresponding Sub-Graph with all the related STIX objects will appear.
 
 ### Attack Graph
 
