@@ -5,7 +5,7 @@ This is an Open Source tool for visualizing [STIX](https://oasis-open.github.io/
 1. Attack Graph and 
 2. Activity Thread Graph 
 
-by applying [The Diamond Model of Intrusion Analysis](https://www.activeresponse.org/wp-content/uploads/2013/07/diamond.pdf) methodology as well as Tactics (Phases), Techniques and Procedures (TTPs) from the [MITRE ATT&CK v8.2](https://attack.mitre.org/) framework. More precisely the Attack Graph aims to provide a graphical representation of a known attack scenario sourced by some adversary (Threat Actor) whereas the Activity Thread Graph represents the local findings. Attack Graph and Activity Thread Graph both have a main graph and one or more subgraphs, depending on the amount of Techniques available. Subgraphs are shown up by clicking on the individual Technique object. 
+by applying [The Diamond Model of Intrusion Analysis](https://www.activeresponse.org/wp-content/uploads/2013/07/diamond.pdf) methodology as well as Tactics (Phases), Techniques and Procedures (TTP) from the [MITRE ATT&CK v8.2](https://attack.mitre.org/) framework. More precisely the Attack Graph aims to provide a graphical representation of a known attack scenario sourced by some adversary (Threat Actor) whereas the Activity Thread Graph represents the local findings. Attack Graph and Activity Thread Graph both have a main graph and one or more subgraphs, depending on the amount of Techniques available. Subgraphs are shown up by clicking on the individual Technique object. 
 
 The goal with this tool is to help a Cyber Threat Hunter (Cyber Security Analyst) in building complete visibilty to an attack scenario after consuming primarily Strategic and Operational Threat Intelligence reports but also limited Tactical Threat Intelligence feeds and representing the gathered Intelligence in the Attack Graph. This helps him/her in getting an understanding of how the adversary operated the cyber threat campaign in order to defend against it. The Activity Thread Graph allows to chain locally identified attacker activity and visualize it in a timeline.
 
@@ -45,10 +45,9 @@ will be displayed in an Attack or Activity Thread Graph. An Attack Graph is time
 
 ## How to use the tool?
 
-The STIX Bundle needs to have a structured schema with several Grouping SDOs. All objects that are related or in the
-same context will be referenced in the `` "object_refs" ``´ field of the associated Grouping SDO.
+The STIX Bundle needs to have a structured schema with several STIX Domain Objects (SDO) of type Grouping. All other SDOs and STIX Cyber-observable Objects (SCOs) that are related or employed in the same context will be referenced in the `` "object_refs" `` field of the associated Grouping SDO.
 
-For providing a valid STIX Bundle schema that can be processed in the application 3 requirements are necessary:
+For providing a valid STIX Bundle schema that can be processed in the tool, three requirements are necessary:
 
 1. Each Grouping SDO needs to have one Attack Pattern SDO reference. The Attack Pattern SDO schema is derived from the
    MITRE ATT&CK framework and can be found on the
