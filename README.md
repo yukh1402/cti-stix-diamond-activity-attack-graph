@@ -1,13 +1,17 @@
 # cti-stix-diamond-activity-attack-graph
 
-This is an Open Source tool for visualizing [STIX](https://oasis-open.github.io/cti-documentation/stix/intro.html)
-2.1 content in an Attack and Activity Thread graph by applying
-[The Diamond Model of Intrusion Analysis](https://www.activeresponse.org/wp-content/uploads/2013/07/diamond.pdf)
-methodology and attack phases from the [MITRE ATT&CK v8.2](https://attack.mitre.org/) framework.
+This is an Open Source tool for visualizing [STIX](https://oasis-open.github.io/cti-documentation/stix/intro.html) 2.1 content in 
+
+1. an Attack Graph and 
+2. Activity Thread Graph 
+ 
+by applying [The Diamond Model of Intrusion Analysis](https://www.activeresponse.org/wp-content/uploads/2013/07/diamond.pdf) methodology and attack phases from the [MITRE ATT&CK v8.2](https://attack.mitre.org/) framework. The goal with this tool is to help a Threat Hunter (Security Analyst) in building complete visibilty to an attack scenario after consuming primarily Strategic and Operational Threat Intelligence reports  chaining attacker activity together and visualize it 
 
 The tool is implemented in the [HTML 5 Boilerplate](https://html5boilerplate.com/) framework. The complete visualization
 is built with [d3.js](https://d3js.org/), a Javascript library for document manipulation, and all is processed in the
 browser without requiring a server (backend).
+
+In order to 
 
 ## Quick access
 
@@ -26,7 +30,7 @@ docker run -d -p 80:80 1402/cti-stix-diamond-activity-attack-graph:latest
 
 ## Graph types
 
-STIX objects can be easily visualized by providing a STIX 2.1 Bundle. Depending on the graph selection STIX information
+STIX objects can be easily visualized by providing a STIX 2.1 Bundle. Depending on the graph selection, STIX information
 will be displayed in an Attack or Activity Thread Graph. An Attack Graph is timeless and shows multiple TTPs (
 techniques, tactics and procedures) in MITRE phases. The Activity Thread Graph takes the time into account and generates
 a correlated time/TTP graph. By selecting a TTP a Sub-Graph will appear with all the related STIX objects.
