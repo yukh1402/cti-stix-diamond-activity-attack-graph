@@ -18,7 +18,7 @@ To use this tool as planned, some specific requirements related to STIX 2.1 obje
 ## Quick access
 
 To get a quick impression on the output and functionalities of the tool visit https://yukh1402.github.io/cti-stix-diamond-activity-attack-graph/ and load the following partial Ryuk Ransomware scenario example
-[STIX 2.1](https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph/tree/main/example/example-bundle.json) bundle into the tool. You can use this URL for leveraging the online version of this tool.
+[STIX 2.1](https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph/tree/main/example/example-bundle.json) bundle into the Attack Graph of the tool. You can use this URL for leveraging the online version of this tool.
 
 If you want to deploy your own application instance we recommend to setup a docker container. The docker [image](https://hub.docker.com/r/1402/cti-stix-diamond-activity-attack-graph) is available on Docker Hub. For activating the image and mounting it to port 80 in your own environment, enter the following command on your docker system:
 
