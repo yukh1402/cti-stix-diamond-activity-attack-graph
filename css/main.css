@@ -416,3 +416,8 @@ textarea {
   font-size: 12px;
   z-index: -1;
 }
+
+.control-icon {
+  max-height: 40px;
+  max-width: 40px;
+}
