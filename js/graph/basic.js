@@ -95,6 +95,7 @@ function initGraph(divId, width = 1000, height = 500, marginLeft, marginTop) {
     .attr("viewBox", [0, 0, width, height])
     .classed("svg-background", true)
     .append("g")
+    .attr("id", "svg-graph")
     .attr("transform", "translate(" + marginLeft + "," + marginTop + ")");
 }
 
@@ -552,7 +553,7 @@ function graphZoom(scatter, y, yAxis, attackPatternNodes) {
 }
 
 /**
- * This updates the graph view on a zoom event
+ * This updates the Activity Thread Graph view on a zoom event
  * @param event: Zoom event that is triggered
  * @param scatter:
  * @param y
@@ -686,7 +687,7 @@ function showOverlayGroupings(event, attackPatternNodes) {
     .on("mouseover", (event, n) => showTooltip(event, n, true))
     .on("mousemove", (event, n) => attackPatternMousemove(event, n, true))
     .on("mouseout", hideTooltip)
-    .on("dblclick", (event, n) => attackPatternClick(event, n, [], false));
+    .on("click", (event, n) => attackPatternClick(event, n, [], false));
 
   overlaySVG.selectAll("#overlayNode")
     .append("text")
@@ -706,7 +707,7 @@ function showOverlayGroupings(event, attackPatternNodes) {
     .on("start", (event, d) => nodeDragStart(event, d, simulation))
     .on("drag", (event, d) => nodeDragged(event, d, simulation, false))
 
-  overlayNodes.call(drag).on("click", (event, d) => nodeClick(event, d, simulation, false));
+  overlayNodes.call(drag).on("notificationclick", (event, d) => nodeClick(event, d, simulation, false));
 
   let overlayView = document.getElementById("overlayView");
   let closeBtn = document.createElement("button");
@@ -739,6 +740,7 @@ function tickOverlay(width, height) {
 function createGraph(graph, node = undefined) {
   if (graph !== undefined) {
     removeGraphComponents();
+    activateZoom();
     if (graphSelection === GRAPH_TYPE.SUB_GRAPH) {
       buildSubGraph(node);
     } else if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH) {
@@ -958,6 +960,31 @@ function removeNodeView() {
 let svg = initGraph("svg",
   WIDTH + MARGIN.LEFT + MARGIN.RIGHT,
   HEIGHT + MARGIN.TOP + MARGIN.BOTTOM, MARGIN.LEFT, MARGIN.TOP);
+
+function activateZoom() {
+  let zoom = d3.zoom().on("zoom", zoomed);
+
+  svg.transition()
+    .duration(750)
+    .call(zoom.transform, d3.zoomIdentity);
+  zoom.transform.k = 0;
+
+  d3.select("#svg").call(d3.zoom().on("zoom", zoomed));
+  d3.select("#zoom-in").on("click", function () {
+    zoom.scaleBy(svg.transition().duration(750), 1.2);
+  })
+  d3.select("#zoom-out").on("click", function () {
+    zoom.scaleBy(svg.transition().duration(750), 0.8);
+  })
+}
+
+function zoomed(event) {
+  if (stixGraph !== undefined) {
+    let left = event.transform.x + MARGIN.LEFT;
+    let top = event.transform.y + MARGIN.TOP;
+    svg.attr("transform", "translate(" + left + "," + top + ") scale(" + event.transform.k + ")");
+  }
+}
 
 addArrowMarker("#mdef")
 
