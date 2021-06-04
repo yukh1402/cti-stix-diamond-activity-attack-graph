@@ -562,7 +562,7 @@ function graphZoom(scatter, y, yAxis, attackPatternNodes) {
  */
 function onZoom(event, scatter, y, yAxis, attackPatternNodes) {
   let newY = event.transform.rescaleY(y);
-  yAxis.call(d3.axisLeft(newY));
+  yAxis.call(d3.axisLeft(newY).tickFormat((d, i) => format(d, i, newY.ticks().length - 1, event.transform.k)));
 
   // Update node position
   scatter.selectAll("circle")
@@ -589,6 +589,37 @@ function onZoom(event, scatter, y, yAxis, attackPatternNodes) {
       attackPatternNodes[d.source].x + ((attackPatternNodes[d.target].x - attackPatternNodes[d.source].x) / 2))
     .attr("y", d =>
       attackPatternNodes[d.source].y + ((attackPatternNodes[d.target].y - attackPatternNodes[d.source].y) / 2));
+}
+
+
+let formatMillisecond = d3.timeFormat(".%L"),
+  formatSecond = d3.timeFormat(":%S"),
+  formatMinute = d3.timeFormat("%I:%M"),
+  formatHour = d3.timeFormat("%I %p"),
+  formatDay = d3.timeFormat("%a %d"),
+  formatWeek = d3.timeFormat("%b %d"),
+  formatMonth = d3.timeFormat("%B"),
+  formatYear = d3.timeFormat("%Y");
+
+function multiFormat(date) {
+  return (d3.timeSecond(date) < date ? formatMillisecond
+    : d3.timeMinute(date) < date ? formatSecond
+      : d3.timeHour(date) < date ? formatMinute
+        : d3.timeDay(date) < date ? formatHour
+          : d3.timeMonth(date) < date ? (d3.timeWeek(date) < date ? formatDay : formatWeek)
+            : d3.timeYear(date) < date ? formatMonth
+              : formatYear)(date);
+}
+
+
+function format(d, currentIndex, lastTickIndex, zoomIndex) {
+  const weekDayMonth = d3.timeFormat("%a %e");
+  // Sticky date on small zoom index
+  if (currentIndex === 0 && zoomIndex >= 388 || currentIndex === lastTickIndex && zoomIndex >= 388) {
+    return weekDayMonth(d);
+  } else {
+    return multiFormat(d);
+  }
 }
 
 function createNodeLabels(id) {
