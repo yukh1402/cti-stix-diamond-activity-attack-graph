@@ -18,7 +18,7 @@ export function getReportView(titleId, contentId, typeId, reportSDO) {
   if (reportSDO?.report_types) addNodeViewTitleAndTextList(reportDIV, "Report types:", reportSDO.report_types,
     "badge-dark");
   if (reportSDO?.published) addNodeViewTitleAndText(reportDIV, "Published:",
-    new Date(reportSDO.published).toString());
+    new Date(reportSDO.published).toUTCString());
 
   el.appendChild(reportDIV);
   customFieldView(reportDIV.id, reportSDO);

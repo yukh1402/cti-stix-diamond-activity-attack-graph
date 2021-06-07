@@ -14,9 +14,9 @@ export function getObservedDataView(titleId, contentId, typeId, observedSDO) {
   observedDIV.id = "observed-data";
 
   if (observedSDO?.first_observed) addNodeViewTitleAndText(observedDIV, "First observed:",
-    new Date(observedSDO.first_observed).toString());
+    new Date(observedSDO.first_observed).toUTCString());
   if (observedSDO?.last_observed) addNodeViewTitleAndText(observedDIV, "Last observed:",
-    new Date(observedSDO.last_observed).toString());
+    new Date(observedSDO.last_observed).toUTCString());
 
   el.appendChild(observedDIV);
   customFieldView(observedDIV.id, observedSDO);

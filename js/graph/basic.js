@@ -38,6 +38,7 @@ import {URL_TYPE} from "../stix/sco/url.js";
 import {IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco.js";
 import {DOMAIN_TYPE} from "../stix/sco/domain.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
+import {SOFTWARE_TYPE} from "../stix/sco/software";
 
 
 let stixBundle = undefined;
@@ -889,6 +890,8 @@ function getNodeImage(node) {
       return "url(#domainImage)";
     case AUTONOMOUS_SYSTEM_TYPE:
       return "url(#autonomousImage)";
+    case SOFTWARE_TYPE:
+      return "url(#softwareImage)";
     default:
       return "url(#questionImage)";
   }
@@ -908,14 +911,14 @@ function setCurrentGraphSelection() {
   }
 }
 
-function parseSTIXContent() {
+function parseSTIXContent(stixContent = null) {
   if (graphSelection === GRAPH_TYPE.SUB_GRAPH) {
     graphSelection = GRAPH_TYPE.ATTACK_GRAPH;
     setCurrentGraphSelection();
   }
   let valid = false;
   eraseSyntaxError();
-  stixBundle = document.getElementById("stixContent").value;
+  stixBundle = stixContent === null ? document.getElementById("stixContent").value: stixContent;
   let bundle = undefined;
   try {
     bundle = JSON.parse(stixBundle);
@@ -1001,6 +1004,9 @@ function activateZoom() {
   zoom.transform.k = 0;
 
   d3.select("#svg").call(d3.zoom().on("zoom", zoomed));
+  // Do not zoom on a double click event
+  d3.select("#svg").on("dblclick.zoom", null);
+
   d3.select("#zoom-in").on("click", function () {
     zoom.scaleBy(svg.transition().duration(750), 1.2);
   })
@@ -1022,7 +1028,8 @@ addArrowMarker("#mdef")
 createGraph();
 setCurrentGraphSelection();
 
-document.getElementById("parseButton").addEventListener("click", parseSTIXContent)
+document.getElementById("parseButton").addEventListener("click", () =>
+  parseSTIXContent(null))
 
 
 let copyright = document.getElementById("copyright");
@@ -1035,3 +1042,80 @@ function openGithub() {
 
 d3.selectAll("#logo").on("click", openGithub)
 d3.selectAll("#logo-text").on("click", openGithub)
+
+dragDropFileUpload();
+
+// Drag and Drop file upload
+function dragDropFileUpload () {
+  eraseSyntaxError();
+  let dropRegion =  document.getElementById("drop-region"),
+    txtPreviewRegion = document.getElementById("txt-preview"),
+    fileInput = document.createElement("input");
+
+  fileInput.type = "file";
+  fileInput.accept = "text/plain";
+  fileInput.multiple = false;
+  dropRegion.addEventListener("click", function () {
+    fileInput.click();
+  });
+
+  function validateFile(file) {
+    return file.type === "text/plain";
+  }
+
+  fileInput.addEventListener("change", function() {
+    eraseSyntaxError();
+    let file = fileInput.files[0];
+    handleFile(file);
+  });
+
+  function preventDefault(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  dropRegion.addEventListener('dragenter', preventDefault, false);
+  dropRegion.addEventListener('dragleave', preventDefault, false);
+  dropRegion.addEventListener('dragover', preventDefault, false);
+  dropRegion.addEventListener('drop', preventDefault, false);
+
+  function handleDrop(e) {
+    eraseSyntaxError();
+    let data = e.dataTransfer,
+      file = data.files[0];
+    handleFile(file);
+  }
+
+  function handleFile(file) {
+    if (validateFile(file)) {
+      removeDragText()
+      uploadFile(file)
+    } else {
+      showSyntaxError("Only file type .txt is allowed.")
+    }
+  }
+
+  dropRegion.addEventListener('drop', handleDrop, false);
+
+  function uploadFile(file) {
+    d3.select("#file-view").remove();
+    let fileView = document.createElement("div");
+    fileView.id = "file-view";
+    fileView.className = "file-view";
+    txtPreviewRegion.appendChild(fileView);
+
+    let previewEl = document.createElement("div");
+    previewEl.innerText = file.name;
+    fileView.appendChild(previewEl);
+
+    let fileReader = new FileReader();
+    fileReader.readAsText(file, "UTF-8")
+    fileReader.onload = function (evt) {
+      parseSTIXContent(evt.target.result)
+    }
+  }
+
+  function removeDragText() {
+    d3.select("#drop-message").remove();
+  }
+}

@@ -22,9 +22,9 @@ export function getIndicatorView(titleId, contentId, typeId, indicatorSDO) {
   if (indicatorSDO?.pattern_type) addNodeViewTitleAndText(indicatorDIV, "Type:", indicatorSDO.pattern_type);
   if (indicatorSDO?.pattern_version) addNodeViewTitleAndText(indicatorDIV, "Version:", indicatorSDO.pattern_version);
   if (indicatorSDO?.valid_from) addNodeViewTitleAndText(indicatorDIV, "Valid from:",
-    new Date(indicatorSDO.valid_from).toString());
+    new Date(indicatorSDO.valid_from).toUTCString());
   if (indicatorSDO?.valid_until) addNodeViewTitleAndText(indicatorDIV, "Valid unti:",
-    new Date(indicatorSDO.valid_until).toString());
+    new Date(indicatorSDO.valid_until).toUTCString());
   if(indicatorSDO?.kill_chain_phases) addKillChainPhases(indicatorDIV, indicatorSDO.kill_chain_phases);
 
   el.appendChild(indicatorDIV);

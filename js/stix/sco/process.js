@@ -12,7 +12,7 @@ export function getProcessView(titleId, contentId, typeId, processSCO) {
   processDIV.id = "process";
 
   if (processSCO?.created_time) addNodeViewTitleAndText(processDIV, "Create time",
-    new Date(processSCO.created_time).toString());
+    new Date(processSCO.created_time).toUTCString());
   if (processSCO?.is_hidden) addNodeViewTitleAndText(processDIV, "Process is hidden:",
     processSCO.is_hidden === true ? "Yes": "No");
 
