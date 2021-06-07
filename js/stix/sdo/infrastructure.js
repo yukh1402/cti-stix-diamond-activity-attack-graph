@@ -21,9 +21,9 @@ export function getInfrastructureView(titleId, contentId, typeId, infrastructure
   if (infrastructureSDO?.infrastructure_types) addNodeViewTitleAndTextList(infrastructureDIV,
     "Infrastructure types:", infrastructureSDO.infrastructure_types, "badge-dark");
   if(infrastructureSDO?.first_seen) addNodeViewTitleAndText(infrastructureDIV, "First seen: ",
-    new Date(infrastructureSDO.first_seen).toString());
+    new Date(infrastructureSDO.first_seen).toUTCString());
   if(infrastructureSDO?.last_seen) addNodeViewTitleAndText(infrastructureDIV, "Last seen: ",
-    new Date(infrastructureSDO.last_seen).toString());
+    new Date(infrastructureSDO.last_seen).toUTCString());
   if (infrastructureSDO?.kill_chain_phases) addKillChainPhases(infrastructureDIV, infrastructureSDO.kill_chain_phases);
 
   el.appendChild(infrastructureDIV);

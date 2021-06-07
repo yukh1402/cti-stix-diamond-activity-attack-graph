@@ -28,6 +28,7 @@ import {DIRECTORY_TYPE, getDirectoryView} from "../stix/sco/directory.js";
 import {getProcessView, PROCESS_TYPE} from "../stix/sco/process.js";
 import {getCustomSTIXView} from "../stix/basic.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
+import {getSoftwareView, SOFTWARE_TYPE} from "../stix/sco/software";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
@@ -39,6 +40,7 @@ export const DIAMOND_MODEL_META_FEATURE_CATEGORIES = [
 ]
 
 export const TTP_Y_AXIS = [
+  // One array for each row of the Mitre Attack Enterprise Matrix https://attack.mitre.org/matrices/enterprise/
   [
     {ttp: "T1595", category: "reconnaissance"},
     {ttp: "T1583", category: "resource-development"},
@@ -645,6 +647,7 @@ export function getNodeLabel(node, fullName = true) {
     case VULNERABILITY_TYPE:
     case FILE_TYPE:
     case AUTONOMOUS_SYSTEM_TYPE:
+    case SOFTWARE_TYPE:
       return showNodeLabel(node.data?.name);
     case PROCESS_TYPE:
       return showNodeLabel(node.data?.command_line);
@@ -653,6 +656,10 @@ export function getNodeLabel(node, fullName = true) {
     case URL_TYPE:
     case DOMAIN_TYPE:
       return showNodeLabel(node.data?.value);
+    case DIRECTORY_TYPE:
+      return showNodeLabel(node.data?.path);
+    default:
+      return "N/A";
   }
 }
 
@@ -664,6 +671,8 @@ export function getNodeLabel(node, fullName = true) {
 function showNodeLabel(val) {
   if (val !== undefined) {
     return val.length > 30 ? val.substr(0,30) + "..." : val;
+  } else {
+    return "N/A";
   }
 }
 
@@ -750,6 +759,9 @@ export function createView(data, titleId, contentId, typeId) {
       break;
     case PROCESS_TYPE:
       getProcessView(titleId, contentId, typeId, data);
+      break;
+    case SOFTWARE_TYPE:
+      getSoftwareView(titleId, contentId, typeId, data);
       break;
     default:
       getCustomSTIXView(contentId, typeId, data);

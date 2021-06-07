@@ -421,3 +421,26 @@ textarea {
   max-height: 40px;
   max-width: 40px;
 }
+
+#drop-message {
+  color: lightgrey;
+}
+
+#drop-region {
+  background-color: #fff;
+  border-radius:20px;
+  box-shadow:0 0 35px rgba(0,0,0,0.05);
+  border-style: dotted;
+  border-color: lightgrey;
+  padding:60px 40px;
+  text-align: center;
+  cursor:pointer;
+  transition:.3s;
+}
+#drop-region:hover {
+  box-shadow:0 0 45px rgba(0,0,0,0.1);
+}
+
+.highlight {
+  box-shadow:0 0 45px rgba(0,0,0,0.1);
+}

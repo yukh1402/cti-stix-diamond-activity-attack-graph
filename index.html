@@ -67,9 +67,21 @@
       <div>
         <label for="stixContent" class="bmd-label-floating">STIX 2.1 JSON</label>
         <textarea class="form-control" id="stixContent" rows="35"></textarea>
+
         <button type="button" class="mt-2 btn btn-raised btn-primary"
                 id="parseButton">Parse
         </button>
+        <div class="mt-2 mb-2">
+          <span >OR</span>
+        </div>
+
+        <div id="drop-region">
+          <div id="drop-message">
+            Drag & Drop STIX 2.1 .txt file
+          </div>
+          <div id="txt-preview"></div>
+        </div>
+
         <div id="syntaxError"></div>
       </div>
     </div>
@@ -168,6 +180,9 @@
             </pattern>
             <pattern id="urlImage" height="24" width="24" x="0" y="0">
               <image width="22" height="22" x="-1" y="-2" xlink:href="img/url.png"></image>
+            </pattern>
+            <pattern id="softwareImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/software.png"></image>
             </pattern>
             <pattern id="autonomousImage" height="24" width="24" x="0" y="0">
               <image width="22" height="22" x="-1" y="-2" xlink:href="img/autonomous.png"></image>

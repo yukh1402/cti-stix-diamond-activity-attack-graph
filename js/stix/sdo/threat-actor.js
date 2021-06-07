@@ -20,9 +20,9 @@ export function getThreatActorView(titleId, contentId, typeId, threatActorSDO) {
   if (threatActorSDO?.goals) addNodeViewTitleAndTextList(threatActorDIV, "Goals:", threatActorSDO.goals,
     "badge-dark");
   if (threatActorSDO?.first_seen) addNodeViewTitleAndText(threatActorDIV, "First seen:",
-    new Date(threatActorSDO.first_seen).toString());
+    new Date(threatActorSDO.first_seen).toUTCString());
   if (threatActorSDO?.last_seen) addNodeViewTitleAndText(threatActorDIV, "Last seen:",
-    new Date(threatActorSDO.last_seen).toString());
+    new Date(threatActorSDO.last_seen).toUTCString());
   if (threatActorSDO?.threat_actor_types) addNodeViewTitleAndTextList(threatActorDIV, "Threat Actor types:",
     threatActorSDO.threat_actor_types, "badge-dark");
   if (threatActorSDO?.roles) addNodeViewTitleAndTextList(threatActorDIV, "Roles:",

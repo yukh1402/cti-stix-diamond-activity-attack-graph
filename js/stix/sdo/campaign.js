@@ -17,9 +17,9 @@ export function getCampaignView(titleId, contentId, typeId, campaignSDO) {
   if (campaignSDO?.aliases) addNodeViewTitleAndTextList(campaignDIV, "Aliases:", campaignSDO.aliases);
   if (campaignSDO?.description) addNodeViewTitleAndText(campaignDIV, "Description:", campaignSDO.description);
   if (campaignSDO?.first_seen) addNodeViewTitleAndText(campaignDIV, "First seen:",
-    new Date(campaignSDO.first_seen).toString());
+    new Date(campaignSDO.first_seen).toUTCString());
   if (campaignSDO?.last_seen) addNodeViewTitleAndText(campaignDIV, "Last seen:",
-    new Date(campaignSDO.last_seen).toString());
+    new Date(campaignSDO.last_seen).toUTCString());
   if(campaignSDO?.objective) addNodeViewTitleAndText(campaignDIV, "Objective:", campaignSDO.objective);
 
   el.appendChild(campaignDIV);

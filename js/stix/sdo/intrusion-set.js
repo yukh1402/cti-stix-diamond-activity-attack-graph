@@ -18,9 +18,9 @@ export function getIntrusionSetView(titleId, contentId, typeId, intrusionSDO) {
   if (intrusionSDO?.description) addNodeViewTitleAndText(intrusionDIV, "Description:", intrusionSDO.description);
 
   if (intrusionSDO?.first_seen) addNodeViewTitleAndText(intrusionDIV, "First seen:",
-    new Date(intrusionSDO.first_seen).toString());
+    new Date(intrusionSDO.first_seen).toUTCString());
   if (intrusionSDO?.last_seen) addNodeViewTitleAndText(intrusionDIV, "Last seen:",
-    new Date(intrusionSDO.last_seen).toString());
+    new Date(intrusionSDO.last_seen).toUTCString());
   if (intrusionSDO?.goals) addNodeViewTitleAndTextList(intrusionDIV, "Goals:", intrusionSDO.goals,
     "badge-dark");
   if (intrusionSDO?.resource_level) addNodeViewTitleAndText(intrusionDIV, "Resource level:",
