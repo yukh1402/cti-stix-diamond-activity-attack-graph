@@ -1,4 +1,4 @@
-import {addNodeViewTextList, addNodeViewTitleAndText, addNodeViewTitleAndTextList, customFieldView} from "../basic";
+import {addNodeViewTitleAndText, addNodeViewTitleAndTextList, customFieldView} from "../basic.js";
 
 export const SOFTWARE_TYPE = "software";
 

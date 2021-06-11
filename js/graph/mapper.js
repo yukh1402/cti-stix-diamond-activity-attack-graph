@@ -28,7 +28,7 @@ import {DIRECTORY_TYPE, getDirectoryView} from "../stix/sco/directory.js";
 import {getProcessView, PROCESS_TYPE} from "../stix/sco/process.js";
 import {getCustomSTIXView} from "../stix/basic.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
-import {getSoftwareView, SOFTWARE_TYPE} from "../stix/sco/software";
+import {getSoftwareView, SOFTWARE_TYPE} from "../stix/sco/software.js";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",

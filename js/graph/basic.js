@@ -38,7 +38,7 @@ import {URL_TYPE} from "../stix/sco/url.js";
 import {IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco.js";
 import {DOMAIN_TYPE} from "../stix/sco/domain.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
-import {SOFTWARE_TYPE} from "../stix/sco/software";
+import {SOFTWARE_TYPE} from "../stix/sco/software.js";
 
 
 let stixBundle = undefined;
