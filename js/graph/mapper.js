@@ -334,16 +334,6 @@ export function getTTP(node) {
 }
 
 /**
- * Get the TTP Y-Axis Id for the Attack Graph
- * @param ttpNumber: The technique, tactic and procedure number from Mitre Attack
- * @param tactic: The Mitre Attack Tactic category
- */
-export function getTTPAxisId(ttpNumber, tactic) {
-  return TTP_Y_AXIS.findIndex(ttpList => ttpList.find(ttp => ttpNumber.includes(ttp.ttp)
-    && ttp.category === tactic.toLowerCase().split(" ").join("-")));
-}
-
-/**
  * Get TTP tatic category from Attack Pattern SDO
  * @param node: Attack Pattern SDO Node
  */
@@ -353,7 +343,7 @@ export function getTactic(node) {
 
 
 /**
- * Parse the Tactic name to the X-Axis Category format
+ * Parse the tactic name to the X-Axis category format
  */
 export function parseTacticNameToXAxis(tactic) {
   let string = "";
@@ -369,7 +359,7 @@ export function parseTacticNameToXAxis(tactic) {
 }
 
 /**
- * Parse a STIX Bundle to a Node structure for creating a Mitre Attack Graph. Only Grouping SDOs with an
+ * Parse a STIX Bundle to a Node (class) structure for creating a Mitre Attack Graph. Only Grouping SDOs with an
  * Attack Pattern SDO are considered.
  * @param bundle
  * @return Graph
@@ -398,6 +388,12 @@ export function parseBundleToGraph(bundle) {
   return new Graph(nodes, groupingLinks);
 }
 
+/**
+ * Build a Sub-Graph based on the object references of a specific Grouping SDO
+ * @param grouping: Grouping SDO
+ * @param bundle: STIX Bundle
+ * @return {Graph}
+ */
 function buildSubGraphForGrouping(grouping, bundle) {
   let childNodes = [];
   let childLinks = [];
@@ -481,7 +477,17 @@ function processRefFields(bundle, childNodes, childLinks, node, sourceIndex) {
           }
         }
         if (refNodeIndex > -1) {
-          childLinks.push(new Link(sourceIndex, refNodeIndex, undefined, "related-to"));
+          switch (key) {
+            case "parent_ref":
+              childLinks.push(new Link(refNodeIndex, sourceIndex, undefined, "parent-of"));
+              break;
+            case "image_ref":
+              childLinks.push(new Link(refNodeIndex, sourceIndex, undefined, "image-of"));
+              break;
+            default:
+              childLinks.push(new Link(sourceIndex, refNodeIndex, undefined, "refers-to"));
+              break;
+          }
         }
       })
     })
@@ -490,7 +496,7 @@ function processRefFields(bundle, childNodes, childLinks, node, sourceIndex) {
 
 
 /**
- * Get all Attack Pattern STIX Domain objects from all Grouping SDOs
+ * Get all Attack Pattern STIX Domain objects (SDOs) from all Grouping SDOs
  * @param graph
  */
 export function getNodesWithAttackPattern(graph) {
@@ -519,29 +525,13 @@ export function getNodesWithAttackPattern(graph) {
 }
 
 /**
- * Get Parent technique
+ * Get the parent technique of a sub-technique
  */
 export function parentTechnique(subTechnique) {
   if (subTechnique.includes(".")) {
     return subTechnique.slice(0, -4);
   } else {
     return subTechnique;
-  }
-}
-
-
-/**
- * For the Sub Attack Graph the node with sequence number 1 or the min date is the first relative node
- * @param nodes
- */
-export function getFirstRelativeNodeTime(nodes) {
-  let relativeTime = nodes.filter(node => "x_sequence_number" in node.data)
-    .find(n => n.data.x_sequence_number === 1)
-
-  if (relativeTime !== undefined) {
-    return Date.parse(relativeTime.created);
-  } else {
-    return getMinNodeDate(nodes);
   }
 }
 
@@ -564,8 +554,8 @@ export function getMinNodeDate(nodes) {
 }
 
 /**
- * The sub graph is split into 5 layers. Layer 1-4 are the Diamond Event Categories. The fifth layer is a floating
- * layer where STIX Cyber observable objects are displayed over all layers.
+ * The Sub-Graph is split into 5 layers. Layer 1-4 are the Diamond Event Categories. The fifth layer is a floating
+ * layer where STIX Cyber Observable objects are displayed over all.
  *
  *              --|---------------------------------------------------------------------------------------------|
  *                |                                                                                             |
@@ -623,7 +613,7 @@ export function getDiamondModelCategoryLayer(node) {
 }
 
 /**
- * Get the Node label which should be displayed in the Graph
+ * Get the node label which should be displayed in the graph
  * @param node
  * @param fullName: Labels used in the node overlay view
  */
@@ -678,7 +668,7 @@ function showNodeLabel(val) {
 
 /**
  * Create the node view depending on the STIX object
- * @param data: This is a Node (STIX) object
+ * @param data: This is a node (STIX) object
  * @param titleId: The id of the title HTML element
  * @param contentId: The id of the content HTML element
  * @param typeId: The id of the type HTML element

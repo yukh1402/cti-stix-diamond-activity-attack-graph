@@ -317,10 +317,6 @@ textarea {
   stroke: black;
 }
 
-.link-sub-graph {
-  stroke: black;
-}
-
 .tooltipAttackGraph {
   position: absolute;
   text-align: center;
@@ -388,10 +384,6 @@ textarea {
 .view-border-bottom {
   padding-bottom: 15px;
   border-bottom: 1px solid lightgrey;
-}
-
-.fixed {
-  border: 1px solid white;
 }
 
 .overlay-nodes {
