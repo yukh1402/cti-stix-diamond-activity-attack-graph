@@ -9,7 +9,7 @@ import {
   createView,
   DIAMOND_MODEL_META_FEATURE_CATEGORIES,
   getMinNodeDate,
-  getMaxNodeDate
+  getMaxNodeDate, setLinkIndex
 } from "./mapper.js";
 import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern.js";
 import {GROUPING_TYPE} from "../stix/sdo/grouping.js";
@@ -636,6 +636,7 @@ function createGraph(graph, node = undefined) {
     } else if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH) {
       buildAttackGraph(graph);
     } else if (graphSelection === GRAPH_TYPE.ACTIVITY_THREAD) {
+      graph = parseBundleToGraph(stixBundle);
       buildActivityThreadGraph(graph);
     }
   }
@@ -776,7 +777,7 @@ function parseSTIXContent(stixContent = null) {
   }
   let valid = false;
   eraseSyntaxError();
-  stixBundle = stixContent === null ? document.getElementById("stixContent").value: stixContent;
+  stixBundle = stixContent === null ? document.getElementById("stixContent").value : stixContent;
   let bundle = undefined;
   try {
     bundle = JSON.parse(stixBundle);
@@ -791,6 +792,7 @@ function parseSTIXContent(stixContent = null) {
     }
   }
   if (valid) {
+    stixBundle = bundle;
     stixGraph = parseBundleToGraph(bundle);
     createGraph(stixGraph);
   }
@@ -904,9 +906,9 @@ d3.selectAll("#logo-text").on("click", openGithub)
 dragDropFileUpload();
 
 // Drag and Drop file upload
-function dragDropFileUpload () {
+function dragDropFileUpload() {
   eraseSyntaxError();
-  let dropRegion =  document.getElementById("drop-region"),
+  let dropRegion = document.getElementById("drop-region"),
     txtPreviewRegion = document.getElementById("txt-preview"),
     fileInput = document.createElement("input");
 
@@ -921,7 +923,7 @@ function dragDropFileUpload () {
     return file.type === "text/plain";
   }
 
-  fileInput.addEventListener("change", function() {
+  fileInput.addEventListener("change", function () {
     eraseSyntaxError();
     let file = fileInput.files[0];
     handleFile(file);
