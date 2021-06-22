@@ -9,7 +9,7 @@ import {
   createView,
   DIAMOND_MODEL_META_FEATURE_CATEGORIES,
   getMinNodeDate,
-  getMaxNodeDate, setLinkIndex
+  getMaxNodeDate
 } from "./mapper.js";
 import {ATTACK_PATTERN_TYPE} from "../stix/sdo/attack-pattern.js";
 import {GROUPING_TYPE} from "../stix/sdo/grouping.js";

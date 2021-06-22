@@ -758,21 +758,3 @@ export function createView(data, titleId, contentId, typeId) {
       break;
   }
 }
-
-/**
- * Set the target and source index for a Link object. This is required because the attack graph force-simulation
- * removes the index and replaces it with the node. As a result the activity thread can't access the index number and
- * an error occurs.
- * @param link: A link object
- */
-export function setLinkIndex(link) {
-  let source = link.source;
-  let target = link.target;
-  if (isNaN(source)) {
-    source = link.source.index;
-  }
-  if (isNaN(target)) {
-    target = link.target.index;
-  }
-  return new Link(source, target, link.data, link?.relation);
-}
