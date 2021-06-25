@@ -37,6 +37,7 @@ import {IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco.js";
 import {DOMAIN_TYPE} from "../stix/sco/domain.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
 import {SOFTWARE_TYPE} from "../stix/sco/software.js";
+import {USER_ACCOUNT_TYPE} from "../stix/sco/user-account";
 
 
 let stixBundle = undefined;
@@ -751,6 +752,8 @@ function getNodeImage(node) {
       return "url(#autonomousImage)";
     case SOFTWARE_TYPE:
       return "url(#softwareImage)";
+    case USER_ACCOUNT_TYPE:
+      return "url(#userAccountImage)";
     default:
       return "url(#questionImage)";
   }
