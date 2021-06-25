@@ -29,6 +29,7 @@ import {getProcessView, PROCESS_TYPE} from "../stix/sco/process.js";
 import {getCustomSTIXView} from "../stix/basic.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
 import {getSoftwareView, SOFTWARE_TYPE} from "../stix/sco/software.js";
+import {getUserAccountView, USER_ACCOUNT_TYPE} from "../stix/sco/user-account";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
@@ -484,6 +485,9 @@ function processRefFields(bundle, childNodes, childLinks, node, sourceIndex) {
             case "image_ref":
               childLinks.push(new Link(refNodeIndex, sourceIndex, undefined, "image-of"));
               break;
+            case "creator_user_ref":
+              childLinks.push(new Link(sourceIndex, refNodeIndex, undefined, "created-by"));
+              break;
             default:
               childLinks.push(new Link(sourceIndex, refNodeIndex, undefined, "refers-to"));
               break;
@@ -648,6 +652,8 @@ export function getNodeLabel(node, fullName = true) {
       return showNodeLabel(node.data?.value);
     case DIRECTORY_TYPE:
       return showNodeLabel(node.data?.path);
+    case USER_ACCOUNT_TYPE:
+      return showNodeLabel(node.data?.user_id ? node.data.user_id : node.data?.display_name);
     default:
       return "N/A";
   }
@@ -752,6 +758,9 @@ export function createView(data, titleId, contentId, typeId) {
       break;
     case SOFTWARE_TYPE:
       getSoftwareView(titleId, contentId, typeId, data);
+      break;
+    case USER_ACCOUNT_TYPE:
+      getUserAccountView(titleId, contentId, typeId, data);
       break;
     default:
       getCustomSTIXView(contentId, typeId, data);
