@@ -37,7 +37,7 @@ import {IPV4_TYPE, IPV6_TYPE} from "../stix/sco/ipv-sco.js";
 import {DOMAIN_TYPE} from "../stix/sco/domain.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
 import {SOFTWARE_TYPE} from "../stix/sco/software.js";
-import {USER_ACCOUNT_TYPE} from "../stix/sco/user-account";
+import {USER_ACCOUNT_TYPE} from "../stix/sco/user-account.js";
 
 
 let stixBundle = undefined;
