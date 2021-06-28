@@ -29,7 +29,7 @@ import {getProcessView, PROCESS_TYPE} from "../stix/sco/process.js";
 import {getCustomSTIXView} from "../stix/basic.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
 import {getSoftwareView, SOFTWARE_TYPE} from "../stix/sco/software.js";
-import {getUserAccountView, USER_ACCOUNT_TYPE} from "../stix/sco/user-account";
+import {getUserAccountView, USER_ACCOUNT_TYPE} from "../stix/sco/user-account.js";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
