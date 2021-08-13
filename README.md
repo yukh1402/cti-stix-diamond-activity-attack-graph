@@ -45,6 +45,8 @@ will be displayed in an Attack or Activity Thread Graph. An Attack Graph is time
 
 ## How to use the tool?
 
+Notice: This tool is Chrome (Browser) optimized.
+
 The STIX Bundle MUST have a structured schema with at least one or multiple STIX Domain Objects (SDO) of type Grouping. All other SDOs, STIX Relationship Objects (SROs) and STIX Cyber-observable Objects (SCOs) that are related or employed in the same context will be referenced via id in the `` "object_refs" `` field of the associated Grouping SDO.
 
 For providing a valid STIX Bundle schema that can be processed in the tool, three requirements are necessary:
