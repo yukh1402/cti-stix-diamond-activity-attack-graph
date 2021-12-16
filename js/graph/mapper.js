@@ -30,6 +30,7 @@ import {getCustomSTIXView} from "../stix/basic.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
 import {getSoftwareView, SOFTWARE_TYPE} from "../stix/sco/software.js";
 import {getUserAccountView, USER_ACCOUNT_TYPE} from "../stix/sco/user-account.js";
+import {CODE_TYPE} from "../stix/sco/code";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
@@ -654,6 +655,8 @@ export function getNodeLabel(node, fullName = true) {
       return showNodeLabel(node.data?.path);
     case USER_ACCOUNT_TYPE:
       return showNodeLabel(node.data?.user_id ? node.data.user_id : node.data?.display_name);
+    case CODE_TYPE:
+      return showNodeLabel(node.data?.value);
     default:
       return "N/A";
   }
