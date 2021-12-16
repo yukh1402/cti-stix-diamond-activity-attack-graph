@@ -38,7 +38,7 @@ import {DOMAIN_TYPE} from "../stix/sco/domain.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
 import {SOFTWARE_TYPE} from "../stix/sco/software.js";
 import {USER_ACCOUNT_TYPE} from "../stix/sco/user-account.js";
-import {CODE_TYPE} from "../stix/sco/code";
+import {CODE_TYPE} from "../stix/sco/code.js";
 
 
 let stixBundle = undefined;
