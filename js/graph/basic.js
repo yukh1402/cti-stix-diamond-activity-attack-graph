@@ -38,6 +38,7 @@ import {DOMAIN_TYPE} from "../stix/sco/domain.js";
 import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
 import {SOFTWARE_TYPE} from "../stix/sco/software.js";
 import {USER_ACCOUNT_TYPE} from "../stix/sco/user-account.js";
+import {CODE_TYPE} from "../stix/sco/code";
 
 
 let stixBundle = undefined;
@@ -754,6 +755,8 @@ function getNodeImage(node) {
       return "url(#softwareImage)";
     case USER_ACCOUNT_TYPE:
       return "url(#userAccountImage)";
+    case CODE_TYPE:
+      return "url(#codeImage)"
     default:
       return "url(#questionImage)";
   }
@@ -916,14 +919,14 @@ function dragDropFileUpload() {
     fileInput = document.createElement("input");
 
   fileInput.type = "file";
-  fileInput.accept = "text/plain";
+  fileInput.accept = "text/plain,application/json";
   fileInput.multiple = false;
   dropRegion.addEventListener("click", function () {
     fileInput.click();
   });
 
   function validateFile(file) {
-    return file.type === "text/plain";
+    return file.type === "text/plain" || file.type === "application/json";
   }
 
   fileInput.addEventListener("change", function () {
