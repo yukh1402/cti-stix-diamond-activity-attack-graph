@@ -1,5 +1,5 @@
 {
-  "name": "CTI-STIX-Diamond-Activity-Attack-Graph",
+  "name": "idoubles_opensourcetool",
   "version": "0.0.1",
   "description": "",
   "keywords": "",
@@ -12,11 +12,15 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.12.4",
-    "typescript": "^4.2.4"
+    "parcel": "^2.7.0",
+    "@parcel/optimizer-htmlnano": "^2.7.0",
+    "typescript": "^4.8.2"
   },
   "dependencies": {
-    "bootstrap-material-design": "^4.1.1",
-    "d3": "^6.5.0"
+    "bootstrap-material-design": "^4.1.3",
+    "d3": "^7.6.1"
+  },
+  "engines": {
+    "node": "14"
   }
 }

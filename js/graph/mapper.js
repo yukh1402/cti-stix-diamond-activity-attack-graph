@@ -31,6 +31,8 @@ import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
 import {getSoftwareView, SOFTWARE_TYPE} from "../stix/sco/software.js";
 import {getUserAccountView, USER_ACCOUNT_TYPE} from "../stix/sco/user-account.js";
 import {CODE_TYPE} from "../stix/sco/code.js";
+import {EMAIL_MESSAGE_TYPE, getEmailMessageView} from "../stix/sco/email-message.js";
+import {ARTIFACT_TYPE, getArtifactView} from "../stix/sco/artifact.js";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
@@ -657,6 +659,10 @@ export function getNodeLabel(node, fullName = true) {
       return showNodeLabel(node.data?.user_id ? node.data.user_id : node.data?.display_name);
     case CODE_TYPE:
       return showNodeLabel(node.data?.value);
+    case EMAIL_MESSAGE_TYPE:
+      return showNodeLabel(node.data?.subject);
+    case ARTIFACT_TYPE:
+      return showNodeLabel(node.data?.x_name);
     default:
       return "N/A";
   }
@@ -764,6 +770,12 @@ export function createView(data, titleId, contentId, typeId) {
       break;
     case USER_ACCOUNT_TYPE:
       getUserAccountView(titleId, contentId, typeId, data);
+      break;
+    case EMAIL_MESSAGE_TYPE:
+      getEmailMessageView(titleId, contentId, typeId, data);
+      break;
+    case ARTIFACT_TYPE:
+      getArtifactView(titleId, contentId, typeId, data);
       break;
     default:
       getCustomSTIXView(contentId, typeId, data);

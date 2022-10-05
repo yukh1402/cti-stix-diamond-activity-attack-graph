@@ -315,6 +315,11 @@ textarea {
 
 .link {
   stroke: black;
+  border-top: 1px dotted
+}
+
+.link-dot {
+
 }
 
 .tooltipAttackGraph {
@@ -378,7 +383,16 @@ textarea {
 
 .node-body {
   overflow-y: auto;
-  max-height: 700px;
+}
+
+@media all and (max-width: 1800px) {
+  .node-body {
+    max-height: 700px;
+  }
+}
+
+.card-view {
+  z-index: 99999;
 }
 
 .view-border-bottom {

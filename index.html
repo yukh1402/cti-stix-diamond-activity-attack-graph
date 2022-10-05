@@ -2,6 +2,8 @@
 <html class="no-js" lang="">
 
 <head>
+  <script src="js/graph/basic.js" type="module"></script>
+
   <meta charset="utf-8">
   <title>CTI STIX Diamond Activity Attack Graph</title>
   <meta name="description" content="">
@@ -44,7 +46,6 @@
 });</script>
 
 <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
-
   <header class="bmd-layout-header">
     <div class="navbar navbar-light ">
       <button class="btn btn-raised btn-primary" type="button" data-toggle="drawer" data-target="#dw">
@@ -62,6 +63,7 @@
     </div>
   </header>
 
+<!--  Parse STIX area-->
   <div id="dw" class="bmd-layout-drawer bg-faded">
     <div class="container mt-2">
       <div>
@@ -101,6 +103,12 @@
           <span>Object selection</span>
           <img class="control-icon mb-1" src="img/leftclick.png">
         </div>
+<!--        <div class="col-7"></div>-->
+<!--        <div class="col-1">-->
+<!--          <button class="btn btn-raised btn-primary" type="button" id="create-stix-btn">-->
+<!--            Create STIX object-->
+<!--          </button>-->
+<!--        </div>-->
       </div>
       <div id="svg-container">
         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg">
@@ -196,6 +204,12 @@
             <pattern id="questionImage" height="24" width="24" x="0" y="0">
               <image width="22" height="22" x="-1" y="-2" xlink:href="img/question.png"></image>
             </pattern>
+            <pattern id="emailMessageImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/email-message.png"></image>
+            </pattern>
+            <pattern id="artifactImage" height="24" width="24" x="0" y="0">
+              <image width="22" height="22" x="-1" y="-2" xlink:href="img/artifact.png"></image>
+            </pattern>
           </defs>
         </svg>
       </div>
@@ -208,7 +222,6 @@
     <a href="https://github.com/yukh1402/cti-stix-diamond-activity-attack-graph" target="_blank">Github</a>
   </div>
 </div>
-<script src="js/graph/basic.js" type="module"></script>
 </body>
 
 </html>

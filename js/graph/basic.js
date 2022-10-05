@@ -39,6 +39,12 @@ import {AUTONOMOUS_SYSTEM_TYPE} from "../stix/sco/autonomous-system.js";
 import {SOFTWARE_TYPE} from "../stix/sco/software.js";
 import {USER_ACCOUNT_TYPE} from "../stix/sco/user-account.js";
 import {CODE_TYPE} from "../stix/sco/code.js";
+import {EMAIL_MESSAGE_TYPE} from "../stix/sco/email-message.js";
+import {ARTIFACT_TYPE} from "../stix/sco/artifact.js";
+import {COURSE_OF_ACTION_TYPE} from "../stix/sdo/course-of-action.js";
+import {INCIDENT_TYPE} from "../stix/sdo/incident.js";
+import {capitalize} from "./utils.js";
+import {loadCreateSTIXForm} from "../stix/basic.js";
 
 
 let stixBundle = undefined;
@@ -69,8 +75,9 @@ const HEIGHT = 650;
 
 // Default Graph selection
 let graphSelection = window.location.hash.replace("#", "") || GRAPH_TYPE.ATTACK_GRAPH;
+window.location.hash = graphSelection === GRAPH_TYPE.ATTACK_GRAPH ? GRAPH_TYPE.ATTACK_GRAPH: "";
 
-/**
+  /**
  * Get Graph selection through change in URL hash
  */
 window.onhashchange = function () {
@@ -213,6 +220,11 @@ function buildActivityThreadGraph(graph) {
     .attr('marker-end', 'url(#arrow)')
     .classed("link", true);
 
+  // Set link line class
+  svg.selectAll('#link-line')
+    .filter(d => d.data?.x_hypothesized === true)
+    .attr("stroke-dasharray", "5, 5");
+
   // Add circles
   scatter
     .selectAll("circle")
@@ -298,6 +310,11 @@ function buildAttackGraph(graph) {
     .attr("id", "link-line")
     .attr('marker-end', 'url(#arrow)')
     .classed("link", true);
+
+  // Set link line class
+  svg.selectAll('#link-line')
+    .filter(d => d.data?.x_hypothesized === true)
+    .attr("stroke-dasharray", "5, 5");
 
   // Set link labels
   svg.selectAll("#link")
@@ -396,6 +413,11 @@ function buildSubGraph(groupingNode) {
     .attr("id", "link-line")
     .attr('marker-end', 'url(#arrow)')
     .classed("link", true)
+
+  // Set link line class
+  svg.selectAll('#link-line')
+    .filter(d => d.data?.x_hypothesized === true)
+    .attr("stroke-dasharray", "5, 5");
 
   svg.selectAll("#link")
     .append("text")
@@ -757,6 +779,10 @@ function getNodeImage(node) {
       return "url(#userAccountImage)";
     case CODE_TYPE:
       return "url(#codeImage)"
+    case EMAIL_MESSAGE_TYPE:
+      return "url(#emailMessageImage)"
+    case ARTIFACT_TYPE:
+      return "url(#artifactImage)"
     default:
       return "url(#questionImage)";
   }
@@ -800,6 +826,7 @@ function parseSTIXContent(stixContent = null) {
   if (valid) {
     stixBundle = bundle;
     stixGraph = parseBundleToGraph(bundle);
+    console.log(stixGraph)
     createGraph(stixGraph);
   }
 }
@@ -824,7 +851,7 @@ function createNodeView(node) {
   nodeViewDIV.id = "nodeView"
   nodeViewDIV.className = "nodeView"
   nodeViewDIV.innerHTML =
-    "<div class='card'>" +
+    "<div class='card card-view'>" +
     "<div class='card-header'>" +
     "<button type='button' class='btn' id='view-close-btn'>" +
     "  <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-arrow-right\" viewBox=\"0 0 16 16\">\n" +
@@ -909,9 +936,89 @@ function openGithub() {
 d3.selectAll("#logo").on("click", openGithub)
 d3.selectAll("#logo-text").on("click", openGithub)
 
+
+// Create STIX Objects ------------------------
+
+//document.getElementById("create-stix-btn").addEventListener("click", () => createSTIXObjects());
+
+function createSTIXObjects() {
+
+  function removeCreateView() {
+    d3.select("#creat-stix-dialog").remove();
+  }
+
+  function openSTIXCreateDialog(objectTypes=[]) {
+    let createSTIX = document.createElement("div");
+    createSTIX.id = "creat-stix-dialog";
+    createSTIX.className = "nodeView";
+    createSTIX.innerHTML =
+      "<div class='card card-view'>" +
+      "<div class='card-header'>" +
+      "<button type='button' class='btn' id='create-view-close-btn'>" +
+      "  <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-arrow-right\" viewBox=\"0 0 16 16\">\n" +
+      "  <path fill-rule=\"evenodd\" d=\"M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z\"/>\n" +
+      "</svg>" +
+      "</button>" +
+      "</div>" +
+      "<div class='card-body node-body'>" +
+      "<h6>New STIX Object</h6>" +
+      "<div id='new-stix-area'></div>" +
+      "<h6><div class='row-flex'>" +
+      "<div><svg id='node-view-img' width='60' height='70' viewBox='0 -12 1 28'>" +
+      "</svg></div>" +
+      "<div class='column-flex'><span id='node-title'></span><span class='node-type' id='node-type'></span></div>" +
+      "</div></h6>" +
+      "<form><div id='create-form'></div></form>" +
+      "</div>" +
+      "</div>"
+    document.getElementById("workspace").appendChild(createSTIX);
+
+    let dropdownButton = document.createElement("button");
+    dropdownButton.className = "btn btn-raised btn-primary dropdown-toggle w-100";
+    dropdownButton.type = "button";
+    dropdownButton.id = "dropdownSTIXType";
+    dropdownButton.setAttribute("data-toggle", "dropdown");
+    dropdownButton.setAttribute("aria-expanded", "false");
+    dropdownButton.setAttribute("aria-haspopup", "true");
+    dropdownButton.innerText = "Object types";
+
+    let list = document.createElement("div");
+    list.className = "dropdown-menu";
+    list.setAttribute("aria-labelledby", "dropdownMenuButton");
+
+    objectTypes.forEach(obj => {
+      let stixType = document.createElement("a");
+      stixType.className = "dropdown-item";
+      stixType.innerText = capitalize(obj);
+      stixType.onclick = (ev) => {
+        loadCreateSTIXForm(obj, 'create-form', 'node-title', 'node-type');
+        d3.select("#node-view-img")
+          .append("circle")
+          .attr("r", 10)
+          .style("fill", () => getNodeImage(new Node("1", null, obj)));
+      }
+      list.appendChild(stixType);
+    });
+
+    let STIXArea = document.getElementById("new-stix-area");
+    STIXArea.appendChild(dropdownButton);
+    STIXArea.appendChild(list);
+
+    document.getElementById("create-view-close-btn").addEventListener("click", removeCreateView)
+  }
+
+  let STIXTypes = [ATTACK_PATTERN_TYPE, CAMPAIGN_TYPE, COURSE_OF_ACTION_TYPE, IDENTITY_TYPE, INCIDENT_TYPE, INDICATOR_TYPE];
+
+  if (graphSelection === GRAPH_TYPE.ATTACK_GRAPH || graphSelection === GRAPH_TYPE.ACTIVITY_THREAD) {
+    openSTIXCreateDialog([GROUPING_TYPE])
+  } else {
+    openSTIXCreateDialog(STIXTypes)
+  }
+}
+
+// Drag and Drop file upload ---------------
 dragDropFileUpload();
 
-// Drag and Drop file upload
 function dragDropFileUpload() {
   eraseSyntaxError();
   let dropRegion = document.getElementById("drop-region"),
@@ -985,3 +1092,4 @@ function dragDropFileUpload() {
     d3.select("#drop-message").remove();
   }
 }
+// --------------------------------

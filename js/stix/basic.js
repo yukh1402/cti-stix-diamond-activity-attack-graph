@@ -1,4 +1,5 @@
 import {capitalize} from "../graph/utils.js";
+import {buildGroupingCreateView, GROUPING_TYPE} from "./sdo/grouping.js";
 
 
 /**
@@ -6,8 +7,9 @@ import {capitalize} from "../graph/utils.js";
  * @param divId: The DIV id where the custom field values should be displayed
  * @param obj: Any SDO or SCO
  * @param allKeys: Display all fields and not only custom fields
+ * @param exclude: A list of JSON Keys that need to be excluded during processing
  */
-export function customFieldView (divId, obj, allKeys = false) {
+export function customFieldView (divId, obj, allKeys = false, exclude = []) {
   let customKeys = [];
   if (allKeys === false) {
     customKeys = Object.keys(obj).filter((key) => key.charAt(0) === "x" && key.charAt(1) === "_" );
@@ -17,12 +19,14 @@ export function customFieldView (divId, obj, allKeys = false) {
   if (customKeys.length > 0) {
     const customDIV = document.createElement("div");
     customKeys.forEach(key => {
-      addNodeViewTitle(customDIV, reformatCustomKey(key) + ":");
-      if (Array.isArray(obj[key])) {
-        //  Show as badges
-        addNodeViewTextList(customDIV, obj[key], "badge-dark");
-      } else {
-        addNodeViewText(customDIV, obj[key]);
+      if (exclude.findIndex(entry => entry === key) === -1) {
+        addNodeViewTitle(customDIV, reformatCustomKey(key) + ":");
+        if (Array.isArray(obj[key])) {
+          //  Show as badges
+          addNodeViewTextList(customDIV, obj[key], "badge-dark");
+        } else {
+          addNodeViewText(customDIV, obj[key]);
+        }
       }
     });
     document.getElementById(divId).appendChild(customDIV);
@@ -90,7 +94,7 @@ export function addNodeViewTextList(divEl, textList, badgeColor = "badge-primary
   let badgeDIV = document.createElement("div");
   badgeDIV.className = "view-border-bottom";
   textList.forEach(alias => {
-    badgeDIV.innerHTML += "<span class='badge badge-pill m-1 " + badgeColor + "'>" + alias +"</span>";
+    badgeDIV.innerHTML += "<div><span class='badge badge-pill " + badgeColor + "'>" + alias +"</span></div>";
   })
   divEl.appendChild(badgeDIV);
 }
@@ -128,5 +132,16 @@ function getExternalId(externalId) {
     return " - " + externalId;
   } else {
     return "";
+  }
+}
+
+
+/**
+ * Load STIX Object create form
+ */
+export function loadCreateSTIXForm(STIXType, divID, titleID, typeID) {
+  switch (STIXType) {
+    case GROUPING_TYPE:
+      return buildGroupingCreateView(divID, titleID, typeID)
   }
 }
