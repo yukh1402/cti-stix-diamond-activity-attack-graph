@@ -9,7 +9,7 @@ export class Node {
   constructor(id, data, type = undefined, subGraph = undefined, groupingId = undefined,
               x = undefined, y = undefined) {
     this.id = id;
-    this.data = data;
+    this.data = data; // STIX Format
     this.type = type;
     this.subGraph = subGraph;
     this.groupingId = groupingId;
