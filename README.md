@@ -1,4 +1,4 @@
-# IdoubleS-OpenSourceTool
+# cti-stix-diamond-activity-attack-graph
 
 This is an Open Source tool for visualizing [STIX](https://oasis-open.github.io/cti-documentation/stix/intro.html) 2.1 content in an
 
