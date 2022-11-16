@@ -45,6 +45,7 @@ import {COURSE_OF_ACTION_TYPE} from "../stix/sdo/course-of-action.js";
 import {INCIDENT_TYPE} from "../stix/sdo/incident.js";
 import {capitalize} from "./utils.js";
 import {loadCreateSTIXForm} from "../stix/basic.js";
+import {WINDOWS_REGISTRY_KEY_TYPE} from "../stix/sco/windows-registry-key.js";
 
 
 let stixBundle = undefined;
@@ -783,6 +784,8 @@ function getNodeImage(node) {
       return "url(#emailMessageImage)"
     case ARTIFACT_TYPE:
       return "url(#artifactImage)"
+    case WINDOWS_REGISTRY_KEY_TYPE:
+      return "url(#winRegKey)"
     default:
       return "url(#questionImage)";
   }
@@ -826,7 +829,6 @@ function parseSTIXContent(stixContent = null) {
   if (valid) {
     stixBundle = bundle;
     stixGraph = parseBundleToGraph(bundle);
-    console.log(stixGraph)
     createGraph(stixGraph);
   }
 }

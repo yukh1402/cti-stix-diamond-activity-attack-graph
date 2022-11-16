@@ -20,11 +20,14 @@ export function customFieldView (divId, obj, allKeys = false, exclude = []) {
     const customDIV = document.createElement("div");
     customKeys.forEach(key => {
       if (exclude.findIndex(entry => entry === key) === -1) {
-        addNodeViewTitle(customDIV, reformatCustomKey(key) + ":");
-        if (Array.isArray(obj[key])) {
+        if (obj[key].constructor === Object) {
+          customFieldView(divId, obj[key], allKeys, exclude);
+        } else if (Array.isArray(obj[key])) {
           //  Show as badges
+          addNodeViewTitle(customDIV, reformatCustomKey(key) + ":");
           addNodeViewTextList(customDIV, obj[key], "badge-dark");
         } else {
+          addNodeViewTitle(customDIV, reformatCustomKey(key) + ":");
           addNodeViewText(customDIV, obj[key]);
         }
       }

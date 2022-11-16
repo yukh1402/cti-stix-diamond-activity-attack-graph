@@ -33,6 +33,7 @@ import {getUserAccountView, USER_ACCOUNT_TYPE} from "../stix/sco/user-account.js
 import {CODE_TYPE} from "../stix/sco/code.js";
 import {EMAIL_MESSAGE_TYPE, getEmailMessageView} from "../stix/sco/email-message.js";
 import {ARTIFACT_TYPE, getArtifactView} from "../stix/sco/artifact.js";
+import {WINDOWS_REGISTRY_KEY_TYPE, getWindowsRegistryKeyView} from "../stix/sco/windows-registry-key.js";
 
 export const MITRE_ATTACK_CATEGORIES = [
   "Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation",
@@ -647,7 +648,9 @@ export function getNodeLabel(node, fullName = true) {
     case SOFTWARE_TYPE:
       return showNodeLabel(node.data?.name);
     case PROCESS_TYPE:
-      return showNodeLabel(node.data?.command_line);
+      return showNodeLabel(node.data?.command_line ? node.data.command_line: node.data?.x_name);
+    case WINDOWS_REGISTRY_KEY_TYPE:
+      return showNodeLabel(node.data?.key)
     case IPV4_TYPE:
     case IPV6_TYPE:
     case URL_TYPE:
@@ -764,6 +767,9 @@ export function createView(data, titleId, contentId, typeId) {
       break;
     case PROCESS_TYPE:
       getProcessView(titleId, contentId, typeId, data);
+      break;
+    case WINDOWS_REGISTRY_KEY_TYPE:
+      getWindowsRegistryKeyView(titleId, contentId, typeId, data);
       break;
     case SOFTWARE_TYPE:
       getSoftwareView(titleId, contentId, typeId, data);

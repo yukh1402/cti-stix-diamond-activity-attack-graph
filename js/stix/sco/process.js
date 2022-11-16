@@ -4,7 +4,7 @@ export const PROCESS_TYPE = "process";
 
 
 export function getProcessView(titleId, contentId, typeId, processSCO) {
-  document.getElementById(titleId).innerHTML += processSCO?.command_line ? processSCO.command_line: "";
+  document.getElementById(titleId).innerHTML += processSCO?.command_line ? processSCO.command_line: processSCO?.x_name ? processSCO.x_name: "";
   document.getElementById(typeId).innerHTML += "Process";
 
   let el = document.getElementById(contentId);
@@ -21,5 +21,5 @@ export function getProcessView(titleId, contentId, typeId, processSCO) {
   if (processSCO?.command_line) addNodeViewTitleAndText(processDIV, "Command line:", processSCO.command_line);
 
   el.appendChild(processDIV);
-  customFieldView(processDIV.id, processSCO);
+  customFieldView(processDIV.id, processSCO, true, ["cwd", "command_line", "pid", "is_hidden"]);
 }
