@@ -1,5 +1,5 @@
 import {addNodeViewTitle, addNodeViewTitleAndText, customFieldView} from "../basic.js";
-import {capitalize} from "../../graph/utils";
+import {capitalize} from "../../graph/utils.js";
 
 export const WINDOWS_REGISTRY_KEY_TYPE = "windows-registry-key";
 
