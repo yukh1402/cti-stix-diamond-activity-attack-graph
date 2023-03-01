@@ -4,7 +4,10 @@ export const PROCESS_TYPE = "process";
 
 
 export function getProcessView(titleId, contentId, typeId, processSCO) {
-  document.getElementById(titleId).innerHTML += processSCO?.command_line ? processSCO.command_line: processSCO?.x_name ? processSCO.x_name: "";
+  document.getElementById(titleId).innerHTML += processSCO?.command_line ? processSCO.command_line :
+    processSCO?.x_name ? processSCO.x_name :
+      processSCO?.extensions['windows-service-ext']?.service_name ? processSCO.extensions['windows-service-ext'].service_name
+        : "";
   document.getElementById(typeId).innerHTML += "Process";
 
   let el = document.getElementById(contentId);
@@ -14,7 +17,7 @@ export function getProcessView(titleId, contentId, typeId, processSCO) {
   if (processSCO?.created_time) addNodeViewTitleAndText(processDIV, "Create time",
     new Date(processSCO.created_time).toUTCString());
   if (processSCO?.is_hidden) addNodeViewTitleAndText(processDIV, "Process is hidden:",
-    processSCO.is_hidden === true ? "Yes": "No");
+    processSCO.is_hidden === true ? "Yes" : "No");
 
   if (processSCO?.pid) addNodeViewTitleAndText(processDIV, "PID:", processSCO.pid.toString());
   if (processSCO?.cwd) addNodeViewTitleAndText(processDIV, "Current working directory:", processSCO.cwd);

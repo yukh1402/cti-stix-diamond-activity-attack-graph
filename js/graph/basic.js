@@ -346,9 +346,11 @@ function buildAttackGraph(graph) {
 
   let simulation = d3.forceSimulation()
     .nodes(attackPatterns)
-    .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(WIDTH / MITRE_ATTACK_CATEGORIES.length, HEIGHT / 4))
-    .force("link", d3.forceLink(graph.links).distance(60))
+    .force("charge", d3.forceManyBody().strength(-100))
+    .force("link", d3.forceLink(graph.links).distance(10))
+    // .force("charge", d3.forceManyBody(0))
+    // .force("center", d3.forceCenter(0, HEIGHT/2))
+    // .force("link", d3.forceLink(graph.links))
     .on("tick", () => forceDirectedTick("#circle", "#node-label", "#link-line",
       "#link-label"))
 
@@ -733,6 +735,8 @@ function getNodeImage(node) {
       return "url(#attackPatternImage)";
     case TOOL_TYPE:
       return "url(#toolImage)";
+    case COURSE_OF_ACTION_TYPE:
+      return "url(#courseOfAction)"
     case MALWARE_TYPE:
       return "url(#malwareImage)";
     case VULNERABILITY_TYPE:

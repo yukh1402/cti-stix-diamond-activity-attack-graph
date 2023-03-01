@@ -67,7 +67,7 @@ export const TTP_Y_AXIS = [
     {ttp: "T1586", category: "resource-development"},
     {ttp: "T1190", category: "initial-access"},
     {ttp: "T1203", category: "execution"},
-    {ttp: "T1197", category: "persistence"} ,
+    {ttp: "T1197", category: "persistence"},
     {ttp: "T1134", category: "privilege-escalation"},
     {ttp: "T1134", category: "defense-evasion"},
     {ttp: "T1555", category: "credential-access"},
@@ -91,7 +91,7 @@ export const TTP_Y_AXIS = [
     {ttp: "T1570", category: "lateral-movement"},
     {ttp: "T1119", category: "collection"},
     {ttp: "T1132", category: "command-and-control"},
-    {ttp: "T1048", category:  "exfiltration"},
+    {ttp: "T1048", category: "exfiltration"},
     {ttp: "T1486", category: "impact"}
   ],
   [
@@ -107,7 +107,7 @@ export const TTP_Y_AXIS = [
     {ttp: "T1563", category: "lateral-movement"},
     {ttp: "T1115", category: "collection"},
     {ttp: "T1001", category: "command-and-control"},
-    {ttp: "T1041", category:  "exfiltration"},
+    {ttp: "T1041", category: "exfiltration"},
     {ttp: "T1565", category: "impact"}
   ],
   [
@@ -123,7 +123,7 @@ export const TTP_Y_AXIS = [
     {ttp: "T1021", category: "lateral-movement"},
     {ttp: "T1530", category: "collection"},
     {ttp: "T1568", category: "command-and-control"},
-    {ttp: "T1011", category:  "exfiltration"},
+    {ttp: "T1011", category: "exfiltration"},
     {ttp: "T1491", category: "impact"}
   ],
   [
@@ -139,7 +139,7 @@ export const TTP_Y_AXIS = [
     {ttp: "T1091", category: "lateral-movement"},
     {ttp: "T1602", category: "collection"},
     {ttp: "T1573", category: "command-and-control"},
-    {ttp: "T1052", category:  "exfiltration"},
+    {ttp: "T1052", category: "exfiltration"},
     {ttp: "T1561", category: "impact"}
   ],
   [
@@ -155,7 +155,7 @@ export const TTP_Y_AXIS = [
     {ttp: "T1072", category: "lateral-movement"},
     {ttp: "T1213", category: "collection"},
     {ttp: "T1008", category: "command-and-control"},
-    {ttp: "T1567", category:  "exfiltration"},
+    {ttp: "T1567", category: "exfiltration"},
     {ttp: "T1499", category: "impact"}
   ],
   [
@@ -170,7 +170,7 @@ export const TTP_Y_AXIS = [
     {ttp: "T1080", category: "lateral-movement"},
     {ttp: "T1005", category: "collection"},
     {ttp: "T1105", category: "command-and-control"},
-    {ttp: "T1029", category:  "exfiltration"},
+    {ttp: "T1029", category: "exfiltration"},
     {ttp: "T1495", category: "impact"}
   ],
   [
@@ -185,7 +185,7 @@ export const TTP_Y_AXIS = [
     {ttp: "T1550", category: "lateral-movement"},
     {ttp: "T1039", category: "collection"},
     {ttp: "T1104", category: "command-and-control"},
-    {ttp: "T1537", category:  "exfiltration"},
+    {ttp: "T1537", category: "exfiltration"},
     {ttp: "T1490", category: "impact"}
   ],
   [
@@ -645,10 +645,14 @@ export function getNodeLabel(node, fullName = true) {
     case VULNERABILITY_TYPE:
     case FILE_TYPE:
     case AUTONOMOUS_SYSTEM_TYPE:
+    case COURSE_OF_ACTION_TYPE:
     case SOFTWARE_TYPE:
       return showNodeLabel(node.data?.name);
     case PROCESS_TYPE:
-      return showNodeLabel(node.data?.command_line ? node.data.command_line: node.data?.x_name);
+      return showNodeLabel(node.data?.command_line
+        ? node.data.command_line : node.data?.x_name
+          ? node.data?.x_name : node.data?.extensions['windows-service-ext']?.service_name
+            ? node.data.extensions['windows-service-ext'].service_name : "");
     case WINDOWS_REGISTRY_KEY_TYPE:
       return showNodeLabel(node.data?.key)
     case IPV4_TYPE:
@@ -666,6 +670,8 @@ export function getNodeLabel(node, fullName = true) {
       return showNodeLabel(node.data?.subject);
     case ARTIFACT_TYPE:
       return showNodeLabel(node.data?.x_name);
+    case NOTE_TYPE:
+      return showNodeLabel(node.data?.content);
     default:
       return "N/A";
   }
@@ -678,7 +684,7 @@ export function getNodeLabel(node, fullName = true) {
  */
 function showNodeLabel(val) {
   if (val !== undefined) {
-    return val.length > 30 ? val.substr(0,30) + "..." : val;
+    return val.length > 30 ? val.substr(0, 30) + "..." : val;
   } else {
     return "N/A";
   }
